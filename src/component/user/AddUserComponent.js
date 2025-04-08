@@ -7,7 +7,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { userAddingField } from "@/constant/helper";
-import { ArrowLeftFromLine, ArrowRightFromLine } from "lucide-react";
+import {
+  ArrowLeftFromLine,
+  ArrowRightFromLine,
+  CloudLightning,
+  Trash2,
+  Plus
+} from "lucide-react";
 
 // Parent Component
 const AddUserComponent = () => {
@@ -43,6 +49,8 @@ const AddUserComponent = () => {
       [name]: files?.[0] || value,
     }));
   }, []);
+
+  console.log(formData);
 
   return (
     <div className="text-black dark:text-white p-4">
@@ -90,15 +98,75 @@ const AddUserComponent = () => {
 
 export default AddUserComponent;
 
-// Basic Categories
-export const BasicCategories = ({ formData, setValue, setIsOpen }) => {
-  const next = () =>
-    setIsOpen((prev) => ({ ...prev, BusinessCategories: true }));
+
+
+export const BasicCategories = ({ formData, setValue, setIsOpen, onMobileChange }) => {
+  const [errors, setErrors] = useState({});
+  const [mobileNumbers, setMobileNumbers] = useState([""]);
+
+  // 👇 Notify parent when mobileNumbers change
+  useEffect(() => {
+    if (onMobileChange) {
+      onMobileChange(mobileNumbers);
+    }
+  }, [mobileNumbers]);
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!String(formData.handlerName).trim()) {
+      newErrors.handlerName = "Handler name is required";
+    }
+
+    mobileNumbers.forEach((num, idx) => {
+      const trimmed = String(num).trim();
+      if (!trimmed) {
+        newErrors[`mobile_${idx}`] = "Mobile number is required";
+      } else if (!/^\d{10}$/.test(trimmed)) {
+        newErrors[`mobile_${idx}`] = "Mobile number must be 10 digits";
+      }
+    });
+
+    if (!String(formData.email).trim()) {
+      newErrors.email = "Email is required";
+    }
+
+    if (!String(formData.password).trim()) {
+      newErrors.password = "Password is required";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const next = () => {
+    if (validate()) {
+      setValue({ target: { name: "mobileNumbers", value: mobileNumbers } });
+      setIsOpen((prev) => ({ ...prev, BusinessCategories: true }));
+    }
+  };
+
+  const handleMobileChange = (value, index) => {
+    const updated = [...mobileNumbers];
+    updated[index] = value;
+    setMobileNumbers(updated);
+  };
+
+  const addMobileField = () => {
+    setMobileNumbers((prev) => [...prev, ""]);
+  };
+
+  const removeMobileField = (index) => {
+    const updated = [...mobileNumbers];
+    updated.splice(index, 1);
+    setMobileNumbers(updated);
+  };
 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
-        <div>
+        {/* Handler Name */}
+        <div className={`${errors.handlerName ? "border border-red-400 p-1 rounded" : ""}`}>
           <Label htmlFor="handlerName">Handler Name</Label>
           <Input
             className="bg-gray-100 dark:bg-gray-700 mt-1"
@@ -107,18 +175,42 @@ export const BasicCategories = ({ formData, setValue, setIsOpen }) => {
             value={formData.handlerName}
             onChange={setValue}
           />
+          {errors.handlerName && <p className="text-sm text-red-500 mt-1">{errors.handlerName}</p>}
         </div>
-        <div>
-          <Label htmlFor="mobileNumber">Mobile Number</Label>
-          <Input
-            className="bg-gray-100 dark:bg-gray-700 mt-1"
-            id="mobileNumber"
-            name="mobileNumber"
-            value={formData.mobileNumber}
-            onChange={setValue}
-          />
-        </div>
-        <div>
+
+        {/* Mobile Numbers */}
+        {mobileNumbers.map((number, idx) => (
+          <div key={`mobile_${idx}`} className="relative">
+            <Label htmlFor={`mobile_${idx}`}>Mobile Number {idx + 1}</Label>
+            <Input
+              className="bg-gray-100 dark:bg-gray-700 mt-1 pr-10"
+              id={`mobile_${idx}`}
+              name={`mobile_${idx}`}
+              value={number}
+              onChange={(e) => handleMobileChange(e.target.value, idx)}
+            />
+            {errors[`mobile_${idx}`] && (
+              <p className="text-sm text-red-500 mt-1">{errors[`mobile_${idx}`]}</p>
+            )}
+            <div className="absolute top-[33px] right-2 flex gap-2">
+              {mobileNumbers.length > 1 && (
+                <Trash2
+                  className="w-5 h-5 text-red-500 cursor-pointer"
+                  onClick={() => removeMobileField(idx)}
+                />
+              )}
+              {idx === mobileNumbers.length - 1 && (
+                <Plus
+                  className="w-5 h-5 text-green-600 cursor-pointer"
+                  onClick={addMobileField}
+                />
+              )}
+            </div>
+          </div>
+        ))}
+
+        {/* Email */}
+        <div className={`${errors.email ? "border border-red-400 p-1 rounded" : ""}`}>
           <Label htmlFor="email">Email</Label>
           <Input
             className="bg-gray-100 dark:bg-gray-700 mt-1"
@@ -127,8 +219,11 @@ export const BasicCategories = ({ formData, setValue, setIsOpen }) => {
             value={formData.email}
             onChange={setValue}
           />
+          {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
         </div>
-        <div>
+
+        {/* Password */}
+        <div className={`${errors.password ? "border border-red-400 p-1 rounded" : ""}`}>
           <Label htmlFor="password">Password</Label>
           <Input
             className="bg-gray-100 dark:bg-gray-700 mt-1"
@@ -138,8 +233,11 @@ export const BasicCategories = ({ formData, setValue, setIsOpen }) => {
             value={formData.password}
             onChange={setValue}
           />
+          {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
         </div>
       </div>
+
+      {/* Next Button */}
       <div className="grid place-items-center mt-3 w-full">
         <Button
           onClick={next}
@@ -153,14 +251,12 @@ export const BasicCategories = ({ formData, setValue, setIsOpen }) => {
     </>
   );
 };
-
 // Business Categories
 export const BusinessCategories = ({ formData, setValue, setIsOpen }) => {
   const back = () =>
     setIsOpen((prev) => ({ ...prev, BusinessCategories: false }));
 
-  const next = () =>
-    setIsOpen((prev) => ({ ...prev, SocialMediaLink: true }));
+  const next = () => setIsOpen((prev) => ({ ...prev, SocialMediaLink: true }));
 
   return (
     <>
@@ -268,12 +364,20 @@ export const BusinessCategories = ({ formData, setValue, setIsOpen }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-        <Button onClick={back} variant="secondary" className="w-full flex gap-2">
+        <Button
+          onClick={back}
+          variant="secondary"
+          className="w-full flex gap-2"
+        >
           <ArrowLeftFromLine className="w-4 h-4 group-hover:translate-x-2" />
           <span>Edit in Basic Categories</span>
         </Button>
 
-        <Button onClick={next} variant="secondary" className="w-full flex gap-2">
+        <Button
+          onClick={next}
+          variant="secondary"
+          className="w-full flex gap-2"
+        >
           <span>Add Social Media Link</span>
           <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-2" />
         </Button>
@@ -285,7 +389,18 @@ export const BusinessCategories = ({ formData, setValue, setIsOpen }) => {
 // Social Media Link
 export const SocialMediaLink = ({ formData, setValue, setIsOpen }) => {
   const back = () =>
-    setIsOpen((prev) => ({ ...prev, SocialMediaLink: false }));
+    setIsOpen((prev) => ({
+      ...prev,
+      BusinessCategories: true,
+      SocialMediaLink: false,
+    }));
+  const next = () =>
+    setIsOpen((prev) => ({
+      ...prev,
+      BasicCategories: false,
+      BusinessCategories: false,
+      BasicCategories: true,
+    }));
 
   return (
     <>
@@ -332,10 +447,23 @@ export const SocialMediaLink = ({ formData, setValue, setIsOpen }) => {
         </div>
       </div>
 
-      <div className="grid place-items-center mt-5 w-full">
-        <Button onClick={back} variant="secondary" className="w-full flex gap-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+        <Button
+          onClick={back}
+          variant="secondary"
+          className="w-full flex gap-2"
+        >
           <ArrowLeftFromLine className="w-4 h-4 group-hover:translate-x-2" />
-          <span>Edit Business Info</span>
+          <span>Edit in Business Categories</span>
+        </Button>
+
+        <Button
+          onClick={next}
+          variant="secondary"
+          className="w-full flex gap-2"
+        >
+          <span>Make Payment</span>
+          <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-2" />
         </Button>
       </div>
     </>

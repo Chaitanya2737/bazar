@@ -1,9 +1,13 @@
+
 import { createSlice } from "@reduxjs/toolkit";
 import { userAddingField } from "@/constant/helper";
 import { createUserApi } from "./serviceApi";
 
 // Try loading from localStorage
 const savedUser = (() => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
   try {
     const data = localStorage.getItem("userFormData");
     return data ? JSON.parse(data) : null;

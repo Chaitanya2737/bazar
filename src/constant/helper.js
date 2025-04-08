@@ -24,7 +24,7 @@ export const businessCategories = [
 export const userAddingField = {
  // BasicCategories
  handlerName: "",
-  mobileNumber: [""],
+  mobileNumbers: [],
   email: "",
   password: "Default@123",
 
