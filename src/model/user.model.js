@@ -21,10 +21,10 @@ const userSchema = new mongoose.Schema({
       validator: function (arr) {
         return arr.length >= 1 && arr.length <= 4; // Allow 1 to 4 numbers
       },
-      message: "A user must have at least 1 and at most 4 mobile numbers.", 
+      message: "A user must have at least 1 and at most 4 mobile numbers.",
     },
   },
-  gstNumber :{
+  gstNumber: {
     type: String,
   },
   email: {
@@ -35,8 +35,10 @@ const userSchema = new mongoose.Schema({
     required: true,
   },
   role: {
-    role: { type: String, enum: ["user", "admin", "moderator"]}
-  },
+    type: String,
+    enum: ["user", "business", "admin"],
+    default: "user",
+  },  
   subscriptionPlan: {
     type: String,
     enum: ["basic", "premium"],
@@ -59,11 +61,11 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
     immutable: true,
   },
-  expringDate: {
-    type: Date,
-    required: true,
-  },
-  language : {
+  // expringDate: {
+  //   type: Date,
+  //   required: true,
+  // },
+  language: {
     type: String,
   },
 
@@ -89,12 +91,12 @@ const userSchema = new mongoose.Schema({
   },
   referralCode: {
     type: mongoose.Schema.Types.ObjectId,
-    ref:"referral",
+    ref: "referral",
     unique: true,
     sparse: true, // Allows null values without uniqueness conflict
-  }
+  },
 });
 
 const UserModel = mongoose.models.User || mongoose.model("User", userSchema);
 
-module.exports = UserModel;
+export default UserModel;

@@ -7,7 +7,6 @@ const connectDB = async () => {
     console.log("DB already connected");
     return;
   }
-  console.log(process.env.DB_STRING);
   try {
     await mongoose.connect(process.env.DB_STRING, {
       useNewUrlParser: true,

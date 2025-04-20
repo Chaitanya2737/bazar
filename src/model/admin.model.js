@@ -36,41 +36,6 @@ const adminSchema = new mongoose.Schema(
       immutable: true,
       default: Date.now,
     },
-    validationExpiresAt: {
-      type: Date,
-    },
-    payments: [
-      {
-        user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "User",
-          required: true,
-        },
-        amount: {
-          type: Number,
-          required: true,
-        },
-        paymentMethod: {
-          type: String,
-          required: true,
-          enum: ["credit_card", "debit_card", "paypal", "upi", "net_banking"],
-        },
-        transactionId: {
-          type: String,
-          required: true,
-          unique: true,
-        },
-        status: {
-          type: String,
-          enum: ["pending", "completed", "failed"],
-          default: "pending",
-        },
-        date: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
   },
   {
     timestamps: true,

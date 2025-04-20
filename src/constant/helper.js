@@ -39,7 +39,7 @@ export const userAddingField = {
   state: "Maharashtra",
   GstNumber: "",
   language: "",
-  categories: businessCategories,
+  categories: "",
   admin: "",
   role: "user",
 
@@ -50,9 +50,6 @@ export const userAddingField = {
     x: "",
     linkedin: "",
     youtube:"",
-
-
-
  // payment 
 
   subscriptionPlan: ["basic", "premium"],

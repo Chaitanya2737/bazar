@@ -37,8 +37,6 @@ const userCreationSlice = createSlice({
     },
     updateUser: (state, action) => {
       state.user = { ...state.user, ...action.payload };
-
-      // Save to localStorage
       localStorage.setItem("userFormData", JSON.stringify(state.user));
     },
   },

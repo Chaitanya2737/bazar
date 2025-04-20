@@ -1,13 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 // Load initial state from localStorage if available
-const initialDarkMode =
-  typeof window !== "undefined"
-    ? JSON.parse(localStorage.getItem("darkMode")) ?? false
-    : false;
+// const initialDarkMode =
+//   typeof window !== "undefined"
+//     ? JSON.parse(localStorage.getItem("darkMode")) ?? false
+//     : false;
 
 const initialState = {
-  darkMode: initialDarkMode,
+  darkMode: false,
 };
 
 const themeSlice = createSlice({
