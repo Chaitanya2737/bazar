@@ -25,8 +25,10 @@ export const authOptions = {
             }else{
               return "unable to find role"
             }
+            console.log(req.headers.referer);
         }
       })
+      
   ],
 
   session: {
