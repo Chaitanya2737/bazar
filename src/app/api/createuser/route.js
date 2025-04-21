@@ -155,7 +155,7 @@ export async function POST (req) {
 
 export async function GET() {
  await connectDB()
- console.log("Cloudinary config:", cloudinary.config());
- const user =  await UserModel.find();
- return NextResponse.json(user)
+ const test =cloudinary.config()
+//  const user =  await UserModel.find();
+ return NextResponse.json(test)
 }
