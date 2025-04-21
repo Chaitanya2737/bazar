@@ -56,7 +56,6 @@ export async function POST(req) {
       youtube,
       expiringDate,
     } = user;
-    return NextResponse.json(user)
 
     if (!businessName || !businessLocation || !admin || !email || !password) {
       return NextResponse.json(
@@ -86,49 +85,49 @@ export async function POST(req) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // ✅ Upload businessIcon to Cloudinary only if it's valid
-    let uploadedUrl = "";
-    if (
-      businessIcon &&
-      typeof businessIcon.arrayBuffer === "function" &&
-      businessIcon.name
-    ) {
-      try {
-        const sanitizedFolderName = businessName
-          .trim()
-          .replace(/[^a-zA-Z0-9-_]/g, "-")
-          .substring(0, 60);
-        const arrayBuffer = await businessIcon.arrayBuffer();
-        const buffer = Buffer.from(arrayBuffer);
+    // let uploadedUrl = "";
+    // if (
+    //   businessIcon &&
+    //   typeof businessIcon.arrayBuffer === "function" &&
+    //   businessIcon.name
+    // ) {
+    //   try {
+    //     const sanitizedFolderName = businessName
+    //       .trim()
+    //       .replace(/[^a-zA-Z0-9-_]/g, "-")
+    //       .substring(0, 60);
+    //     const arrayBuffer = await businessIcon.arrayBuffer();
+    //     const buffer = Buffer.from(arrayBuffer);
 
-        uploadedUrl = await new Promise((resolve, reject) => {
-          const uploadOptions = {
-            folder: sanitizedFolderName,
-            resource_type: "auto",
-            allowed_formats: ["jpg", "png", "jpeg", "webp", "gif"],
-            max_file_size: 5 * 1024 * 1024,
-          };
+    //     uploadedUrl = await new Promise((resolve, reject) => {
+    //       const uploadOptions = {
+    //         folder: sanitizedFolderName,
+    //         resource_type: "auto",
+    //         allowed_formats: ["jpg", "png", "jpeg", "webp", "gif"],
+    //         max_file_size: 5 * 1024 * 1024,
+    //       };
 
-          const stream = cloudinary.uploader.upload_stream(
-            uploadOptions,
-            (error, result) => {
-              if (error) {
-                console.error("Cloudinary upload error:", error , cloudinary.config());
-                reject(error);
-              } else {
-                resolve(result.secure_url);
-              }
-            }
-          );
+    //       const stream = cloudinary.uploader.upload_stream(
+    //         uploadOptions,
+    //         (error, result) => {
+    //           if (error) {
+    //             console.error("Cloudinary upload error:", error , cloudinary.config());
+    //             reject(error);
+    //           } else {
+    //             resolve(result.secure_url);
+    //           }
+    //         }
+    //       );
 
-          stream.end(buffer);
-        });
-      } catch (err) {
-        return NextResponse.json(
-          { success: false, message: "Error uploading image to Cloudinary" },
-          { status: 500 }
-        );
-      }
-    }
+    //       stream.end(buffer);
+    //     });
+    //   } catch (err) {
+    //     return NextResponse.json(
+    //       { success: false, message: "Error uploading image to Cloudinary" },
+    //       { status: 500 }
+    //     );
+    //   }
+    // }
 
     const category = await CategoryModel.findOne({ name: categories });
     if (!category) {
@@ -169,7 +168,7 @@ export async function POST(req) {
         x: x || "",
         linkedin: linkedin || "",
       },
-      businessIcon: uploadedUrl,
+      businessIcon: "abcd",
     });
 
     await newUser.save();
