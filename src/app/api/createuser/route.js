@@ -70,7 +70,7 @@ export async function POST(req) {
     // ✅ Upload business icon to Cloudinary
     let uploadedUrl = "";
     if (businessIcon) {
-      const sanitizedFolderName = businessLocation.trim().replace(/[^a-zA-Z0-9-_]/g, "-").substring(0, 60);
+      const sanitizedFolderName = businessName.trim().replace(/[^a-zA-Z0-9-_]/g, "-").substring(0, 60);
       const arrayBuffer = await businessIcon.arrayBuffer(); // ✅ Corrected variable
       const buffer = Buffer.from(arrayBuffer);
 
