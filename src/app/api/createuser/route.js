@@ -1,12 +1,13 @@
 export const runtime = "nodejs"; // ✅ for App Router & file upload
 
 import { NextResponse } from "next/server";
-import { cloudinary } from "@/lib/cloudinary"; // Make sure you import this
+
 import connectDB from "@/lib/db";
 import UserModel from "@/model/user.model";
 import bcrypt from "bcryptjs";
 import CategoryModel from "@/model/categories.model";
 import AdminModel from "@/model/admin.model";
+import cloudinary from "@/lib/cloudinaryConfig";
 
 export async function POST(req) {
   try {
@@ -83,8 +84,8 @@ export async function POST(req) {
 
         const stream = cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
           if (error) {
-            console.error("Cloudinary upload error:", error);
             reject(error);
+            console.error("Cloudinary upload error:", error);
           } else {
             resolve(result.secure_url);
           }
