@@ -56,6 +56,7 @@ export async function POST(req) {
       youtube,
       expiringDate,
     } = user;
+    return NextResponse.json(user)
 
     if (!businessName || !businessLocation || !admin || !email || !password) {
       return NextResponse.json(
