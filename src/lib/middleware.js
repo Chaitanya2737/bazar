@@ -33,11 +33,11 @@ export async function multerMiddleware(file, filename) {
         (error, result) => {
           if (error) {
             console.error("Cloudinary upload error:", error);
+            console.log("error coming from here");
             reject({ 
               error: error.message || "File upload failed", 
               status: 500 
             });
-            console.log("error coming from here");
           } else {
             console.log("Upload successful:", result.secure_url);
             resolve(result.secure_url);

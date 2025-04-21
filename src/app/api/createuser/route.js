@@ -68,13 +68,13 @@ export async function POST (req) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // ✅ Upload business icon to Cloudinary
-  
+    let uploadedUrl = "";
     if (businessIcon) {
       const sanitizedFolderName = businessName.trim().replace(/[^a-zA-Z0-9-_]/g, "-").substring(0, 60);
       const arrayBuffer = await businessIcon.arrayBuffer(); // ✅ Corrected variable
       const buffer = Buffer.from(arrayBuffer);
 
-     let uploadedUrl = await new Promise((resolve, reject) => {
+      uploadedUrl = await new Promise((resolve, reject) => {
         const uploadOptions = {
           folder: sanitizedFolderName,
           resource_type: "auto",
@@ -151,4 +151,10 @@ export async function POST (req) {
       stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
     }, { status: 500 });
   }
+}
+
+export async function GET() {
+ await connectDB()
+ const user =  await UserModel.find();
+ return NextResponse.json(user)
 }
