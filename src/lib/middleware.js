@@ -18,11 +18,13 @@ export async function multerMiddleware(file, filename) {
       const stream = cloudinary.uploader.upload_stream(
         { folder: folderName },
         (error, result) => {
-          if (error) reject({ error: error.message, status: 500 });
+          if (error){
+            console.log(error);
+            reject({ error: error.message, status: 500 });
+          }
           else resolve(result.secure_url);
         }
       );
-
       stream.end(buffer);
     });
   } catch (error) {
