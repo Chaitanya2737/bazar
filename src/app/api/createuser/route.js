@@ -9,18 +9,15 @@ import CategoryModel from "@/model/categories.model";
 import AdminModel from "@/model/admin.model";
 import cloudinary from "@/lib/cloudinaryConfig";
 
-function corsHeaders() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Content-Type": "application/json",
-  };
-}
-
-
-export async function POST(req) {
+export async function POST (req) {
   try {
+
+    const headers = new Headers({
+      "Access-Control-Allow-Origin": "*", // Or specific origin like "http://localhost:3000"
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    });
+  
     await connectDB();
 
     const formData = await req.formData();
@@ -28,26 +25,14 @@ export async function POST(req) {
     const userDataJson = formData.get("userdata");
 
     if (!userDataJson) {
-      return new NextResponse(JSON.stringify({
-        success: false,
-        message: "userdata is missing"
-      }), {
-        status: 400,
-        headers: corsHeaders()
-      });
+      return NextResponse.json({ success: false, message: "userdata is missing" }, { status: 400 });
     }
 
     let user;
     try {
       user = JSON.parse(userDataJson);
     } catch (error) {
-      return new NextResponse(JSON.stringify({
-        success: false,
-        message: "Invalid userdata format"
-      }), {
-        status: 400,
-        headers: corsHeaders()
-      });
+      return NextResponse.json({ success: false, message: "Invalid userdata format" }, { status: 400 });
     }
 
     const {
@@ -74,40 +59,22 @@ export async function POST(req) {
     } = user;
 
     if (!businessName || !businessLocation || !admin || !email || !password) {
-      return new NextResponse(JSON.stringify({
-        success: false,
-        message: "Missing required fields"
-      }), {
-        status: 400,
-        headers: corsHeaders()
-      });
+      return NextResponse.json({ success: false, message: "Missing required fields" }, { status: 400 });
     }
 
     const validatedMobileNumbers = Array.isArray(mobileNumbers) ? mobileNumbers : [mobileNumbers];
     if (validatedMobileNumbers.length < 1 || validatedMobileNumbers.length > 4) {
-      return new NextResponse(JSON.stringify({
-        success: false,
-        message: "Mobile numbers must be between 1 and 4"
-      }), {
-        status: 400,
-        headers: corsHeaders()
-      });
+      return NextResponse.json({ success: false, message: "Mobile numbers must be between 1 and 4" }, { status: 400 });
     }
 
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
-      return new NextResponse(JSON.stringify({
-        success: false,
-        message: "User with this email already exists."
-      }), {
-        status: 409,
-        headers: corsHeaders()
-      });
+      return NextResponse.json({ success: false, message: "User with this email already exists." }, { status: 409 });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ Upload to Cloudinary
+    // ✅ Upload business icon to Cloudinary
     let uploadedUrl = "";
     if (businessIcon) {
       const sanitizedFolderName = businessName.trim().replace(/[^a-zA-Z0-9-_]/g, "-").substring(0, 60);
@@ -124,10 +91,10 @@ export async function POST(req) {
 
         const stream = cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
           if (error) {
-            console.error("Cloudinary upload error:", error);
+            console.error("Cloudinary upload error: and error comming form here", error);
             reject(error);
           } else {
-            resolve(result.secure_url);
+            resolve(result);
           }
         });
 
@@ -137,24 +104,12 @@ export async function POST(req) {
 
     const category = await CategoryModel.findOne({ name: categories });
     if (!category) {
-      return new NextResponse(JSON.stringify({
-        success: false,
-        message: "Category not found."
-      }), {
-        status: 404,
-        headers: corsHeaders()
-      });
+      return NextResponse.json({ success: false, message: "Category not found." }, { status: 404 });
     }
 
     const adminDoc = await AdminModel.findOne({ name: admin });
     if (!adminDoc) {
-      return new NextResponse(JSON.stringify({
-        success: false,
-        message: "Admin not registered."
-      }), {
-        status: 404,
-        headers: corsHeaders()
-      });
+      return NextResponse.json({ success: false, message: "Admin not registered." }, { status: 404 });
     }
 
     const newUser = new UserModel({
@@ -185,7 +140,7 @@ export async function POST(req) {
 
     await newUser.save();
 
-    return new NextResponse(JSON.stringify({
+    return NextResponse.json({
       success: true,
       message: "User registered successfully.",
       data: {
@@ -193,24 +148,17 @@ export async function POST(req) {
         businessName: newUser.businessName,
         email: newUser.email,
       },
-    }), {
-      status: 201,
-      headers: corsHeaders()
-    });
+    }, { status: 201 });
 
   } catch (error) {
-    console.error("Error occurred:", error);
-    return new NextResponse(JSON.stringify({
+    console.log("Error occurred:", error);
+    return NextResponse.json({
       success: false,
       message: error.message || "Internal Server Error",
       stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
-    }), {
-      status: 500,
-      headers: corsHeaders()
-    });
+    }, { status: 500 });
   }
 }
-
 
 export async function GET() {
  await connectDB()
