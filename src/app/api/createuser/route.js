@@ -88,13 +88,13 @@ export async function POST(req) {
     console.log("hash generated");
 
     // Handle business icon upload
-    let fileUrl = "/Sample_User_Icon.png"; // Default icon
     try {
       const uploadedUrl = await multerMiddleware(businessIcon, businessName);
-      if (uploadedUrl) fileUrl = uploadedUrl;
+      if (uploadedUrl) {
+        console.log("image not uploaded");
+      }
     } catch (uploadError) {
       console.error("File upload error:", uploadError);
-      fileUrl = "/Default_Error_Icon.png"; // Use a default error icon in case of upload failure
     }
     console.log("file generated");
     // Fetch category document
