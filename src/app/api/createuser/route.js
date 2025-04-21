@@ -8,13 +8,29 @@ import AdminModel from "@/model/admin.model";
 
 export async function POST(req) {
   try {
-    // Connect to the database
     await connectDB();
     const formData = await req.formData();
+
     const businessIcon = formData.get("businessIcon");
     const userDataJson = formData.get("userdata");
-    const user = JSON.parse(userDataJson);
-    const { businessName,
+
+    // Parse user data
+    let user;
+    try {
+      user = JSON.parse(userDataJson);
+    } catch (error) {
+      console.error("Invalid JSON format for userdata:", error);
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid userdata format.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const {
+      businessName,
       handlerName,
       mobileNumbers,
       email,
@@ -36,30 +52,30 @@ export async function POST(req) {
       expiringDate,
     } = user;
 
-    // Basic Validation
-    if (!businessName || !businessLocation || !admin ) {
+    // Validate required fields
+    if (!businessName || !businessLocation || !admin || !email || !password) {
       return NextResponse.json(
         {
           success: false,
-          message:
-            "Missing required fields. Please provide business name, location, admin, email, and password.",
+          message: "Missing required fields. Please provide all necessary information.",
         },
-        { status: 400 } // Bad Request
+        { status: 400 }
       );
     }
 
-    // Validate mobile numbers
+    // Validate and normalize mobile numbers
     const validatedMobileNumbers = Array.isArray(mobileNumbers) ? mobileNumbers : [mobileNumbers];
-    // Check that the array length is between 1 and 4
     if (validatedMobileNumbers.length < 1 || validatedMobileNumbers.length > 4) {
-      return NextResponse.json({
-        success: false,
-        message: "Mobile numbers must be between 1 and 4.",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Mobile numbers must be between 1 and 4.",
+        },
+        { status: 400 }
+      );
     }
 
-
-    // Check if the user already exists
+    // Check if user already exists
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -74,46 +90,40 @@ export async function POST(req) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Handle file upload
-    let fileUrl;
+    // Handle business icon upload
+    let fileUrl = "/Sample_User_Icon.png"; // Default icon
     try {
-      fileUrl = await multerMiddleware(businessIcon, businessName);
-      if (!fileUrl) {
-        // Default file if no icon is uploaded
-        fileUrl = "@/assets/Sample_User_Icon.png"; // Ensure this path is publicly accessible
-      }
-    } catch (error) {
-      console.error("File upload error:", error);
-      fileUrl = "@/assets/Sample_User_Icon.png";
+      const uploadedUrl = await multerMiddleware(businessIcon, businessName);
+      if (uploadedUrl) fileUrl = uploadedUrl;
+    } catch (uploadError) {
+      console.error("File upload error:", uploadError);
     }
 
-    // Check if category exists and get its ID
+    // Fetch category document
     const category = await CategoryModel.findOne({ name: categories });
     if (!category) {
-      return NextResponse.json({
-        success: false,
-        message: "Category not found.",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Category not found.",
+        },
+        { status: 404 }
+      );
     }
 
-    // Check if admin exists and get its ID
+    // Fetch admin document
     const adminDoc = await AdminModel.findOne({ name: admin });
     if (!adminDoc) {
-      return NextResponse.json({
-        success: false,
-        message: "Admin not registered.",
-      });
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Admin not registered.",
+        },
+        { status: 404 }
+      );
     }
 
-    // Ensure expiringDate is provided or use default
-    // if (!expiringDate) {
-    //   return NextResponse.json({
-    //     success: false,
-    //     message: "Expiring date is required.",
-    //   });
-    // }
-
-    // Create a new user document
+    // Create new user document
     const newUser = new UserModel({
       businessName,
       handlerName,
@@ -126,7 +136,7 @@ export async function POST(req) {
       state,
       GstNumber,
       language,
-      categories: category._id, 
+      categories: category._id,
       admin: adminDoc._id,
       role,
       expiringDate,
@@ -134,17 +144,14 @@ export async function POST(req) {
         insta: insta || "",
         youtube: youtube || "",
         facebook: facebook || "",
-        x: x || "", // Twitter (X)
+        x: x || "",
         linkedin: linkedin || "",
       },
       businessIcon: fileUrl,
     });
-    console.log(role);
 
-    // Save the user to the database
     await newUser.save();
 
-    // Return the response with user data
     return NextResponse.json(
       {
         success: true,
@@ -158,12 +165,13 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (error) {
+    console.error("Registration Error:", error);
     return NextResponse.json(
       {
         success: false,
         message: error.message || "Internal Server Error",
       },
-      { status: 500 } // Internal Server Error
+      { status: 500 }
     );
   }
 }

@@ -29,6 +29,7 @@ export default function Home() {
         darkMode ? "dark" : ""
       }`}
     >
+
       <Navbar />
     </div>
   );
