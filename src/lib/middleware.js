@@ -19,7 +19,7 @@ export async function multerMiddleware(file, filename) {
         { folder: folderName },
         (error, result) => {
           if (error){
-            console.log(error);
+            console.log(error , "error coming from here");
             reject({ error: error.message, status: 500 });
           }
           else resolve(result.secure_url);
