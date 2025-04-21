@@ -10,9 +10,9 @@ import { v2 as cloudinary } from "cloudinary";
 
 // Configure Cloudinary once
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: "dp8evydam",
+  api_key: "591652925595255",
+  api_secret:"hvHhjSg8Hf4LUfpDyJ9T_E42HoE",
   secure: true,
 });
 
@@ -69,30 +69,16 @@ export async function POST(req) {
       );
     }
 
-    // Handle file upload
     let businessIconUrl = '';
     const file = formData.get("businessIcon");
     
     if (file) {
-      // Validate file
-      if (file.size > MAX_FILE_SIZE) {
-        return NextResponse.json(
-          { success: false, message: "File size exceeds 5MB limit" },
-          { status: 400 }
-        );
-      }
-      
-      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
-        return NextResponse.json(
-          { success: false, message: "Only JPEG, PNG, and WebP images are allowed" },
-          { status: 400 }
-        );
-      }
-
+      console.log("File found, starting upload");
       try {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        
+    
+        console.log("Uploading to Cloudinary...");
         const uploadResult = await new Promise((resolve, reject) => {
           const uploadStream = cloudinary.uploader.upload_stream(
             { 
@@ -100,25 +86,34 @@ export async function POST(req) {
               resource_type: "auto"
             },
             (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
+              if (error) {
+                console.error("Cloudinary upload error:", error);
+                reject(error);
+              } else {
+                console.log("Upload successful");
+                resolve(result);
+              }
             }
           );
           uploadStream.end(buffer);
         });
-        
-        businessIconUrl = uploadResult.secure_url;
-      } catch (error) {
-        console.error("Image upload failed:", error);
+    
+        businessIconUrl = uploadResult?.secure_url;
+        console.log("File uploaded to:", businessIconUrl);
+      } catch (uploadError) {
+        console.error("File upload failed:", uploadError);
+        // Return a proper JSON response even on upload failure
         return NextResponse.json(
           { 
             success: false, 
-            message: "Image upload failed",
-            error: error.message 
+            message: "File upload failed",
+            error: uploadError.message 
           },
           { status: 500 }
         );
       }
+    } else {
+      console.log("No file provided, continuing without business icon");
     }
 
     // Check for existing user
