@@ -85,40 +85,32 @@ export async function POST(req) {
     }
 
     // ⬇️ Upload business icon
-    const file = formData.get("businessIcon");
     let uploadedImage = null;
 
-    if (!file || typeof file.arrayBuffer !== "function") {
-      return NextResponse.json(
-        { error: "Valid businessIcon file not found" },
-        { status: 400 }
-      );
-    }
-
     try {
+      const file = formData.get("businessIcon");
+    
+      if (!file) {
+        return NextResponse.json({ error: "File not found" }, { status: 400 });
+      }
+    
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
-
-      uploadedImage = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "next-cloudinary-uploads",
-            resource_type: "auto",
-          },
+    
+      uploadedResult = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "next-cloudinary-uploads" },
           (error, result) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(result.secure_url);
-            }
+            if (error) reject(error);
+            else resolve(result);
           }
         );
-        stream.end(buffer);
+        uploadStream.end(buffer);
       });
     } catch (error) {
-      console.error("Cloudinary upload error:", error);
+      console.log("Upload image failed", error);
       return NextResponse.json(
-        { success: false, message: "Upload image failed" },
+        { error: "Upload image failed" },
         { status: 500 }
       );
     }
