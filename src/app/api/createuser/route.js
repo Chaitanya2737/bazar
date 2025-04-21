@@ -22,7 +22,6 @@ export async function POST(req) {
     const formData = await req.formData();
     const businessIcon = formData.get("businessIcon");
     const userDataJson = formData.get("userdata");
-    
 
     // Parse user data
     let user;
@@ -89,18 +88,24 @@ export async function POST(req) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log("hash generated");
-
     // Handle business icon upload
+    let uploadedUrl;
     try {
-      const uploadedUrl = await multerMiddleware(businessIcon, businessName);
-      if (uploadedUrl) {
-        console.log("image not uploaded");
+      uploadedUrl = await multerMiddleware(businessIcon, businessName);
+      if (!uploadedUrl) {
+        return NextResponse.json(
+          { success: false, message: "Image upload failed" },
+          { status: 500 }
+        );
       }
     } catch (uploadError) {
       console.error("File upload error:", uploadError);
+      return NextResponse.json(
+        { success: false, message: "File upload failed" },
+        { status: 500 }
+      );
     }
-    console.log("file generated");
+
     // Fetch category document
     const category = await CategoryModel.findOne({ name: categories });
     if (!category) {
@@ -110,8 +115,6 @@ export async function POST(req) {
       );
     }
 
-    console.log("categories check");
-
     // Fetch admin document
     const adminDoc = await AdminModel.findOne({ name: admin });
     if (!adminDoc) {
@@ -120,7 +123,6 @@ export async function POST(req) {
         { status: 404 }
       );
     }
-    console.log("admin check");
 
     // Create new user document
     const newUser = new UserModel({
@@ -146,11 +148,10 @@ export async function POST(req) {
         x: x || "",
         linkedin: linkedin || "",
       },
-      businessIcon: fileUrl,
+      businessIcon: uploadedUrl,
     });
 
     await newUser.save();
-    console.log(newUser);
 
     // Return success response
     return NextResponse.json(
@@ -166,8 +167,7 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (error) {
-    console.log("error comming for here");
-    console.error("Registration Error:", error);
+    console.log("Error occurred:", error);
     return NextResponse.json(
       {
         success: false,
@@ -178,3 +178,4 @@ export async function POST(req) {
     );
   }
 }
+

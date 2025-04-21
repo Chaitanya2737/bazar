@@ -7,6 +7,8 @@ export async function multerMiddleware(file, filename) {
       throw { error: "No file provided", status: 400 };
     }
 
+    console.log(file);
+
     // Sanitize folder name
     const sanitizedFolderName = filename
       .trim()
