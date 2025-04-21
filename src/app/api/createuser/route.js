@@ -1,21 +1,23 @@
 export const runtime = "nodejs"; // ✅ for App Router & file upload
 
 import { NextResponse } from "next/server";
-
 import connectDB from "@/lib/db";
 import UserModel from "@/model/user.model";
 import bcrypt from "bcryptjs";
 import CategoryModel from "@/model/categories.model";
 import AdminModel from "@/model/admin.model";
-
 import { v2 as cloudinary } from "cloudinary";
 
-// Configuration
+// Configure Cloudinary once
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
 });
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export async function POST(req) {
   try {
@@ -41,82 +43,86 @@ export async function POST(req) {
       );
     }
 
-    const {
-      businessName,
-      handlerName,
-      mobileNumbers,
-      email,
-      password,
-      bio,
-      address,
-      businessLocation,
-      state,
-      GstNumber,
-      language,
-      categories,
-      admin,
-      role,
-      insta,
-      facebook,
-      x,
-      linkedin,
-      youtube,
-      expiringDate,
-    } = user;
-
-    if (!businessName || !businessLocation || !admin || !email || !password) {
+    // Validate required fields
+    const requiredFields = ['businessName', 'businessLocation', 'admin', 'email', 'password'];
+    const missingFields = requiredFields.filter(field => !user[field]);
+    
+    if (missingFields.length > 0) {
       return NextResponse.json(
-        { success: false, message: "Missing required fields" },
+        { 
+          success: false, 
+          message: `Missing required fields: ${missingFields.join(', ')}` 
+        },
         { status: 400 }
       );
     }
 
-    const validatedMobileNumbers = Array.isArray(mobileNumbers)
-      ? mobileNumbers
-      : [mobileNumbers];
-    if (
-      validatedMobileNumbers.length < 1 ||
-      validatedMobileNumbers.length > 4
-    ) {
+    // Validate mobile numbers
+    const validatedMobileNumbers = Array.isArray(user.mobileNumbers)
+      ? user.mobileNumbers
+      : [user.mobileNumbers];
+      
+    if (validatedMobileNumbers.length < 1 || validatedMobileNumbers.length > 4) {
       return NextResponse.json(
         { success: false, message: "Mobile numbers must be between 1 and 4" },
         { status: 400 }
       );
     }
 
-    // ⬇️ Upload business icon
-    let uploadedImage = null;
-
-    try {
-      const file = formData.get("businessIcon");
+    // Handle file upload
+    let businessIconUrl = '';
+    const file = formData.get("businessIcon");
     
-      if (!file) {
-        return NextResponse.json({ error: "File not found" }, { status: 400 });
-      }
-    
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-    
-      uploadedResult = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: "next-cloudinary-uploads" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
+    if (file) {
+      // Validate file
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { success: false, message: "File size exceeds 5MB limit" },
+          { status: 400 }
         );
-        uploadStream.end(buffer);
-      });
-    } catch (error) {
-      console.log("Upload image failed", error);
-      return NextResponse.json(
-        { error: "Upload image failed" },
-        { status: 500 }
-      );
+      }
+      
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+        return NextResponse.json(
+          { success: false, message: "Only JPEG, PNG, and WebP images are allowed" },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+        
+        const uploadResult = await new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            { 
+              folder: "next-cloudinary-uploads",
+              resource_type: "auto"
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          uploadStream.end(buffer);
+        });
+        
+        businessIconUrl = uploadResult.secure_url;
+      } catch (error) {
+        console.error("Image upload failed:", error);
+        return NextResponse.json(
+          { 
+            success: false, 
+            message: "Image upload failed",
+            error: error.message 
+          },
+          { status: 500 }
+        );
+      }
     }
 
     // Check for existing user
-    const existingUser = await UserModel.findOne({ email });
+    const existingUser = await UserModel.findOne({ email: user.email });
     if (existingUser) {
       return NextResponse.json(
         { success: false, message: "User with this email already exists." },
@@ -124,9 +130,11 @@ export async function POST(req) {
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password
+    const hashedPassword = await bcrypt.hash(user.password, 10);
 
-    const category = await CategoryModel.findOne({ name: categories });
+    // Validate category
+    const category = await CategoryModel.findOne({ name: user.categories });
     if (!category) {
       return NextResponse.json(
         { success: false, message: "Category not found." },
@@ -134,7 +142,8 @@ export async function POST(req) {
       );
     }
 
-    const adminDoc = await AdminModel.findOne({ name: admin });
+    // Validate admin
+    const adminDoc = await AdminModel.findOne({ name: user.admin });
     if (!adminDoc) {
       return NextResponse.json(
         { success: false, message: "Admin not registered." },
@@ -142,30 +151,31 @@ export async function POST(req) {
       );
     }
 
+    // Create new user
     const newUser = new UserModel({
-      businessName,
-      handlerName,
+      businessName: user.businessName,
+      handlerName: user.handlerName,
       mobileNumber: validatedMobileNumbers,
-      email,
+      email: user.email,
       password: hashedPassword,
-      bio,
-      address,
-      businessLocation,
-      state,
-      GstNumber,
-      language,
+      bio: user.bio,
+      address: user.address,
+      businessLocation: user.businessLocation,
+      state: user.state,
+      GstNumber: user.GstNumber,
+      language: user.language,
       categories: category._id,
       admin: adminDoc._id,
-      role,
-      expiringDate,
+      role: user.role,
+      expiringDate: user.expiringDate,
       socialMediaLinks: {
-        insta: insta || "",
-        youtube: youtube || "",
-        facebook: facebook || "",
-        x: x || "",
-        linkedin: linkedin || "",
+        insta: user.insta || "",
+        youtube: user.youtube || "",
+        facebook: user.facebook || "",
+        x: user.x || "",
+        linkedin: user.linkedin || "",
       },
-      businessIcon: uploadedImage.secure_url,
+      businessIcon: businessIconUrl,
     });
 
     await newUser.save();
@@ -194,10 +204,19 @@ export async function POST(req) {
   }
 }
 
-
 export async function GET() {
-  await connectDB();
-  const test = cloudinary.config();
-  //  const user =  await UserModel.find();
-  return NextResponse.json(test);
+  try {
+    await connectDB();
+    // Just return a success message for the GET endpoint
+    return NextResponse.json(
+      { success: true, message: "API is working" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("GET Error:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }
