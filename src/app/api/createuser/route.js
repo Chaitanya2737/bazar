@@ -1,4 +1,8 @@
+
 export const config = {
+  api: {
+    bodyParser: false, 
+  },
   runtime: "nodejs",
 };
 import { NextResponse } from "next/server";
