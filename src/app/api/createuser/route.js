@@ -70,7 +70,7 @@ export async function POST(req) {
     }
 
     let businessIconUrl = '';
-    const file = formData.get("businessIcon");
+    const file =await formData.get("businessIcon");
     
     if (file) {
       console.log("File found, starting upload");

@@ -7,7 +7,7 @@ export async function POST(request) {
   try {
     await connectDB();
 
-    const { email, name, password, mobileNumber } = await request.json();
+    const { email, name, password, mobileNumber , icon } = await request.json();
 
     if (!email || !name || !password || !mobileNumber) {
       return NextResponse.json({ success: false, msg: "All values are required" }, { status: 400 });
