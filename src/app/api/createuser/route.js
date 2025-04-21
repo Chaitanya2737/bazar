@@ -8,11 +8,11 @@ import CategoryModel from "@/model/categories.model";
 import AdminModel from "@/model/admin.model";
 import { v2 as cloudinary } from "cloudinary";
 
-// Configure Cloudinary once
+// Configure Cloudinary
 cloudinary.config({
-  cloud_name: "dp8evydam",
-  api_key: "591652925595255",
-  api_secret:"hvHhjSg8Hf4LUfpDyJ9T_E42HoE",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
 });
 
@@ -22,10 +22,10 @@ const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 export async function POST(req) {
   try {
     await connectDB();
-
     const formData = await req.formData();
+    
+    // Get and parse user data
     const userDataJson = formData.get("userdata");
-
     if (!userDataJson) {
       return NextResponse.json(
         { success: false, message: "userdata is missing" },
@@ -69,60 +69,61 @@ export async function POST(req) {
       );
     }
 
+    // Handle file upload
     let businessIconUrl = '';
-    const file =await formData.get("businessIcon");
+    const file = formData.get("businessIcon");
     
     if (file) {
-      console.log("File found, starting upload");
       try {
+        // Validate file
+        if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+          return NextResponse.json(
+            { success: false, message: "Invalid file type" },
+            { status: 400 }
+          );
+        }
+
+        if (file.size > MAX_FILE_SIZE) {
+          return NextResponse.json(
+            { success: false, message: "File size exceeds 5MB limit" },
+            { status: 400 }
+          );
+        }
+
+        // Convert file to base64
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-    
-        console.log("Uploading to Cloudinary...");
-        const uploadResult = await new Promise((resolve, reject) => {
-          const uploadStream = cloudinary.uploader.upload_stream(
-            { 
-              folder: "next-cloudinary-uploads",
-              resource_type: "auto",
-              allowed_formats: ["jpg", "png", "webp"], 
-              type: "upload"
-            },
-            (error, result) => {
-              if (error) {
-                console.error("Cloudinary upload error:", error);
-                reject(error);
-              } else {
-                console.log("Upload successful");
-                resolve(result);
-              }
-            }
-          );
-          uploadStream.end(buffer);
+        const base64String = buffer.toString('base64');
+        const dataUri = `data:${file.type};base64,${base64String}`;
+
+        // Upload to Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(dataUri, {
+          folder: "next-cloudinary-uploads",
+          resource_type: "auto",
+          allowed_formats: ["jpg", "png", "webp"],
+          type: "upload",
         });
-    
-        businessIconUrl = uploadResult?.secure_url;
-        console.log("File uploaded to:", businessIconUrl);
-      } catch (uploadError) {
-        console.error("File upload failed:", uploadError);
-        // Return a proper JSON response even on upload failure
+
+        businessIconUrl = uploadResult.secure_url;
+        console.log("Upload successful:", businessIconUrl);
+      } catch (error) {
+        console.error("Upload failed:", error);
         return NextResponse.json(
           { 
-            success: false, 
+            success: false,
             message: "File upload failed",
-            error: uploadError.message 
+            error: error.message
           },
           { status: 500 }
         );
       }
-    } else {
-      console.log("No file provided, continuing without business icon");
     }
 
     // Check for existing user
     const existingUser = await UserModel.findOne({ email: user.email });
     if (existingUser) {
       return NextResponse.json(
-        { success: false, message: "User with this email already exists." },
+        { success: false, message: "User with this email already exists" },
         { status: 409 }
       );
     }
@@ -134,7 +135,7 @@ export async function POST(req) {
     const category = await CategoryModel.findOne({ name: user.categories });
     if (!category) {
       return NextResponse.json(
-        { success: false, message: "Category not found." },
+        { success: false, message: "Category not found" },
         { status: 404 }
       );
     }
@@ -143,7 +144,7 @@ export async function POST(req) {
     const adminDoc = await AdminModel.findOne({ name: user.admin });
     if (!adminDoc) {
       return NextResponse.json(
-        { success: false, message: "Admin not registered." },
+        { success: false, message: "Admin not registered" },
         { status: 404 }
       );
     }
@@ -177,21 +178,29 @@ export async function POST(req) {
 
     await newUser.save();
 
-    return new NextResponse(JSON.stringify(response), {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': 'https://bazar-xzmf.vercel.app',
-        'Access-Control-Allow-Methods': 'POST',
-        'Access-Control-Allow-Headers': 'Content-Type'
+    return NextResponse.json(
+      { 
+        success: true,
+        message: "User created successfully",
+        user: {
+          id: newUser._id,
+          businessName: newUser.businessName,
+          email: newUser.email
+        }
+      },
+      { 
+        status: 201,
+     
       }
-    });
+    );
+
   } catch (error) {
     console.error("Unhandled Error:", error);
     return NextResponse.json(
       {
         success: false,
-        message: error.message || "Internal Server Error",
+        message: "Internal Server Error",
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined
       },
       { status: 500 }
     );
@@ -201,7 +210,6 @@ export async function POST(req) {
 export async function GET() {
   try {
     await connectDB();
-    // Just return a success message for the GET endpoint
     return NextResponse.json(
       { success: true, message: "API is working" },
       { status: 200 }
