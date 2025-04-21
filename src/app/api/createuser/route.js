@@ -32,8 +32,6 @@ export async function POST(req) {
       );
     }
 
-    console.log(user);
-
     // Destructure user data
     const {
       businessName,
@@ -87,6 +85,8 @@ export async function POST(req) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    console.log("hash generated");
+
     // Handle business icon upload
     let fileUrl = "/Sample_User_Icon.png"; // Default icon
     try {
@@ -96,7 +96,7 @@ export async function POST(req) {
       console.error("File upload error:", uploadError);
       fileUrl = "/Default_Error_Icon.png"; // Use a default error icon in case of upload failure
     }
-
+    console.log("file generated");
     // Fetch category document
     const category = await CategoryModel.findOne({ name: categories });
     if (!category) {
@@ -106,6 +106,8 @@ export async function POST(req) {
       );
     }
 
+    console.log("categories check");
+
     // Fetch admin document
     const adminDoc = await AdminModel.findOne({ name: admin });
     if (!adminDoc) {
@@ -114,6 +116,7 @@ export async function POST(req) {
         { status: 404 }
       );
     }
+    console.log("admin check");
 
     // Create new user document
     const newUser = new UserModel({
@@ -143,6 +146,7 @@ export async function POST(req) {
     });
 
     await newUser.save();
+    console.log(newUser);
 
     // Return success response
     return NextResponse.json(
@@ -158,6 +162,7 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (error) {
+    console.log("error comming for here");
     console.error("Registration Error:", error);
     return NextResponse.json(
       {
