@@ -1,7 +1,4 @@
 export const config = {
-  api: {
-    bodyParser: false,
-  },
   runtime: "nodejs",
 };
 import { NextResponse } from "next/server";
@@ -11,7 +8,6 @@ import UserModel from "@/model/user.model";
 import bcrypt from "bcryptjs";
 import CategoryModel from "@/model/categories.model";
 import AdminModel from "@/model/admin.model";
-import { use } from "react";
 
 export async function POST(req) {
   try {
@@ -22,8 +18,7 @@ export async function POST(req) {
     const formData = await req.formData();
     const businessIcon = formData.get("businessIcon");
     const userDataJson = formData.get("userdata");
-
-    console.log(userDataJson);
+    
 
     // Parse user data
     let user;
@@ -174,30 +169,3 @@ export async function POST(req) {
     );
   }
 }
-
-
-
-
-
-const {
-  businessName,
-  handlerName,
-  mobileNumbers,
-  email,
-  password,
-  bio,
-  address,
-  businessLocation,
-  state,
-  GstNumber,
-  language,
-  categories,
-  admin,
-  role,
-  insta,
-  facebook,
-  x,
-  linkedin,
-  youtube,
-  expiringDate,
-} = user;
