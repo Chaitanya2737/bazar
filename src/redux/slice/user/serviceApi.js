@@ -5,7 +5,7 @@ export const createUserApi = createAsyncThunk(
   "user/createuser",
   async (data, { rejectWithValue }) => {
     try {
-      const response = await axios.post("/api/createuser", data, {
+      const response = await axios.post("https://bazar-kohl-eta.vercel.app/api/createuser", data, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
