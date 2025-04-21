@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+
+
 import { NextResponse } from "next/server";
 import { multerMiddleware } from "@/lib/middleware";
 import connectDB from "@/lib/db";
