@@ -7,14 +7,22 @@ import UserModel from "@/model/user.model";
 import bcrypt from "bcryptjs";
 import CategoryModel from "@/model/categories.model";
 import AdminModel from "@/model/admin.model";
-import cloudinary from "@/lib/cloudinaryConfig";
+
+import { v2 as cloudinary } from "cloudinary";
+
+// Configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET, // Click 'View Credentials' below to copy your API secret
+});
 
 export async function POST(req) {
   try {
     await connectDB();
 
     const formData = await req.formData();
-    const businessIcon = formData.get("businessIcon");
+    
     const userDataJson = formData.get("userdata");
 
     if (!userDataJson) {
@@ -67,12 +75,45 @@ export async function POST(req) {
     const validatedMobileNumbers = Array.isArray(mobileNumbers)
       ? mobileNumbers
       : [mobileNumbers];
-    if (validatedMobileNumbers.length < 1 || validatedMobileNumbers.length > 4) {
+    if (
+      validatedMobileNumbers.length < 1 ||
+      validatedMobileNumbers.length > 4
+    ) {
       return NextResponse.json(
         { success: false, message: "Mobile numbers must be between 1 and 4" },
         { status: 400 }
       );
     }
+
+    let result = "";
+    try {
+      const file = await formData.get("businessIcon");
+
+      if (!file) {
+        return NextResponse.json({ error: "File not found" }, { status: 400 });
+      }
+
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          { folder: "next-cloudinary-uploads" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        uploadStream.end(buffer);
+      });
+    } catch (error) {
+      console.log("UPload image failed", error);
+      return NextResponse.json(
+        { error: "Upload image failed" },
+        { status: 500 }
+      );
+    }
+    console.log(result.secure_url);
 
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
@@ -168,7 +209,7 @@ export async function POST(req) {
         x: x || "",
         linkedin: linkedin || "",
       },
-      businessIcon: "abcd",
+      businessIcon: result.secure_url,
     });
 
     await newUser.save();
@@ -199,8 +240,8 @@ export async function POST(req) {
 }
 
 export async function GET() {
- await connectDB()
- const test =cloudinary.config()
-//  const user =  await UserModel.find();
- return NextResponse.json(test)
+  await connectDB();
+  const test = cloudinary.config();
+  //  const user =  await UserModel.find();
+  return NextResponse.json(test);
 }
