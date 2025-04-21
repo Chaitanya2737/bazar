@@ -83,7 +83,9 @@ export async function POST(req) {
           const uploadStream = cloudinary.uploader.upload_stream(
             { 
               folder: "next-cloudinary-uploads",
-              resource_type: "auto"
+              resource_type: "auto",
+              allowed_formats: ["jpg", "png", "webp"], 
+              type: "upload"
             },
             (error, result) => {
               if (error) {
@@ -175,18 +177,15 @@ export async function POST(req) {
 
     await newUser.save();
 
-    return NextResponse.json(
-      {
-        success: true,
-        message: "User registered successfully.",
-        data: {
-          id: newUser._id,
-          businessName: newUser.businessName,
-          email: newUser.email,
-        },
-      },
-      { status: 201 }
-    );
+    return new NextResponse(JSON.stringify(response), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': 'https://bazar-xzmf.vercel.app',
+        'Access-Control-Allow-Methods': 'POST',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
   } catch (error) {
     console.error("Unhandled Error:", error);
     return NextResponse.json(
