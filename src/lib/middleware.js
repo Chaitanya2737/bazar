@@ -8,7 +8,7 @@ export async function multerMiddleware(file, filename) {
     }
 
     // Sanitize folder name
-    const sanitizedFolderName = folderName
+    const sanitizedFolderName = filename
       .trim()
       .replace(/[^a-zA-Z0-9-_]/g, "-") // Replace special chars with hyphens
       .substring(0, 60); // Limit length
@@ -22,8 +22,8 @@ export async function multerMiddleware(file, filename) {
       const uploadOptions = {
         folder: sanitizedFolderName,
         resource_type: "auto", // Auto-detect file type
-        allowed_formats: ["jpg", "png", "jpeg", "webp", "gif"], // Restrict formats
-        max_file_size: 5 * 1024 * 1024, // 5MB limit
+        allowed_formats: ["jpg", "png", "jpeg", "webp", "gif"], 
+        max_file_size: 5 * 1024 * 1024,
       };
 
       const stream = cloudinary.uploader.upload_stream(
