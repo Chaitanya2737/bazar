@@ -8,15 +8,26 @@ export const createUserApi = createAsyncThunk(
       const response = await axios.post("/api/createuser", data, {
         headers: {
           "Content-Type": "multipart/form-data",
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         },
       });
+
       return response.data;
     } catch (error) {
+      // Check if the server returned an HTML page instead of JSON
+      if (
+        error.response &&
+        error.response.data &&
+        typeof error.response.data === "string" &&
+        error.response.data.startsWith("<!DOCTYPE")
+      ) {
+        console.error("HTML Error page received:", error.response.data);
+        return rejectWithValue("Received unexpected HTML error page.");
+      }
+
       console.error("Error creating user:", error);
-      return rejectWithValue(error.response?.data || "Unknown error");
+
+      // If response has JSON error
+      return rejectWithValue(error.response?.data || "Unknown error occurred.");
     }
   }
 );
