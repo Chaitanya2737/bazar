@@ -1,6 +1,5 @@
 export const runtime = "nodejs";
 
-
 import { NextResponse } from "next/server";
 import { multerMiddleware } from "@/lib/middleware";
 import connectDB from "@/lib/db";
@@ -11,9 +10,11 @@ import AdminModel from "@/model/admin.model";
 
 export async function POST(req) {
   try {
+    // Connect to the database
     await connectDB();
+    
+    // Parse the form data
     const formData = await req.formData();
-
     const businessIcon = formData.get("businessIcon");
     const userDataJson = formData.get("userdata");
 
@@ -24,14 +25,12 @@ export async function POST(req) {
     } catch (error) {
       console.error("Invalid JSON format for userdata:", error);
       return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid userdata format.",
-        },
+        { success: false, message: "Invalid userdata format." },
         { status: 400 }
       );
     }
 
+    // Destructure user data
     const {
       businessName,
       handlerName,
@@ -58,22 +57,16 @@ export async function POST(req) {
     // Validate required fields
     if (!businessName || !businessLocation || !admin || !email || !password) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Missing required fields. Please provide all necessary information.",
-        },
+        { success: false, message: "Missing required fields." },
         { status: 400 }
       );
     }
 
-    // Validate and normalize mobile numbers
+    // Validate mobile numbers
     const validatedMobileNumbers = Array.isArray(mobileNumbers) ? mobileNumbers : [mobileNumbers];
     if (validatedMobileNumbers.length < 1 || validatedMobileNumbers.length > 4) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Mobile numbers must be between 1 and 4.",
-        },
+        { success: false, message: "Mobile numbers must be between 1 and 4." },
         { status: 400 }
       );
     }
@@ -82,10 +75,7 @@ export async function POST(req) {
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "A user with this email already exists.",
-        },
+        { success: false, message: "User with this email already exists." },
         { status: 409 }
       );
     }
@@ -100,16 +90,14 @@ export async function POST(req) {
       if (uploadedUrl) fileUrl = uploadedUrl;
     } catch (uploadError) {
       console.error("File upload error:", uploadError);
+      fileUrl = "/Default_Error_Icon.png"; // Use a default error icon in case of upload failure
     }
 
     // Fetch category document
     const category = await CategoryModel.findOne({ name: categories });
     if (!category) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Category not found.",
-        },
+        { success: false, message: "Category not found." },
         { status: 404 }
       );
     }
@@ -118,10 +106,7 @@ export async function POST(req) {
     const adminDoc = await AdminModel.findOne({ name: admin });
     if (!adminDoc) {
       return NextResponse.json(
-        {
-          success: false,
-          message: "Admin not registered.",
-        },
+        { success: false, message: "Admin not registered." },
         { status: 404 }
       );
     }
@@ -155,6 +140,7 @@ export async function POST(req) {
 
     await newUser.save();
 
+    // Return success response
     return NextResponse.json(
       {
         success: true,
@@ -173,6 +159,7 @@ export async function POST(req) {
       {
         success: false,
         message: error.message || "Internal Server Error",
+        stack: process.env.NODE_ENV === "development" ? error.stack : undefined, // Include stack trace only in development mode
       },
       { status: 500 }
     );
