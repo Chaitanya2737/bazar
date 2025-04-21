@@ -14,7 +14,7 @@ import { v2 as cloudinary } from "cloudinary";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET, // Click 'View Credentials' below to copy your API secret
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 export async function POST(req) {
@@ -22,7 +22,6 @@ export async function POST(req) {
     await connectDB();
 
     const formData = await req.formData();
-    
     const userDataJson = formData.get("userdata");
 
     if (!userDataJson) {
@@ -85,36 +84,46 @@ export async function POST(req) {
       );
     }
 
-    let result = "";
+    // ⬇️ Upload business icon
+    const file = formData.get("businessIcon");
+    let uploadedImage = null;
+
+    if (!file || typeof file.arrayBuffer !== "function") {
+      return NextResponse.json(
+        { error: "Valid businessIcon file not found" },
+        { status: 400 }
+      );
+    }
+
     try {
-      const file = await formData.get("businessIcon");
-
-      if (!file) {
-        return NextResponse.json({ error: "File not found" }, { status: 400 });
-      }
-
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      result = await new Promise((resolve, reject) => {
-        const uploadStream = cloudinary.uploader.upload_stream(
-          { folder: "next-cloudinary-uploads" },
+      uploadedImage = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "next-cloudinary-uploads",
+            resource_type: "auto",
+          },
           (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result.secure_url);
+            }
           }
         );
-        uploadStream.end(buffer);
+        stream.end(buffer);
       });
     } catch (error) {
-      console.log("UPload image failed", error);
+      console.error("Cloudinary upload error:", error);
       return NextResponse.json(
-        { error: "Upload image failed" },
+        { success: false, message: "Upload image failed" },
         { status: 500 }
       );
     }
-    console.log(result.secure_url);
 
+    // Check for existing user
     const existingUser = await UserModel.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
@@ -124,51 +133,6 @@ export async function POST(req) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // ✅ Upload businessIcon to Cloudinary only if it's valid
-    // let uploadedUrl = "";
-    // if (
-    //   businessIcon &&
-    //   typeof businessIcon.arrayBuffer === "function" &&
-    //   businessIcon.name
-    // ) {
-    //   try {
-    //     const sanitizedFolderName = businessName
-    //       .trim()
-    //       .replace(/[^a-zA-Z0-9-_]/g, "-")
-    //       .substring(0, 60);
-    //     const arrayBuffer = await businessIcon.arrayBuffer();
-    //     const buffer = Buffer.from(arrayBuffer);
-
-    //     uploadedUrl = await new Promise((resolve, reject) => {
-    //       const uploadOptions = {
-    //         folder: sanitizedFolderName,
-    //         resource_type: "auto",
-    //         allowed_formats: ["jpg", "png", "jpeg", "webp", "gif"],
-    //         max_file_size: 5 * 1024 * 1024,
-    //       };
-
-    //       const stream = cloudinary.uploader.upload_stream(
-    //         uploadOptions,
-    //         (error, result) => {
-    //           if (error) {
-    //             console.error("Cloudinary upload error:", error , cloudinary.config());
-    //             reject(error);
-    //           } else {
-    //             resolve(result.secure_url);
-    //           }
-    //         }
-    //       );
-
-    //       stream.end(buffer);
-    //     });
-    //   } catch (err) {
-    //     return NextResponse.json(
-    //       { success: false, message: "Error uploading image to Cloudinary" },
-    //       { status: 500 }
-    //     );
-    //   }
-    // }
 
     const category = await CategoryModel.findOne({ name: categories });
     if (!category) {
@@ -209,7 +173,7 @@ export async function POST(req) {
         x: x || "",
         linkedin: linkedin || "",
       },
-      businessIcon: result.secure_url,
+      businessIcon: uploadedImage.secure_url,
     });
 
     await newUser.save();
@@ -227,17 +191,17 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (error) {
-    console.log("Error occurred:", error);
+    console.error("Unhandled Error:", error);
     return NextResponse.json(
       {
         success: false,
         message: error.message || "Internal Server Error",
-        stack: process.env.NODE_ENV === "development" ? error.stack : undefined,
       },
       { status: 500 }
     );
   }
 }
+
 
 export async function GET() {
   await connectDB();
