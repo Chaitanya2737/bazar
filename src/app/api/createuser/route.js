@@ -23,6 +23,8 @@ export async function POST(req) {
     const businessIcon = formData.get("businessIcon");
     const userDataJson = formData.get("userdata");
 
+    console.log(businessIcon);
+
     // Parse user data
     let user;
     try {
