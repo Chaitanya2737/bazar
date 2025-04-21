@@ -16,29 +16,20 @@ export async function POST(request) {
             );
         }
 
+        // Convert file to base64 string
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
+        const base64String = buffer.toString('base64');
+        const dataUri = `data:${file.type};base64,${base64String}`;
     
-        console.log("Uploading to Cloudinary...");
-        const uploadResult = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                { 
-                    folder: "next-cloudinary-uploads",
-                    resource_type: "auto",
-                    allowed_formats: ["jpg", "png", "webp"], 
-                    type: "upload"
-                },
-                (error, result) => {
-                    if (error) {
-                        console.error("Cloudinary upload error:", error);
-                        reject(error);
-                    } else {
-                        console.log("Upload successful");
-                        resolve(result);
-                    }
-                }
-            );
-            uploadStream.end(buffer);
+        console.log("Uploading to Cloudinary using uploader...");
+        
+        // Use uploader.upload() instead of upload_stream
+        const uploadResult = await cloudinary.uploader.upload(dataUri, {
+            folder: "next-cloudinary-uploads",
+            resource_type: "auto",
+            allowed_formats: ["jpg", "png", "webp"],
+            type: "upload"
         });
     
         const businessIconUrl = uploadResult?.secure_url;
