@@ -82,12 +82,12 @@ export async function POST (req) {
           max_file_size: 5 * 1024 * 1024,
         };
 
-        const stream = cloudinary.uploader.upload_stream(uploadOptions, async (error, result) => {
+        const stream = cloudinary.uploader.upload_stream(uploadOptions, (error, result) => {
           if (error) {
-           await reject(error);
-            console.error("Cloudinary upload error:", error);
+            console.error("Cloudinary upload error: and error comming form here", error);
+            reject(error);
           } else {
-          await  resolve(result.secure_url);
+            resolve(result.secure_url);
           }
         });
 
