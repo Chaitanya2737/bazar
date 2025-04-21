@@ -9,7 +9,7 @@ import CategoryModel from "@/model/categories.model";
 import AdminModel from "@/model/admin.model";
 import cloudinary from "@/lib/cloudinaryConfig";
 
-export async function POST(req) {
+export async function POST (req) {
   try {
     await connectDB();
 
@@ -68,13 +68,13 @@ export async function POST(req) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // ✅ Upload business icon to Cloudinary
-    let uploadedUrl = "";
+  
     if (businessIcon) {
       const sanitizedFolderName = businessName.trim().replace(/[^a-zA-Z0-9-_]/g, "-").substring(0, 60);
       const arrayBuffer = await businessIcon.arrayBuffer(); // ✅ Corrected variable
       const buffer = Buffer.from(arrayBuffer);
 
-      uploadedUrl = await new Promise((resolve, reject) => {
+     let uploadedUrl = await new Promise((resolve, reject) => {
         const uploadOptions = {
           folder: sanitizedFolderName,
           resource_type: "auto",
