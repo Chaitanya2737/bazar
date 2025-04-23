@@ -4,7 +4,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 
 export default function SignInPage() {
-  const [username, setUsername] = useState("");
+  const [email, setemail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleLogin = async (e) => {
@@ -12,7 +12,7 @@ export default function SignInPage() {
 
     const res = await signIn("credentials", {
       redirect: false,
-      username,
+      email,
       password,
     });
 
@@ -23,9 +23,9 @@ export default function SignInPage() {
     <form onSubmit={handleLogin}>
       <input
         type="text"
-        placeholder="Username"
-        value={username}
-        onChange={(e) => setUsername(e.target.value)}
+        placeholder="email"
+        value={email}
+        onChange={(e) => setemail(e.target.value)}
       />
       <input
         type="password"

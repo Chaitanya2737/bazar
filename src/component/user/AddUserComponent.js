@@ -12,7 +12,7 @@ import {
   Trash2,
   Plus,
 } from "lucide-react";
-import { resetUser, updateUser } from "@/redux/slice/user/userSlice";
+import { resetUser, updateUser } from "@/redux/slice/user/addUserSlice";
 import { createUserApi } from "@/redux/slice/user/serviceApi";
 
 // Parent Component
