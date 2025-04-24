@@ -1,59 +1,83 @@
-"use client";
+'use client';
 
-import { signIn, useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { userLogin } from "@/redux/slice/user/userSlice";
+import { signIn, useSession } from 'next-auth/react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [form, setForm] = useState({ email: '', password: '' });
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [error, setError] = useState('');
+
   const router = useRouter();
-  const { data: session, status } = useSession();
-  const dispatch = useDispatch();
+  const { status } = useSession();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/user/dashboard');
+    }
+  }, [status, router]);
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsLoggingIn(true);
+    setError('');
 
-    const res = await signIn("credentials", {
+    const res = await signIn('credentials', {
       redirect: false,
-      email,
-      password,
+      email: form.email,
+      password: form.password,
     });
 
+    setIsLoggingIn(false);
+
     if (res?.ok) {
-      router.push("/user/dashboard");
+      // Redirect immediately upon successful login
+      router.push('/user/dashboard');
     } else {
-      alert("Login failed");
+      setError(res?.error || 'Invalid credentials. Please try again.');
     }
   };
 
-  // ✅ Handle already authenticated users
-  useEffect(() => {
-    if (status === "authenticated") {
-      dispatch(userLogin(session)); // Dispatch user login to Redux store
-      router.push("/user/dashboard");
-    }
-  }, [status, session, dispatch, router]); // Add dependencies to avoid potential issues
+  if (status === 'loading') return <div>Loading...</div>;
 
   return (
-    <form onSubmit={handleLogin}>
+    <form
+      onSubmit={handleLogin}
+      className="flex flex-col gap-4 max-w-sm mx-auto mt-10"
+    >
       <input
         type="email"
+        name="email"
         placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        value={form.email}
+        onChange={handleChange}
         required
+        className="p-2 border rounded"
+        aria-label="Email"
       />
       <input
         type="password"
+        name="password"
         placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
+        value={form.password}
+        onChange={handleChange}
         required
+        className="p-2 border rounded"
+        aria-label="Password"
       />
-      <button type="submit">Sign In</button>
+      {error && <p className="text-red-500 text-sm">{error}</p>}
+      <button
+        type="submit"
+        className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+        disabled={isLoggingIn}
+      >
+        {isLoggingIn ? 'Logging in...' : 'Sign In'}
+      </button>
     </form>
   );
 }

@@ -23,7 +23,7 @@ const Navbar = () => {
   };
 
   // Check if the user is authenticated
-  const selector = useSelector((state) => state.userAuth);
+  const selector = useSelector((state) => state?.userAuth?.user);
 
   // Optional: Check if the user is authenticated and show dropdown menu accordingly
   const isAuthenticated = selector?.isAuthenticated;
@@ -60,7 +60,7 @@ const Navbar = () => {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 rounded-md cursor-pointer"
-                onSelect={() => handleNavigation("/admin/signup")}
+                onSelect={() => handleNavigation("/admin/signin")}
               >
                 <UserCog size={16} />
                 <span>Administrator</span>
