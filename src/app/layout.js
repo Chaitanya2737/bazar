@@ -25,9 +25,7 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* You can add global meta tags here if needed */}
-      </head>
-
-      {/* ✅ Google Analytics Scripts */}
+          {/* ✅ Google Analytics Scripts */}
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=G-YW07BJQL9N"
         strategy="afterInteractive"
@@ -44,6 +42,9 @@ export default function RootLayout({ children }) {
           `,
         }}
       />
+      </head>
+
+    
 
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
