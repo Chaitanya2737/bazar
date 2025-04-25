@@ -22,7 +22,7 @@ export default function UserLayout({ children }) {
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
-      gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID}');
+      gtag('config', '${process.env.GOOGLE_ANALYTICS_ID}');
     `,
         }}
       />
