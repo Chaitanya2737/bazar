@@ -3,6 +3,7 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { ThemeProvider } from "next-themes";
 import ProviderAuth from "@/lib/ProviderAuth";
+import Script from "next/script";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +23,28 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head />
+      <head>
+        {/* You can add global meta tags here if needed */}
+      </head>
+
+      {/* ✅ Google Analytics Scripts */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-YW07BJQL9N"
+        strategy="afterInteractive"
+      />
+      <Script
+        id="google-analytics"
+        strategy="afterInteractive"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-YW07BJQL9N');
+          `,
+        }}
+      />
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -32,9 +54,9 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <Providers>   {/* redux provider */} 
-            <ProviderAuth>{children}</ProviderAuth>  {/* nextAuth provider */} 
-          </Providers> 
+          <Providers>
+            <ProviderAuth>{children}</ProviderAuth>
+          </Providers>
         </ThemeProvider>
       </body>
     </html>
