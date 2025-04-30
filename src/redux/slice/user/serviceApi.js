@@ -74,3 +74,48 @@ export const getUserDataApi = createAsyncThunk(
     }
   }
 );
+
+export const getUserPreview = createAsyncThunk(
+  "user/preview",
+  async (subdomain, { rejectWithValue }) => {
+    try {
+      const response = await axios.post(
+        "/api/user/preview",
+        { subdomain },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.data) {
+        return rejectWithValue("No data returned from the server.");
+      }
+
+      return response.data;
+
+    } catch (error) {
+      // Check if the error is a network issue
+      if (!error.response) {
+        console.error("Network error:", error);
+        return rejectWithValue("Network error occurred.");
+      }
+
+      // Handle server-side error status codes
+      if (error.response.status === 404) {
+        console.error("User not found:", error.response.data);
+        return rejectWithValue("User not found.");
+      }
+
+      if (error.response.status === 500) {
+        console.error("Server error:", error.response.data);
+        return rejectWithValue("Internal server error.");
+      }
+
+      // Generic error message if no specific condition is met
+      const errorMessage = error.response?.data || "Unknown error occurred.";
+      return rejectWithValue(errorMessage);
+    }
+  }
+);

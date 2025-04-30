@@ -40,7 +40,6 @@ const UserDashboardPage = () => {
       const fetchUserData = async () => {
         try {
           const data = await dispatch(getUserDataApi(user?.id));
-          console.log("Fetched User Data:", data);
         } catch (error) {
           console.error("API Fetch Error:", error);
         }

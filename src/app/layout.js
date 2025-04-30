@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import { ThemeProvider } from "next-themes";
 import ProviderAuth from "@/lib/ProviderAuth";
 import Script from "next/script";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,26 +26,24 @@ export default function RootLayout({ children }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         {/* You can add global meta tags here if needed */}
-          {/* ✅ Google Analytics Scripts */}
-      <Script
-        src="https://www.googletagmanager.com/gtag/js?id=G-YW07BJQL9N"
-        strategy="afterInteractive"
-      />
-      <Script
-        id="google-analytics"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
+        {/* ✅ Google Analytics Scripts */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-YW07BJQL9N"
+          strategy="afterInteractive"
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
             gtag('js', new Date());
             gtag('config', 'G-YW07BJQL9N');
           `,
-        }}
-      />
+          }}
+        />
       </head>
-
-    
 
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
@@ -57,6 +56,22 @@ export default function RootLayout({ children }) {
         >
           <Providers>
             <ProviderAuth>{children}</ProviderAuth>
+            <Toaster
+              toastOptions={{
+                success: {
+                  backgroundColor: "#4CAF50", // success color (green)
+                },
+                error: {
+                  backgroundColor: "#f44336", // error color (red)
+                },
+                
+                dark: {
+                  backgroundColor: "#2D2D2D", // dark background color
+                  color: "white", // white text in dark mode
+                },
+              }}
+              className="max-w-lg mx-auto"
+            />
           </Providers>
         </ThemeProvider>
       </body>
