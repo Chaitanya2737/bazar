@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import slugify from "slugify";  // Make sure you have slugify installed
+
 const userSchema = new mongoose.Schema({
   businessName: {
     type: String,
@@ -11,6 +13,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  slug: { type: String, unique: true },
   bio: {
     type: String,
   },
@@ -38,7 +41,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["user", "business", "admin"],
     default: "user",
-  },  
+  },
   subscriptionPlan: {
     type: String,
     enum: ["basic", "premium"],
@@ -61,10 +64,6 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
     immutable: true,
   },
-  // expringDate: {
-  //   type: Date,
-  //   required: true,
-  // },
   language: {
     type: String,
   },
@@ -89,12 +88,27 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: false,
   },
+  visitCount: {
+    type: Number,
+    default: 0,
+  },
   referralCode: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "referral",
     unique: true,
     sparse: true, // Allows null values without uniqueness conflict
   },
+});
+
+// Pre-save hook to generate the slug
+userSchema.pre("save", function (next) {
+  if (this.businessName) {
+    this.slug = slugify(this.businessName, {
+      lower: true,
+      strict: true,
+    });
+  }
+  next();
 });
 
 const UserModel = mongoose.models.User || mongoose.model("User", userSchema);

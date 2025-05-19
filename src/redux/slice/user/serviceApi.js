@@ -90,6 +90,7 @@ export const getUserPreview = createAsyncThunk(
       );
 
       if (!response.data) {
+
         return rejectWithValue("No data returned from the server.");
       }
 

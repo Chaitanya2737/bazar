@@ -4,7 +4,8 @@ import { getUserPreview } from "./serviceApi";
 // userPreviewSlice.js (Redux slice)
 const initialState = {
   userPreview: null,
-  loading: false,
+  loading: false, 
+  error:  false,
   errorMessage: null,
 };
 
@@ -34,6 +35,7 @@ const userPreviewSlice = createSlice({
       })
       .addCase(getUserPreview.rejected, (state, action) => {
         state.loading = false;
+        state.error = true
         state.errorMessage = action.error.message;
       });
   },

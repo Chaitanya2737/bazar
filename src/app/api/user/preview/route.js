@@ -78,6 +78,8 @@ function isValidSubdomain(subdomain) {
   return subdomainUnicodeRegex.test(subdomain);
 }
 
+
+
 // Store failed user in cache and manage cache size
 function storeFailedUserCache(subdomain) {
   if (Object.keys(failedUserCache).length >= MAX_CACHE_SIZE) {

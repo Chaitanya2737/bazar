@@ -10,26 +10,7 @@ export const metadata = {
 export default function UserLayout({ children }) {
   return (
     <>
-      {/* Google Analytics Script for GA4 */}
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${process.env.GOOGLE_ANALYTICS_ID}`}
-        strategy="afterInteractive"
-      />
-
-      {/* Initialize Google Analytics */}
-      <Script
-        id="google-analytics"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${process.env.GOOGLE_ANALYTICS_ID}');
-          `,
-        }}
-      />
-
+     
       {/* Render the child components */}
       <div>{children}</div>
     </>

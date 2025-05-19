@@ -1,184 +1,199 @@
 "use client";
 
-import PageVisitTracker from "@/component/googleAnalyatic/Analytic";
-import { loadFromStorage, resetUserPreview } from "@/redux/slice/user/preview";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState, useCallback } from "react";
-import ReactGA from "react-ga4";
+import axios from "axios";
+import { toast, Toaster } from "sonner";
+
+import { loadFromStorage, resetUserPreview } from "@/redux/slice/user/preview";
 import { getUserPreview } from "@/redux/slice/user/serviceApi";
-import { Toaster, toast } from "sonner";
-import { Button } from "@/components/ui/button";
+
 import ThemeToggle from "@/component/themeToggle/themeToggle";
 import Navbar from "@/component/preview/Navbar";
 import MainSection from "@/component/preview/MainSection";
-
-const GA_MEASUREMENT_ID = "G-ZXSFD634MS";
-
-let gaInitialized = false;
+import Userpreviewcount from "@/component/preview/Userpreviewcount";
+import { Skeleton } from "@/components/ui/skeleton";
+import Authorized from "../error/not-authorized/page";
+import { set } from "mongoose";
+import { useRouter } from "next/navigation";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
 
 const UserPreview = () => {
+
+  const router = useRouter();
   const dispatch = useDispatch();
+  const pathname = usePathname();
   const { userPreview, loading, errorMessage } = useSelector(
     (state) => state.previewData || {}
   );
-  const pathname = usePathname();
-  const [visitCount, setVisitCount] = useState(null);
 
-  const initializeGA = useCallback(() => {
-    if (!gaInitialized) {
-      ReactGA.initialize(GA_MEASUREMENT_ID);
-      gaInitialized = true;
+  const [visitCount, setVisitCount] = useState(null);
+  const [backendVisitCount, setBackendVisitCount] = useState(null);
+  const [isUnauthorized, setIsUnauthorized] = useState(false);
+
+  const storedPreview = useMemo(() => {
+    try {
+      return JSON.parse(localStorage.getItem("userPreview") || "{}");
+    } catch {
+      return {};
     }
   }, []);
 
-  const trackPageVisit = useCallback(() => {
+  const sendVisitCountToBackend = async (id, count) => {
+    try {
+      const response = await axios.post("/api/user/usercount", {
+        userId: id,
+        visitCount: count,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error sending visit count:", error);
+      toast.error("Failed to send visit count to backend.");
+    }
+  };
+
+  const trackPageVisit = useCallback(async () => {
     const pageKey = getPageKey(pathname);
     const sessionKey = getSessionKey(pathname);
 
-    ReactGA.send({ hitType: "pageview", page: pathname });
-
-    const hasVisitedThisSession = sessionStorage.getItem(sessionKey);
-
-    if (!hasVisitedThisSession) {
-      const previousCount = parseInt(localStorage.getItem(pageKey) || "0", 10);
-      const newCount = previousCount + 1;
+    if (!sessionStorage.getItem(sessionKey)) {
+      const prevCount = parseInt(localStorage.getItem(pageKey) || "0", 10);
+      const newCount = prevCount + 1;
 
       localStorage.setItem(pageKey, newCount.toString());
       setVisitCount(newCount);
       sessionStorage.setItem(sessionKey, "true");
 
-      ReactGA.event({
-        category: "User Engagement",
-        action: "first_visit",
-        label: `First Visit ${pathname}`,
-        value: 1,
-      });
+      const userId = storedPreview?.data?._id;
 
-      ReactGA.event({
-        category: "User Engagement",
-        action: "page_visit",
-        label: `Visit ${newCount} at ${pathname}`,
-        value: newCount,
-      });
-
-      toast("Event has been created", {
-        description: "Sunday, December 03, 2023 at 9:00 AM",
-        action: {
-          label: "Undo",
-          onClick: () => console.log("Undo"),
-        },
-      });
+      if (userId) {
+        const response = await sendVisitCountToBackend(userId, newCount);
+        if (response?.visitCount !== undefined) {
+          setBackendVisitCount(response.visitCount);
+          localStorage.setItem("visitCount", response.visitCount.toString());
+          toast.success("Event has been created");
+        }
+      } else {
+        toast.error("User ID not found. Skipping visit count update.");
+      }
     } else {
       const count = parseInt(localStorage.getItem(pageKey) || "0", 10);
       setVisitCount(count);
     }
-  }, [pathname]);
+  }, [pathname, storedPreview]);
 
   const fetchUserData = useCallback(async () => {
     try {
-      const rawPath = window.location.pathname;
-
-      // Decode the pathname to handle special characters or encoded characters like %20 for spaces
-      const decodedPath = decodeURIComponent(rawPath);
-
-      // Split the decoded pathname by slashes and filter out empty parts
-      const parts = decodedPath.split("/").filter(Boolean);
-
-      // Extract the first part (subdomain) from the URL path
-      const subdomain = parts.length > 0 ? parts[0] : null;
-
+      const parts = decodeURIComponent(window.location.pathname)
+        .split("/")
+        .filter(Boolean);
+      const subdomain = parts[0];
+  
       if (!subdomain) {
         toast.error("Subdomain not found in URL");
         return;
       }
-
-      // Log or use the subdomain
-      console.log("Subdomain:", subdomain);
+  
       localStorage.setItem("subdomain", subdomain);
-
-      // Clean up old preview
       localStorage.removeItem("userPreview");
       dispatch(resetUserPreview());
-
+  
       const action = await dispatch(getUserPreview(subdomain));
-
+  
+      if (getUserPreview.rejected.match(action)) {
+        const message = action.payload || "Authorization failed.";
+  
+        // Redirect first to avoid visual delay
+        router.replace("/error/not-authorized");
+  
+        // Then optionally toast (if still needed)
+        toast.error(message);
+        return;
+      }
+  
       if (action.payload) {
-        // Only store the data if it's valid
         localStorage.setItem("userPreview", JSON.stringify(action.payload));
         toast.success("User data fetched successfully!");
       } else {
         toast.error("No data returned for the user preview.");
       }
     } catch (error) {
-      toast.error("Error fetching user data");
-      // Ensure no data is saved to localStorage in case of error
+      console.error("Error fetching user data:", error);
+  
+      // Redirect immediately on unexpected error
+      router.replace("/error/not-authorized");
+      toast.error("Unexpected error occurred while fetching user data.");
     }
-  }, [dispatch, pathname]);
+  }, [dispatch, router]);
+  
+
 
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    initializeGA();
     trackPageVisit();
 
-    // Get userPreview data from localStorage
     const userPreviewData = localStorage.getItem("userPreview");
-
-    // Get subdomain from localStorage
     const storedSubdomain = localStorage.getItem("subdomain");
+    const currentSubdomain = pathname.split("/")[1];
 
-    // If userPreview data doesn't exist or subdomain doesn't match, fetch new data
-    if (!userPreviewData || storedSubdomain !== pathname.split("/")[1]) {
+    if (!userPreviewData || storedSubdomain !== currentSubdomain) {
       fetchUserData();
     } else {
       dispatch(loadFromStorage(JSON.parse(userPreviewData)));
     }
+  }, [trackPageVisit, fetchUserData, dispatch, pathname]);
 
-    return () => {
-      setVisitCount(null);
-    };
-  }, [initializeGA, trackPageVisit, fetchUserData, dispatch, pathname]);
 
-  if (visitCount === null) {
-    return null;
-  }
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+  const data = userPreview?.data;
 
-  if (errorMessage) {
-    return <div>Error: {errorMessage}</div>;
-  }
-  console.log(userPreview.data);
+  // Conditionally render skeleton for components
+  const renderUserDataSkeleton = loading || !data;
+  const renderMainSectionSkeleton = loading || !data;
 
   return (
     <div className="bg-white text-black dark:bg-gray-800 dark:text-white min-h-screen p-4 relative">
-      {userPreview?.data ? (
+      <Toaster />
+
+      {/* Skeleton for User Data */}
+      {renderUserDataSkeleton ? (
         <div>
-          <h2>User Preview</h2>
-          <p>{userPreview.data.businessName}</p>
-          <p>{userPreview.data.email}</p>
+          <Skeleton className="w-40 h-6 bg-gray-800 dark:bg-gray-200 rounded mb-2" />
+          <Skeleton className="w-60 h-6 bg-gray-800 dark:bg-gray-200 rounded mb-4" />
         </div>
       ) : (
-        <div>No user data available</div>
+        <>
+          <h2 className="text-xl font-semibold mb-2">User Preview</h2>
+          <p><strong>Business Name:</strong> {data.businessName ?? "N/A"}</p>
+          <p><strong>Email:</strong> {data.email ?? "N/A"}</p>
+        </>
       )}
 
       <Navbar />
-      <MainSection
-        businessName={userPreview.data.businessName}
-        icon={userPreview.data.businessIcon}
-        mobileNumber={userPreview.data.mobileNumber}
-        bio={userPreview.data.bio}
-        email={userPreview.data.email}
-        handlerName={userPreview.data.handlerName}
-        socialMediaLinks={userPreview.data.socialMediaLinks}
-        location={userPreview.data?.businessLocation || ""}
-      />
+
+      {/* Skeleton for Main Section */}
+      {renderMainSectionSkeleton ? (
+        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+      ) : (
+        data && (
+          <MainSection
+            businessName={data.businessName}
+            icon={data.businessIcon}
+            mobileNumber={data.mobileNumber}
+            bio={data.bio}
+            email={data.email}
+            handlerName={data.handlerName}
+            socialMediaLinks={data.socialMediaLinks}
+            location={data.businessLocation || ""}
+          />
+        )
+      )}
+
+      <Userpreviewcount count={backendVisitCount} />
       <ThemeToggle />
     </div>
   );

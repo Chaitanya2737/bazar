@@ -1,5 +1,3 @@
-export const runtime = "nodejs"; // Needed for buffer handling
-
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import UserModel from "@/model/user.model";
@@ -10,6 +8,18 @@ import cloudinary from "@/lib/cloudinaryConfig";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpeg"];
+
+// Slug generator (only for English names)
+function generateSlug(name) {
+  // Check if the name is entirely in English (no non-English characters)
+  const isEnglish = /^[A-Za-z0-9\s\-]+$/.test(name); // Regex for English letters, numbers, spaces, and hyphens
+  if (!isEnglish) return null; // Don't generate slug if it's not an English name
+
+  return slugify(name, {
+    lower: true,
+    strict: true, // Ensures that special characters are removed
+  });
+}
 
 export async function POST(req) {
   try {
@@ -65,7 +75,9 @@ export async function POST(req) {
         },
         { status: 400 }
       );
+
     }
+
 
     // Validate references
     const adminDoc = await AdminModel.findOne({ name: user.admin });
@@ -84,6 +96,7 @@ export async function POST(req) {
       );
     }
 
+    
     // Hash the password
     const hashedPassword = await bcrypt.hash(user.password, 10);
 
@@ -150,6 +163,7 @@ export async function POST(req) {
         linkedin: user.linkedin || "",
       },
       businessIcon: businessIconUrl,
+      count:0
     });
 
     await newUser.save();
@@ -157,7 +171,8 @@ export async function POST(req) {
     return NextResponse.json(
       {
         success: true,
-        message: "User created successfully || todo :- we have work on whatsapp message api",
+        message:
+          "User created successfully || todo :- we have work on whatsapp message api",
         user: {
           id: newUser._id,
           businessName: newUser.businessName,

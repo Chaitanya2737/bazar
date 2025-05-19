@@ -13,6 +13,7 @@ module.exports = {
         dark: '#0f172a',  // dark mode background
         foregroundLight: '#000000',
         foregroundDark: '#f8fafc',
+        tomato : "#1c1b1b"
       },
       fontFamily: {
         poppins: ['Poppins', 'sans-serif'],

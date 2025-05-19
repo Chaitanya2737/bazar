@@ -27,22 +27,6 @@ export default function RootLayout({ children }) {
       <head>
         {/* You can add global meta tags here if needed */}
         {/* ✅ Google Analytics Scripts */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-YW07BJQL9N"
-          strategy="afterInteractive"
-        />
-        <Script
-          id="google-analytics"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-YW07BJQL9N');
-          `,
-          }}
-        />
       </head>
 
       <body
