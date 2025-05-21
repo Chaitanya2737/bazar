@@ -39,3 +39,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+src/lib/sms-sender-b3081-firebase-adminsdk-fbsvc-a2c95cba0e.json
