@@ -130,7 +130,6 @@ body {
 
 /* Smooth background color transition for the button */
 button:hover {
-  background-color: #4c51bf; /* Darker shade of indigo */
   transition: background-color 0.3s ease;
 }
 
@@ -173,4 +172,38 @@ button:hover {
 /* Applying the fadeInUp animation */
 .animate-fadeInUp {
   animation: fadeInUp 1s ease-in-out;
+}
+
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+
+.animate-pulse {
+  animation: pulse 5s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out infinite;
+}
+
+@keyframes bellBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.animate-bell-bounce {
+  animation: bellBounce 1.5s ease-in-out infinite;
+  display: inline-block;
 }
