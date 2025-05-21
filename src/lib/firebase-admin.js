@@ -1,10 +1,17 @@
 import admin from "firebase-admin";
-import { applicationDefault } from "firebase-admin/app";
+import fs from "fs";
 
-process.env.GOOGLE_APPLICATION_CREDENTIALS
 if (!admin.apps.length) {
+  const serviceAccountPath = process.env.FIREBASE_ADMINSDK_PATH;
+
+  if (!serviceAccountPath) {
+    throw new Error("Missing FIREBASE_ADMINSDK_PATH env variable");
+  }
+
+  const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf-8"));
+
   admin.initializeApp({
-    credential: applicationDefault()
+    credential: admin.credential.cert(serviceAccount),
   });
 }
 

@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 importScripts("https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js");
 importScripts("https://www.gstatic.com/firebasejs/8.10.0/firebase-messaging.js");
-debugger
+
 // ✅ Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDXEHl85bVHMWwXdXLF5DCjXt0T9ZOtq2I",
@@ -12,13 +12,13 @@ const firebaseConfig = {
   appId: "1:697685965425:web:d8dcaa63bff6dab15f79d0",
   measurementId: "G-CNBR538QZJ",
 };
-debugger
+
 
 firebase.initializeApp(firebaseConfig);
-debugger
+
 
 const messaging = firebase.messaging();
-debugger
+
 
 
 // ✅ Handle background messages
