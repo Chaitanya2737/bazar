@@ -133,62 +133,65 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    if (permissionStatus === "default" && showPrompt) {
-      toast.custom((t) => (
-        <div
-          className="
-          bg-white dark:bg-gray-800
-          border border-blue-400
-          p-5 rounded-lg shadow-lg
-          text-sm text-gray-900 dark:text-gray-100
-          w-[360px]
-          transition-colors duration-300 ease-in-out
-          focus:outline-none focus:ring-4 focus:ring-blue-400/50
-          flex flex-col gap-4
-        "
-          tabIndex={0}
-        >
-          <div className="flex items-center gap-3">
-            <span
-              className="text-3xl animate-bell-bounce"
-              aria-label="notification bell"
-              role="img"
-            >
-              🔔
-            </span>
-            <h2 className="font-bold text-lg">Stay in the Loop!</h2>
-          </div>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register('/firebase-messaging-sw.js')
+      .then((registration) => {
+        console.log('Service Worker registered:', registration);
+      })
+      .catch((error) => {
+        console.error('Service Worker registration failed:', error);
+      });
+  }
+}, []);
 
-          <p className="text-gray-700 dark:text-gray-300">
-            We’d love to send you <strong>important updates</strong> and helpful
-            tips. Enable notifications to never miss out!
-          </p>
+  useEffect(() => {
+  if (permissionStatus === "default" && showPrompt) {
+    const audio = new Audio("/mixkit-message-pop-alert-2354.mp3");
+    audio.play().catch((err) => {
+      console.warn("Autoplay failed:", err);
+    });
 
-          <div className="flex gap-3">
-            <Button
-              onClick={requestPermissions}
-              variant="default"
-              className="flex-grow transition-transform duration-200 hover:scale-105"
-              disabled={loading}
-            >
-              {loading ? "Enabling..." : "Yes, Notify Me! 🚀"}
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => {
-                toast.dismiss(t);
-                setShowPrompt(false);
-              }}
-              className="transition-transform duration-200 hover:scale-105"
-              disabled={loading}
-            >
-              Maybe Later
-            </Button>
-          </div>
+    toast.custom((t) => (
+      <div
+        className="bg-white dark:bg-gray-800 border border-blue-400 p-5 rounded-lg shadow-lg text-sm text-gray-900 dark:text-gray-100 w-[360px] transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-400/50 flex flex-col gap-4"
+        tabIndex={0}
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-3xl animate-bell-bounce" aria-label="notification bell" role="img">🔔</span>
+          <h2 className="font-bold text-lg">Stay in the Loop!</h2>
         </div>
-      ));
-    }
+      
+
+        <p className="text-gray-700 dark:text-gray-300">
+          We’d love to send you <strong>important updates</strong> and helpful tips. Enable notifications to never miss out!
+        </p>
+
+        <div className="flex gap-3">
+          <Button
+            onClick={requestPermissions}
+            variant="default"
+            className="flex-grow transition-transform duration-200 hover:scale-105"
+            disabled={loading}
+          >
+            {loading ? "Enabling..." : "Yes, Notify Me! 🚀"}
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => {
+              toast.dismiss(t);
+              setShowPrompt(false);
+            }}
+            className="transition-transform duration-200 hover:scale-105"
+            disabled={loading}
+          >
+            Maybe Later
+          </Button>
+        </div>
+      </div>
+    ));
+  }
 
     if (!showPrompt && permissionStatus === "denied") {
       toast.custom((t) => (
