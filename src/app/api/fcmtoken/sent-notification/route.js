@@ -1,24 +1,20 @@
 import connectDB from "@/lib/db";
-import {admin} from "@/lib/firebase-admin";
+import { admin } from "@/lib/firebase-admin";
 import FcmTokenModel from "@/model/fcm.module";
 
 export async function GET() {
   try {
-
     await connectDB();
+
     const tokens = await FcmTokenModel.find();
-
-    
     if (!tokens || tokens.length === 0) {
-        return new Response(JSON.stringify({ message: "No token found" }), {
-            status: 404,
-            headers: { "Content-Type": "application/json" },
-        });
+      return new Response(JSON.stringify({ message: "No tokens found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
     }
-    
-    const registrationTokens = tokens.map((tokenObj) => tokenObj.token);
-    console.log(registrationTokens);
 
+    const registrationTokens = tokens.map((t) => t.token);
 
     const message = {
       notification: {
@@ -35,7 +31,6 @@ export async function GET() {
         successCount: response.successCount,
         failureCount: response.failureCount,
         responses: response.responses,
-        tokens: registrationTokens,
         message: "Notifications sent successfully",
       }),
       {
@@ -45,7 +40,6 @@ export async function GET() {
     );
   } catch (error) {
     console.error("FCM Error:", error);
-
     return new Response(
       JSON.stringify({ message: "Failed to send notifications", error: error.message }),
       {

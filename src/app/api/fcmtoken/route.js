@@ -27,8 +27,8 @@ export async function POST(request) {
           platform,
           appVersion,
           location: {
-            latitude: location.latitude || null,
-            longitude: location.longitude || null,
+            latitude: location?.latitude ?? null,
+            longitude: location?.longitude ?? null,
           },
           city,
         },
@@ -42,5 +42,3 @@ export async function POST(request) {
     return NextResponse.json({ msg: "Internal Server Error" }, { status: 500 });
   }
 }
-
-

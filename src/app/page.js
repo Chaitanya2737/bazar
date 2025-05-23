@@ -7,6 +7,8 @@ import { getToken } from "firebase/messaging";
 import Navbar from "@/component/navBar/page";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { onMessage } from "firebase/messaging";
+
 
 const NOTIF_STORAGE_KEY = "notif-permission-choice";
 
@@ -30,18 +32,17 @@ async function reverseGeocode(lat, lon) {
   }
 }
 
-const getLocation = () => {
-  return new Promise((resolve, reject) => {
+const getLocation = () =>
+  new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
       reject(new Error("Geolocation not supported"));
-    } else {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => resolve(pos.coords),
-        (err) => reject(err)
-      );
+      return;
     }
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve(pos.coords),
+      (err) => reject(err)
+    );
   });
-};
 
 export default function Home() {
   const dispatch = useDispatch();
@@ -52,146 +53,220 @@ export default function Home() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Check notification status and show prompt if needed
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedChoice = localStorage.getItem(NOTIF_STORAGE_KEY);
-      const browserPermission = Notification.permission;
+    if (typeof window === "undefined") return;
 
-      setPermissionStatus(browserPermission);
+    const storedChoice = localStorage.getItem(NOTIF_STORAGE_KEY);
+    const browserPermission = Notification.permission;
 
-      if (browserPermission === "default" && storedChoice !== "asked") {
-        setShowPrompt(true);
-      }
+    setPermissionStatus(browserPermission);
 
-      setMounted(true);
+    if (browserPermission === "default" && storedChoice !== "asked") {
+      setShowPrompt(true);
     }
+
+    setMounted(true);
   }, []);
 
-  const requestPermissions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const permission = await Notification.requestPermission();
-      setPermissionStatus(permission);
-      localStorage.setItem(NOTIF_STORAGE_KEY, "asked");
-      setShowPrompt(false);
+  useEffect(() => {
+    const messaging = getMessagingInstance();
 
-      if (permission !== "granted") {
-        setLoading(false);
-        return;
-      }
-
-      const messaging = getMessagingInstance();
-      const token = await getToken(messaging, {
-        vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
+    if (messaging) {
+      const unsubscribe = onMessage(messaging, (payload) => {
+        console.log("📩 Foreground message received:", payload);
+        alert(`${payload.notification?.title}\n${payload.notification?.body}`);
       });
 
-      if (!token) {
-        toast.error("❌ Failed to get FCM token.");
-        setLoading(false);
-        return;
-      }
+      return () => unsubscribe();
+    }
+  }, []);
+function YourComponent() {
+  useEffect(() => {
+    // Get messaging instance
+    const messaging = getMessaging();
 
-      // Get location coords and city
-      let location = null;
-      let cityName = null;
-      try {
-        location = await getLocation();
-        cityName = await reverseGeocode(location.latitude, location.longitude);
-        console.log("User location coords:", location);
-        console.log("User city:", cityName);
-      } catch (err) {
-        console.log("User denied location or error occurred:", err);
-      }
-
-      // Gather extra info
-      const deviceInfo = navigator.userAgent || "Unknown Device";
-      const platform = navigator.platform || "Unknown Platform";
-      const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0";
-
-      // Get userId from your auth state/context, replace this with actual logic
-
-      // Send all info to backend
-      await fetch("/api/fcmtoken", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token,
-          deviceInfo,
-          platform,
-          appVersion,
-          location,
-          city: cityName,
-        }),
+    // Request notification permission upfront
+    if (Notification.permission !== "granted") {
+      Notification.requestPermission().then((permission) => {
+        if (permission !== "granted") {
+          console.warn("Notification permission not granted.");
+        }
       });
-    } catch (error) {
-      console.error("❌ Error getting token:", error);
-      toast.error("❌ Something went wrong. Please try again.");
-    } finally {
+    }
+
+    // Set up onMessage listener
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("📥 Foreground message: ", payload);
+
+      if (Notification.permission === "granted" && payload.notification) {
+        new Notification(payload.notification.title, {
+          body: payload.notification.body,
+          icon: "/icons/icon-192x192.png",
+          tag: Date.now().toString(), // Unique tag
+        });
+      }
+    });
+
+    // Clean up listener on unmount
+    return () => unsubscribe();
+  }, []);
+
+  return null; // or your component JSX
+}
+
+
+
+ const requestPermissions = useCallback(async () => {
+  setLoading(true);
+  try {
+    const permission = await Notification.requestPermission();
+    setPermissionStatus(permission);
+    localStorage.setItem(NOTIF_STORAGE_KEY, "asked");
+    setShowPrompt(false);
+
+    if (permission !== "granted") {
       setLoading(false);
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-      .register('/firebase-messaging-sw.js')
-      .then((registration) => {
-        console.log('Service Worker registered:', registration);
-      })
-      .catch((error) => {
-        console.error('Service Worker registration failed:', error);
-      });
+    const messaging = getMessagingInstance();
+    const token = await getToken(messaging, {
+      vapidKey: "BOgYxs5ZZ6nHxADKJkwau8LBa8x9uKJnLR61z_OIys0zj8c4r5J3SWWkHYjnlCqr39tWZTjUK52NZ4dMfzIPi6Q",
+    });
+
+    if (!token) {
+      toast.error("❌ Failed to get FCM token.");
+      setLoading(false);
+      return;
+    }
+
+    // Initialize location and cityName with null or defaults
+    let location = null;
+    let cityName = null;
+
+    try {
+      location = await getLocation();
+      cityName = await reverseGeocode(location.latitude, location.longitude);
+      console.log("User location coords:", location);
+      console.log("User city:", cityName);
+    } catch (err) {
+      console.log("User denied location or error occurred:", err);
+      // If error, set location to null explicitly to avoid reference errors
+      location = null;
+      cityName = "Unknown Location";
+    }
+
+    const deviceInfo = navigator.userAgent || "Unknown Device";
+    const platform = navigator.platform || "Unknown Platform";
+    const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0";
+
+    await fetch("/api/fcmtoken", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        deviceInfo,
+        platform,
+        appVersion,
+        location,
+        city: cityName,
+      }),
+    });
+  } catch (error) {
+    console.error("❌ Error getting token:", error);
+    toast.error("❌ Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
   }
 }, []);
 
+useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker
+        .register("/firebase-messaging-sw.js")
+        .then((registration) => {
+          console.log("✅ Service Worker registered:", registration);
+
+          if (Notification.permission === "granted") {
+            getToken(getMessagingInstance(), {
+              vapidKey: "BOgYxs5ZZ6nHxADKJkwau8LBa8x9uKJnLR61z_OIys0zj8c4r5J3SWWkHYjnlCqr39tWZTjUK52NZ4dMfzIPi6Q",
+              serviceWorkerRegistration: registration,
+            })
+              .then((currentToken) => {
+                if (currentToken) {
+                  console.log("✅ FCM Token:", currentToken);
+                  // Optionally send token to your server
+                } else {
+                  console.warn("⚠️ No registration token available. Request permission to generate one.");
+                }
+              })
+              .catch((err) => {
+                console.error("❌ Error retrieving FCM token:", err);
+              });
+          } else {
+            console.warn("🔔 Notification permission not granted");
+          }
+        })
+        .catch((err) => {
+          console.error("❌ Service Worker registration failed:", err);
+        });
+    }
+  }, []);
+
+
   useEffect(() => {
-  if (permissionStatus === "default" && showPrompt) {
-    const audio = new Audio("/mixkit-message-pop-alert-2354.mp3");
-    audio.play().catch((err) => {
-      console.warn("Autoplay failed:", err);
-    });
+    if (permissionStatus === "default" && showPrompt) {
+      const audio = new Audio("/mixkit-message-pop-alert-2354.mp3");
+      audio.play().catch((err) => {
+        console.warn("Autoplay failed:", err);
+      });
 
-    toast.custom((t) => (
-      <div
-        className="bg-white dark:bg-gray-800 border border-blue-400 p-5 rounded-lg shadow-lg text-sm text-gray-900 dark:text-gray-100 w-[360px] transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-400/50 flex flex-col gap-4"
-        tabIndex={0}
-      >
-        <div className="flex items-center gap-3">
-          <span className="text-3xl animate-bell-bounce" aria-label="notification bell" role="img">🔔</span>
-          <h2 className="font-bold text-lg">Stay in the Loop!</h2>
+      toast.custom((t) => (
+        <div
+          className="bg-white dark:bg-gray-800 border border-blue-400 p-5 rounded-lg shadow-lg text-sm text-gray-900 dark:text-gray-100 w-[360px] transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-400/50 flex flex-col gap-4"
+          tabIndex={0}
+        >
+          <div className="flex items-center gap-3">
+            <span
+              className="text-3xl animate-bell-bounce"
+              aria-label="notification bell"
+              role="img"
+            >
+              🔔
+            </span>
+            <h2 className="font-bold text-lg">Stay in the Loop!</h2>
+          </div>
+
+          <p className="text-gray-700 dark:text-gray-300">
+            We’d love to send you <strong>important updates</strong> and helpful
+            tips. Enable notifications to never miss out!
+          </p>
+
+          <div className="flex gap-3">
+            <Button
+              onClick={requestPermissions}
+              variant="default"
+              className="flex-grow transition-transform duration-200 hover:scale-105"
+              disabled={loading}
+            >
+              {loading ? "Enabling..." : "Yes, Notify Me! 🚀"}
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                toast.dismiss(t);
+                setShowPrompt(false);
+              }}
+              className="transition-transform duration-200 hover:scale-105"
+              disabled={loading}
+            >
+              Maybe Later
+            </Button>
+          </div>
         </div>
-      
-
-        <p className="text-gray-700 dark:text-gray-300">
-          We’d love to send you <strong>important updates</strong> and helpful tips. Enable notifications to never miss out!
-        </p>
-
-        <div className="flex gap-3">
-          <Button
-            onClick={requestPermissions}
-            variant="default"
-            className="flex-grow transition-transform duration-200 hover:scale-105"
-            disabled={loading}
-          >
-            {loading ? "Enabling..." : "Yes, Notify Me! 🚀"}
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => {
-              toast.dismiss(t);
-              setShowPrompt(false);
-            }}
-            className="transition-transform duration-200 hover:scale-105"
-            disabled={loading}
-          >
-            Maybe Later
-          </Button>
-        </div>
-      </div>
-    ));
-  }
+      ));
+    }
 
     if (!showPrompt && permissionStatus === "denied") {
       toast.custom((t) => (
