@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { onMessage } from "firebase/messaging";
 
-
 const NOTIF_STORAGE_KEY = "notif-permission-choice";
 
 async function reverseGeocode(lat, lon) {
@@ -80,107 +79,105 @@ export default function Home() {
       return () => unsubscribe();
     }
   }, []);
-function YourComponent() {
-  useEffect(() => {
-    // Get messaging instance
-    const messaging = getMessaging();
+  function YourComponent() {
+    useEffect(() => {
+      // Get messaging instance
+      const messaging = getMessaging();
 
-    // Request notification permission upfront
-    if (Notification.permission !== "granted") {
-      Notification.requestPermission().then((permission) => {
-        if (permission !== "granted") {
-          console.warn("Notification permission not granted.");
-        }
-      });
-    }
-
-    // Set up onMessage listener
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("📥 Foreground message: ", payload);
-
-      if (Notification.permission === "granted" && payload.notification) {
-        new Notification(payload.notification.title, {
-          body: payload.notification.body,
-          icon: "/icons/icon-192x192.png",
-          tag: Date.now().toString(), // Unique tag
+      // Request notification permission upfront
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission().then((permission) => {
+          if (permission !== "granted") {
+            console.warn("Notification permission not granted.");
+          }
         });
       }
-    });
 
-    // Clean up listener on unmount
-    return () => unsubscribe();
+      // Set up onMessage listener
+      const unsubscribe = onMessage(messaging, (payload) => {
+        console.log("📥 Foreground message: ", payload);
+
+        if (Notification.permission === "granted" && payload.notification) {
+          new Notification(payload.notification.title, {
+            body: payload.notification.body,
+            icon: "/icons/icon-192x192.png",
+            tag: Date.now().toString(), // Unique tag
+          });
+        }
+      });
+
+      // Clean up listener on unmount
+      return () => unsubscribe();
+    }, []);
+
+    return null; // or your component JSX
+  }
+
+  const requestPermissions = useCallback(async () => {
+    setLoading(true);
+    try {
+      const permission = await Notification.requestPermission();
+      setPermissionStatus(permission);
+      localStorage.setItem(NOTIF_STORAGE_KEY, "asked");
+      setShowPrompt(false);
+
+      if (permission !== "granted") {
+        setLoading(false);
+        return;
+      }
+
+      const messaging = getMessagingInstance();
+      const token = await getToken(messaging, {
+        vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
+      });
+
+      if (!token) {
+        toast.error("❌ Failed to get FCM token.");
+        setLoading(false);
+        return;
+      }
+
+      // Initialize location and xcityName with null or defaults
+      let location = null;
+      let cityName = null;
+
+      try {
+        location = await getLocation();
+        cityName = await reverseGeocode(location.latitude, location.longitude);
+        console.log("User location coords:", location);
+        console.log("User city:", cityName);
+      } catch (err) {
+        console.log("User denied location or error occurred:", err);
+        // If error, set location to null explicitly to avoid reference errors
+        location = null;
+        cityName = "Unknown Location";
+      }
+
+      const deviceInfo = navigator.userAgent || "Unknown Device";
+      const platform = navigator.platform || "Unknown Platform";
+      const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0";
+
+      await fetch("/api/fcmtoken", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          token,
+          deviceInfo,
+          platform,
+          appVersion,
+          location,
+          city: cityName,
+        }),
+      });
+    } catch (error) {
+      console.error("❌ Error getting token:", error);
+      toast.error("❌ Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  return null; // or your component JSX
-}
-
-
-
- const requestPermissions = useCallback(async () => {
-  setLoading(true);
-  try {
-    const permission = await Notification.requestPermission();
-    setPermissionStatus(permission);
-    localStorage.setItem(NOTIF_STORAGE_KEY, "asked");
-    setShowPrompt(false);
-
-    if (permission !== "granted") {
-      setLoading(false);
-      return;
-    }
-
-    const messaging = getMessagingInstance();
-    const token = await getToken(messaging, {
-      vapidKey: "BOgYxs5ZZ6nHxADKJkwau8LBa8x9uKJnLR61z_OIys0zj8c4r5J3SWWkHYjnlCqr39tWZTjUK52NZ4dMfzIPi6Q",
-    });
-
-    if (!token) {
-      toast.error("❌ Failed to get FCM token.");
-      setLoading(false);
-      return;
-    }
-
-    // Initialize location and cityName with null or defaults
-    let location = null;
-    let cityName = null;
-
-    try {
-      location = await getLocation();
-      cityName = await reverseGeocode(location.latitude, location.longitude);
-      console.log("User location coords:", location);
-      console.log("User city:", cityName);
-    } catch (err) {
-      console.log("User denied location or error occurred:", err);
-      // If error, set location to null explicitly to avoid reference errors
-      location = null;
-      cityName = "Unknown Location";
-    }
-
-    const deviceInfo = navigator.userAgent || "Unknown Device";
-    const platform = navigator.platform || "Unknown Platform";
-    const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0";
-
-    await fetch("/api/fcmtoken", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        token,
-        deviceInfo,
-        platform,
-        appVersion,
-        location,
-        city: cityName,
-      }),
-    });
-  } catch (error) {
-    console.error("❌ Error getting token:", error);
-    toast.error("❌ Something went wrong. Please try again.");
-  } finally {
-    setLoading(false);
-  }
-}, []);
-
-useEffect(() => {
+  useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker
         .register("/firebase-messaging-sw.js")
@@ -189,7 +186,7 @@ useEffect(() => {
 
           if (Notification.permission === "granted") {
             getToken(getMessagingInstance(), {
-              vapidKey: "BOgYxs5ZZ6nHxADKJkwau8LBa8x9uKJnLR61z_OIys0zj8c4r5J3SWWkHYjnlCqr39tWZTjUK52NZ4dMfzIPi6Q",
+              vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
               serviceWorkerRegistration: registration,
             })
               .then((currentToken) => {
@@ -197,7 +194,9 @@ useEffect(() => {
                   console.log("✅ FCM Token:", currentToken);
                   // Optionally send token to your server
                 } else {
-                  console.warn("⚠️ No registration token available. Request permission to generate one.");
+                  console.warn(
+                    "⚠️ No registration token available. Request permission to generate one."
+                  );
                 }
               })
               .catch((err) => {
@@ -212,7 +211,6 @@ useEffect(() => {
         });
     }
   }, []);
-
 
   useEffect(() => {
     if (permissionStatus === "default" && showPrompt) {
