@@ -87,6 +87,7 @@ export async function GET() {
 `,
       },
       tokens: registrationTokens,
+       image: "https://res.cloudinary.com/dp8evydam/image/upload/v1748282798/ChatGPT_Image_May_26_2025_11_33_32_PM_eckicl.png"
     };
 
     const response = await admin.messaging().sendEachForMulticast(message);
