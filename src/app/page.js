@@ -67,6 +67,14 @@ export default function Home() {
     setMounted(true);
   }, []);
 
+
+  const clearloaclStorage = useCallback(() => {
+    localStorage.removeItem(NOTIF_STORAGE_KEY);
+    setPermissionStatus("default");
+    setShowPrompt(true);
+  }
+, []);
+
   useEffect(() => {
     const messaging = getMessagingInstance();
 
@@ -314,6 +322,10 @@ export default function Home() {
         darkMode ? "dark" : ""
       }`}
     >
+
+    <div>
+      <button onClick={clearloaclStorage}> clear data </button>
+    </div>
       <Navbar />
       {/* Your other page content here */}
     </div>

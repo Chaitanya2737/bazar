@@ -12,6 +12,7 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true, 
     });
+    
 
     isConnected = true;
     console.log("DB connected successfully");
