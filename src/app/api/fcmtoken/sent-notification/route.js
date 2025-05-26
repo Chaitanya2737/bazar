@@ -85,9 +85,9 @@ export async function GET() {
 आमच्याशी संपर्क साधा आणि तुमच्या यशाच्या प्रवासाला सुरुवात करा!
 
 `,
+image: "https://res.cloudinary.com/dp8evydam/image/upload/v1748282798/ChatGPT_Image_May_26_2025_11_33_32_PM_eckicl.png"
       },
       tokens: registrationTokens,
-       image: "https://res.cloudinary.com/dp8evydam/image/upload/v1748282798/ChatGPT_Image_May_26_2025_11_33_32_PM_eckicl.png"
     };
 
     const response = await admin.messaging().sendEachForMulticast(message);
