@@ -17,26 +17,21 @@ firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  console.log('Background message received: ', payload);
-  
-  const notificationTitle = payload.data?.title || "📲 New Notification";
-  const notificationOptions = {
-    body: payload.data?.body || "You have a new message.",
-    icon: "/icons/icon-192x192.png",
-    requireInteraction: false,
-    tag: Date.now().toString(),
-    actions: [
-      { action: "open_url", title: "Open Website", icon: "/icons/open-icon.png" },
-      { action: "dismiss", title: "Dismiss", icon: "/icons/close-icon.png" }
-    ],
-    data: {
-      click_action: payload.data?.click_action || "https://bazar-tau-eight.vercel.app/",
-      url: payload.data?.url || "https://bazar-tau-eight.vercel.app/",
-    },
-  };
+  const { title, body, image, click_action } = payload.data;
 
-  self.registration.showNotification(notificationTitle, notificationOptions);
+  self.registration.showNotification(title || "New Message", {
+    body: body || "",
+    icon: "/icons/icon-192x192.png",
+    image: image || undefined,
+    data: { click_action: click_action || "https://bazar-tau-eight.vercel.app/" },
+    actions: [
+      { action: "open_url", title: "Open Website" },
+      { action: "dismiss", title: "Dismiss" },
+      { action: "unsubscribe", title: "Unsubscribe" }
+    ]
+  });
 });
+
 // self.addEventListener("notificationclick", (event) => {
 //   event.notification.close();
 
