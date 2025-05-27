@@ -37,33 +37,33 @@ messaging.onBackgroundMessage((payload) => {
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
+// self.addEventListener("notificationclick", (event) => {
+//   event.notification.close();
 
-  const urlToOpen = event.action === "open_url"
-    ? event.notification.data.url
-    : event.action === "dismiss"
-    ? null
-    : event.notification.data.click_action || "https://bazar-tau-eight.vercel.app/";
+//   const urlToOpen = event.action === "open_url"
+//     ? event.notification.data.url
+//     : event.action === "dismiss"
+//     ? null
+//     : event.notification.data.click_action || "https://bazar-tau-eight.vercel.app/";
 
-  if (!urlToOpen) {
-    // User clicked 'dismiss', no action
-    return;
-  }
+//   if (!urlToOpen) {
+//     // User clicked 'dismiss', no action
+//     return;
+//   }
 
-  event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
-      for (const client of clientList) {
-        // Normalize URLs if needed here
-        if (client.url === urlToOpen && "focus" in client) {
-          return client.focus();
-        }
-      }
-      if (clients.openWindow) {
-        return clients.openWindow(urlToOpen);
-      }
-    }).catch(err => {
-      console.error("Failed to open or focus window:", err);
-    })
-  );
-});
+//   event.waitUntil(
+//     clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
+//       for (const client of clientList) {
+//         // Normalize URLs if needed here
+//         if (client.url === urlToOpen && "focus" in client) {
+//           return client.focus();
+//         }
+//       }
+//       if (clients.openWindow) {
+//         return clients.openWindow(urlToOpen);
+//       }
+//     }).catch(err => {
+//       console.error("Failed to open or focus window:", err);
+//     })
+//   );
+// });
