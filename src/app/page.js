@@ -74,18 +74,28 @@ export default function Home() {
   }
 , []);
 
-  useEffect(() => {
-    const messaging = getMessagingInstance();
+ useEffect(() => {
+  const messaging = getMessagingInstance();
+  if (messaging) {
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log("📩 Foreground message received:", payload);
 
-    if (messaging) {
-      const unsubscribe = onMessage(messaging, (payload) => {
-        console.log("📩 Foreground message received:", payload);
+      // Use either alert, toast, or Notification API (avoid duplicate)
+      if (Notification.permission === "granted" && payload.notification) {
+        new Notification(payload.notification.title, {
+          body: payload.notification.body,
+          icon: "/icons/icon-192x192.png",
+          tag: Date.now().toString(),
+        });
+      } else {
         alert(`${payload.notification?.title}\n${payload.notification?.body}`);
-      });
+      }
+    });
 
-      return () => unsubscribe();
-    }
-  }, []);
+    return () => unsubscribe();
+  }
+}, []);
+
   function YourComponent() {
     useEffect(() => {
       // Get messaging instance
