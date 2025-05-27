@@ -3,11 +3,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMessagingInstance } from "@/lib/firebase.config";
-import { getToken } from "firebase/messaging";
+import { getToken, onMessage } from "firebase/messaging";
 import Navbar from "@/component/navBar/page";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { onMessage } from "firebase/messaging";
 
 const NOTIF_STORAGE_KEY = "notif-permission-choice";
 
@@ -67,26 +66,35 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-    const clearloaclStorage = useCallback(() => {
+  const clearLocalStorage = useCallback(() => {
     localStorage.removeItem(NOTIF_STORAGE_KEY);
     setPermissionStatus("default");
     setShowPrompt(true);
-  }
-, []);
+  }, []);
 
- useEffect(() => {
+useEffect(() => {
   const messaging = getMessagingInstance();
   if (messaging) {
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log("📩 Foreground message received:", payload);
 
-      // Use either alert, toast, or Notification API (avoid duplicate)
       if (Notification.permission === "granted" && payload.notification) {
-        new Notification(payload.notification.title, {
+        const notif = new Notification(payload.notification.title, {
           body: payload.notification.body,
           icon: "/icons/icon-192x192.png",
           tag: Date.now().toString(),
+          data: {
+            click_action: payload.data?.click_action || "https://bazar-tau-eight.vercel.app/",
+            url: payload.data?.url || "https://bazar-tau-eight.vercel.app/",
+          },
         });
+
+        notif.onclick = (event) => {
+          event.preventDefault();
+          console.log("🔗 Notification clicked:", payload.notification.title);
+          window.open(event.target.data.url, "_blank");
+          notif.close();
+        };
       } else {
         alert(`${payload.notification?.title}\n${payload.notification?.body}`);
       }
@@ -96,39 +104,6 @@ export default function Home() {
   }
 }, []);
 
-  function YourComponent() {
-    useEffect(() => {
-      // Get messaging instance
-      const messaging = getMessaging();
-
-      // Request notification permission upfront
-      if (Notification.permission !== "granted") {
-        Notification.requestPermission().then((permission) => {
-          if (permission !== "granted") {
-            console.warn("Notification permission not granted.");
-          }
-        });
-      }
-
-      // Set up onMessage listener
-      const unsubscribe = onMessage(messaging, (payload) => {
-        console.log("📥 Foreground message: ", payload);
-
-        if (Notification.permission === "granted" && payload.notification) {
-          new Notification(payload.notification.title, {
-            body: payload.notification.body,
-            icon: "/icons/icon-192x192.png",
-            tag: Date.now().toString(), // Unique tag
-          });
-        }
-      });
-
-      // Clean up listener on unmount
-      return () => unsubscribe();
-    }, []);
-
-    return null; // or your component JSX
-  }
 
   const requestPermissions = useCallback(async () => {
     setLoading(true);
@@ -154,7 +129,6 @@ export default function Home() {
         return;
       }
 
-      // Initialize location and xcityName with null or defaults
       let location = null;
       let cityName = null;
 
@@ -165,7 +139,6 @@ export default function Home() {
         console.log("User city:", cityName);
       } catch (err) {
         console.log("User denied location or error occurred:", err);
-        // If error, set location to null explicitly to avoid reference errors
         location = null;
         cityName = "Unknown Location";
       }
@@ -331,9 +304,9 @@ export default function Home() {
         darkMode ? "dark" : ""
       }`}
     >
-       <div>
-      <button onClick={clearloaclStorage}> clear data </button>
-    </div>
+      <div>
+        <button onClick={clearLocalStorage}>Clear data</button>
+      </div>
       <Navbar />
       {/* Your other page content here */}
     </div>
