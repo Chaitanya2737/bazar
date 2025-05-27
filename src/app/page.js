@@ -72,22 +72,18 @@ export default function Home() {
     setShowPrompt(true);
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const messaging = getMessagingInstance();
     if (!messaging) return;
 
     const unsubscribe = onMessage(messaging, (payload) => {
-      console.log("📩 Foreground message received:", payload);
-
-      // Example: update some UI state or show an in-app alert/toast instead of native notification
-      alert(`Message: ${payload.notification?.title}\n${payload.notification?.body}`);
-
-      // NO new Notification(...) here — let service worker handle native notifications only
+      // Just log for debug — NO notification or alert
+      console.log("📩 Foreground message received (ignored):", payload);
+      // no Notification, no alert here
     });
 
     return () => unsubscribe();
   }, []);
-
 
   const requestPermissions = useCallback(async () => {
     setLoading(true);

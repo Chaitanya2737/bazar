@@ -43,38 +43,33 @@ messaging.onBackgroundMessage((payload) => {
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
-
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  if (event.action === "open_url") {
-    event.waitUntil(
-      clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
-        for (const client of clientList) {
-          if (client.url === event.notification.data.url && "focus" in client) {
-            return client.focus();
-          }
-        }
-        if (clients.openWindow) {
-          return clients.openWindow(event.notification.data.url);
-        }
-      })
-    );
-  } else if (event.action === "dismiss") {
-    // do nothing extra
-  } else {
-    const clickActionUrl = event.notification?.data?.click_action || "https://bazar-tau-eight.vercel.app/";
-    event.waitUntil(
-      clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
-        for (const client of clientList) {
-          if (client.url === clickActionUrl && "focus" in client) {
-            return client.focus();
-          }
-        }
-        if (clients.openWindow) {
-          return clients.openWindow(clickActionUrl);
-        }
-      })
-    );
+  const urlToOpen = event.action === "open_url"
+    ? event.notification.data.url
+    : event.action === "dismiss"
+    ? null
+    : event.notification.data.click_action || "https://bazar-tau-eight.vercel.app/";
+
+  if (!urlToOpen) {
+    // User clicked 'dismiss', no action
+    return;
   }
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(clientList => {
+      for (const client of clientList) {
+        // Normalize URLs if needed here
+        if (client.url === urlToOpen && "focus" in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    }).catch(err => {
+      console.error("Failed to open or focus window:", err);
+    })
+  );
 });
