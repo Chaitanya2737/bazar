@@ -14,9 +14,6 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
-  const { title, body, image, click_action, actions } = payload.data;
-  console.log("Notification data:", { title, body, image, click_action, actions });
-
   let parsedActions = [];
   try {
     parsedActions = JSON.parse(actions); // Convert string to array
@@ -29,11 +26,10 @@ messaging.onBackgroundMessage((payload) => {
   }
 
   self.registration.showNotification(title || "New Message", {
-    body: body || "",
-    icon: "/icons/icon-192x192.png",
-    image: image || undefined,
+    body: payload?.data.body || "",
+    image: payload?.data.image || undefined,
     data: {
-      click_action: click_action || "https://bazar-tau-eight.vercel.app/",
+      click_action: payload?.data.click_action || "https://bazar-tau-eight.vercel.app/",
     },
     actions: parsedActions,
   });
