@@ -73,36 +73,20 @@ export default function Home() {
   }, []);
 
 useEffect(() => {
-  const messaging = getMessagingInstance();
-  if (messaging) {
+    const messaging = getMessagingInstance();
+    if (!messaging) return;
+
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log("📩 Foreground message received:", payload);
 
-      if (Notification.permission === "granted" && payload.notification) {
-        const notif = new Notification(payload.notification.title, {
-          body: payload.notification.body,
-          icon: "/icons/icon-192x192.png",
-          tag: Date.now().toString(),
-          data: {
-            click_action: payload.data?.click_action || "https://bazar-tau-eight.vercel.app/",
-            url: payload.data?.url || "https://bazar-tau-eight.vercel.app/",
-          },
-        });
+      // Example: update some UI state or show an in-app alert/toast instead of native notification
+      alert(`Message: ${payload.notification?.title}\n${payload.notification?.body}`);
 
-        notif.onclick = (event) => {
-          event.preventDefault();
-          console.log("🔗 Notification clicked:", payload.notification.title);
-          window.open(event.target.data.url, "_blank");
-          notif.close();
-        };
-      } else {
-        alert(`${payload.notification?.title}\n${payload.notification?.body}`);
-      }
+      // NO new Notification(...) here — let service worker handle native notifications only
     });
 
     return () => unsubscribe();
-  }
-}, []);
+  }, []);
 
 
   const requestPermissions = useCallback(async () => {
