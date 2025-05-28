@@ -45,11 +45,10 @@ messaging.onBackgroundMessage((payload) => {
   // Build notification options
   const notificationOptions = {
     body: notificationBody,
-    icon: notificationIcon,
     badge: notificationBadge,
     image: notificationImage,
     vibrate: [300, 100, 400],
-    requireInteraction: parsedActions.length > 0, // keep notification until user interacts if actions exist
+    requireInteraction: parsedActions.length > 0,
     data: {
       click_action: clickAction,
       token: payload.data.token || null,
