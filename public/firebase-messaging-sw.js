@@ -26,7 +26,7 @@ messaging.onBackgroundMessage((payload) => {
   const notificationImage = payload.notification?.image || payload.data.image || undefined;
   const notificationIcon = payload.notification?.icon || payload.data.icon || '/icons/icon-192x192.png';
   const notificationBadge = payload.notification?.badge || '/icons/badge.png';
-  const clickAction = payload.notification?.click_action || payload.data.click_action || '/';
+  const clickAction = payload.notification?.data?.click_action || '/';
 
   // Parse actions safely
   let parsedActions = [];

@@ -37,6 +37,15 @@ export default function Home() {
     setMounted(true);
   }, []);
 
+
+  useEffect(() => {
+   navigator.serviceWorker.register('/firebase-messaging-sw.js')
+  .then((registration) => {
+    console.log('Service Worker registered with scope:', registration.scope);
+  });
+  }, [])
+  
+
   // Clear prompt and reset localStorage
   const clearLocalStorage = useCallback(() => {
     localStorage.removeItem(NOTIF_STORAGE_KEY);
