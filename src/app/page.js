@@ -62,7 +62,6 @@ export default function Home() {
       navigator.serviceWorker
         .register("/firebase-messaging-sw.js")
         .then((registration) => {
-          console.log("✅ Service Worker registered:", registration);
 
           if (Notification.permission === "granted") {
             getToken(getMessagingInstance(), {
@@ -71,7 +70,7 @@ export default function Home() {
             })
               .then((currentToken) => {
                 if (currentToken) {
-                  console.log("✅ FCM Token:", currentToken);
+                  console.log("FCM Token:", currentToken);
                 } else {
                   console.warn("⚠️ No registration token available.");
                 }
@@ -137,7 +136,7 @@ export default function Home() {
         }),
       });
 
-      toast.success("✅ Notifications enabled!");
+      toast.success(" Notifications enabled!");
     } catch (error) {
       console.error("❌ Error in notification permission flow:", error);
       toast.error("❌ Something went wrong. Please try again.");
