@@ -15,7 +15,6 @@ import MainSection from "@/component/preview/MainSection";
 import Userpreviewcount from "@/component/preview/Userpreviewcount";
 import { Skeleton } from "@/components/ui/skeleton";
 import Authorized from "../error/not-authorized/page";
-import { set } from "mongoose";
 import { useRouter } from "next/navigation";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;

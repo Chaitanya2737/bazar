@@ -3,14 +3,15 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMessagingInstance } from "@/lib/firebase.config";
-import { getToken, onMessage } from "firebase/messaging";
+import { getToken, onMessage, getMessaging } from "firebase/messaging";
 import Navbar from "@/component/navBar/page";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
-const NOTIF_STORAGE_KEY = "notif-permission-choice";
+const NOTIF_STORAGE_KEY = "notif_prompted";
 
-async function reverseGeocode(lat, lon) {
+// Reverse geocode helper
+async function reverseGeocode() {
   try {
     const res = await fetch(
       `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`
@@ -30,6 +31,7 @@ async function reverseGeocode(lat, lon) {
   }
 }
 
+// Get user's current location
 const getLocation = () =>
   new Promise((resolve, reject) => {
     if (!navigator.geolocation) {
@@ -77,9 +79,7 @@ export default function Home() {
     if (!messaging) return;
 
     const unsubscribe = onMessage(messaging, (payload) => {
-      // Just log for debug — NO notification or alert
       console.log("📩 Foreground message received (ignored):", payload);
-      // no Notification, no alert here
     });
 
     return () => unsubscribe();
@@ -87,6 +87,7 @@ export default function Home() {
 
   const requestPermissions = useCallback(async () => {
     setLoading(true);
+
     try {
       const permission = await Notification.requestPermission();
       setPermissionStatus(permission);
@@ -94,33 +95,22 @@ export default function Home() {
       setShowPrompt(false);
 
       if (permission !== "granted") {
+        toast.info("🔕 Notifications permission denied.");
         setLoading(false);
         return;
       }
 
-      const messaging = getMessagingInstance();
+      const messaging = getMessaging();
       const token = await getToken(messaging, {
         vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
       });
+
+      console.log("✅ FCM Token:", token);
 
       if (!token) {
         toast.error("❌ Failed to get FCM token.");
         setLoading(false);
         return;
-      }
-
-      let location = null;
-      let cityName = null;
-
-      try {
-        location = await getLocation();
-        cityName = await reverseGeocode(location.latitude, location.longitude);
-        console.log("User location coords:", location);
-        console.log("User city:", cityName);
-      } catch (err) {
-        console.log("User denied location or error occurred:", err);
-        location = null;
-        cityName = "Unknown Location";
       }
 
       const deviceInfo = navigator.userAgent || "Unknown Device";
@@ -135,12 +125,31 @@ export default function Home() {
           deviceInfo,
           platform,
           appVersion,
-          location,
-          city: cityName,
         }),
       });
+
+      toast.success("✅ Notifications enabled!");
+
+      try {
+        const location = await getLocation();
+        const cityName = await reverseGeocode(location.latitude, location.longitude);
+
+        await fetch("/api/fcmtoken/location", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            token,
+            location,
+            city: cityName,
+          }),
+        });
+
+        console.log("📍 Location sent successfully");
+      } catch (err) {
+        console.warn("⚠️ User denied location or an error occurred:", err);
+      }
     } catch (error) {
-      console.error("❌ Error getting token:", error);
+      console.error("❌ Error in notification permission flow:", error);
       toast.error("❌ Something went wrong. Please try again.");
     } finally {
       setLoading(false);
@@ -162,11 +171,8 @@ export default function Home() {
               .then((currentToken) => {
                 if (currentToken) {
                   console.log("✅ FCM Token:", currentToken);
-                  // Optionally send token to your server
                 } else {
-                  console.warn(
-                    "⚠️ No registration token available. Request permission to generate one."
-                  );
+                  console.warn("⚠️ No registration token available.");
                 }
               })
               .catch((err) => {
@@ -191,17 +197,11 @@ export default function Home() {
 
       toast.custom((t) => (
         <div
-          className="bg-white dark:bg-gray-800 border border-blue-400 p-5 rounded-lg shadow-lg text-sm text-gray-900 dark:text-gray-100 w-[360px] transition-colors duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-400/50 flex flex-col gap-4"
+          className="bg-white dark:bg-gray-800 border border-blue-400 p-5 rounded-lg shadow-lg text-sm text-gray-900 dark:text-gray-100 w-[360px] flex flex-col gap-4"
           tabIndex={0}
         >
           <div className="flex items-center gap-3">
-            <span
-              className="text-3xl animate-bell-bounce"
-              aria-label="notification bell"
-              role="img"
-            >
-              🔔
-            </span>
+            <span className="text-3xl animate-bell-bounce">🔔</span>
             <h2 className="font-bold text-lg">Stay in the Loop!</h2>
           </div>
 
@@ -214,7 +214,7 @@ export default function Home() {
             <Button
               onClick={requestPermissions}
               variant="default"
-              className="flex-grow transition-transform duration-200 hover:scale-105"
+              className="flex-grow"
               disabled={loading}
             >
               {loading ? "Enabling..." : "Yes, Notify Me! 🚀"}
@@ -226,7 +226,6 @@ export default function Home() {
                 toast.dismiss(t);
                 setShowPrompt(false);
               }}
-              className="transition-transform duration-200 hover:scale-105"
               disabled={loading}
             >
               Maybe Later
@@ -239,16 +238,7 @@ export default function Home() {
     if (!showPrompt && permissionStatus === "denied") {
       toast.custom((t) => (
         <div
-          className="
-          bg-white dark:bg-gray-900
-          border border-red-500
-          p-5 rounded-lg shadow-lg
-          text-sm text-red-700 dark:text-red-400
-          w-[360px]
-          transition-colors duration-300 ease-in-out
-          focus:outline-none focus:ring-4 focus:ring-red-500/50
-          flex flex-col gap-4
-          "
+          className="bg-white dark:bg-gray-900 border border-red-500 p-5 rounded-lg shadow-lg text-sm text-red-700 dark:text-red-400 w-[360px] flex flex-col gap-4"
           tabIndex={0}
         >
           <div className="flex items-center gap-3">
