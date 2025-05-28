@@ -1,4 +1,5 @@
-// Import Firebase scripts (compat version for service worker)
+// firebase-messaging-sw.js
+
 importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging-compat.js');
 
@@ -13,14 +14,13 @@ firebase.initializeApp({
   measurementId: "G-CNBR538QZJ"
 });
 
-// Retrieve Firebase Messaging instance
 const messaging = firebase.messaging();
 
-// Handle background messages
+// Listen to background messages
 messaging.onBackgroundMessage((payload) => {
   console.log('[Service Worker] Received background message:', payload);
 
-  // Use notification payload fields if available, else fallback to data fields
+  // Extract notification details with fallbacks
   const notificationTitle = payload.notification?.title || payload.data.title || "Notification";
   const notificationBody = payload.notification?.body || payload.data.body || "";
   const notificationImage = payload.notification?.image || payload.data.image || undefined;
@@ -28,11 +28,14 @@ messaging.onBackgroundMessage((payload) => {
   const notificationBadge = payload.notification?.badge || '/icons/badge.png';
   const clickAction = payload.notification?.click_action || payload.data.click_action || '/';
 
-  // Parse actions from data (stringified JSON), with fallback to default actions
+  // Parse actions safely
   let parsedActions = [];
   try {
-    parsedActions = JSON.parse(payload.data.actions) || [];
+    if (payload.data.actions) {
+      parsedActions = JSON.parse(payload.data.actions);
+    }
   } catch (e) {
+    console.warn('Failed to parse actions JSON, falling back to default actions');
     parsedActions = [
       { action: "open_url", title: "Open" },
       { action: "dismiss", title: "Close" }
@@ -46,7 +49,7 @@ messaging.onBackgroundMessage((payload) => {
     badge: notificationBadge,
     image: notificationImage,
     vibrate: [300, 100, 400],
-    requireInteraction: parsedActions.length > 0,
+    requireInteraction: parsedActions.length > 0, // keep notification until user interacts if actions exist
     data: {
       click_action: clickAction,
       token: payload.data.token || null,
@@ -59,16 +62,15 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// Notification click event handler
+// Handle notification click events
 self.addEventListener('notificationclick', (event) => {
   const { notification, action } = event;
   const clickAction = notification.data.click_action || '/';
 
   event.notification.close();
 
-  // Handle action buttons
-  if (action === 'open_url' || !action) {
-    // Open the click_action URL
+  if (action === 'open_url' || action === '' || !action) {
+    // Open or focus the client tab with the URL
     event.waitUntil(
       clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
         for (const client of windowClients) {
@@ -82,7 +84,7 @@ self.addEventListener('notificationclick', (event) => {
       })
     );
   } else if (action === 'unsubscribe') {
-    // Call unsubscribe API with token from notification data
+    // Send unsubscribe request to your backend
     event.waitUntil(
       fetch('/api/unsubscribe', {
         method: 'POST',
@@ -95,12 +97,11 @@ self.addEventListener('notificationclick', (event) => {
       }).catch(console.error)
     );
   } else {
-    // Handle other custom actions if any
     console.log(`Notification action clicked: ${action}`);
   }
 });
 
-// Notification close (dismiss) event handler
+// Handle notification close events
 self.addEventListener('notificationclose', (event) => {
   console.log('Notification was closed:', event.notification.data);
 });
