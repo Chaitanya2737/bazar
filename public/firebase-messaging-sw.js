@@ -1,7 +1,5 @@
-// firebase-messaging-sw.js
-
-importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/9.6.10/firebase-messaging-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 
 // Initialize Firebase app in the service worker
 firebase.initializeApp({
@@ -11,50 +9,56 @@ firebase.initializeApp({
   storageBucket: "sms-sender-b3081.appspot.com",
   messagingSenderId: "697685965425",
   appId: "1:697685965425:web:d8dcaa63bff6dab15f79d0",
-  measurementId: "G-CNBR538QZJ"
+  measurementId: "G-CNBR538QZJ",
 });
 
 const messaging = firebase.messaging();
+
+// Cache to track processed messages
+self.processedMessages = new Set();
 
 // Listen to background messages
 messaging.onBackgroundMessage((payload) => {
   console.log('[Service Worker] Received background message:', payload);
 
   // Extract notification details with fallbacks
-  const notificationTitle = payload.notification?.title || payload.data.title || "Notification";
-  const notificationBody = payload.notification?.body || payload.data.body || "";
-  const notificationImage = payload.notification?.image || payload.data.image || undefined;
-  const notificationIcon = payload.notification?.icon || payload.data.icon || '/icons/icon-192x192.png';
+  const notificationTitle = payload.notification?.title || payload.data?.title || "Notification";
+  const notificationBody = payload.notification?.body || payload.data?.body || "";
+  const notificationImage = payload.notification?.image || payload.data?.image || undefined;
+  const notificationIcon = payload.notification?.icon || payload.data?.icon || '/icons/icon-192x192.png';
   const notificationBadge = payload.notification?.badge || '/icons/badge.png';
-  const clickAction = payload.notification?.data?.click_action || '/';
+  const clickAction =  payload.data?.click_action;
+  const notificationTag = payload.data?.click_action || `notification_${messageId}`;
 
   // Parse actions safely
   let parsedActions = [];
   try {
-    if (payload.data.actions) {
+    if (payload.data?.actions) {
       parsedActions = JSON.parse(payload.data.actions);
     }
   } catch (e) {
     console.warn('Failed to parse actions JSON, falling back to default actions');
     parsedActions = [
       { action: "open_url", title: "Open" },
-      { action: "dismiss", title: "Close" }
+      { action: "dismiss", title: "Close" },
     ];
   }
 
   // Build notification options
   const notificationOptions = {
     body: notificationBody,
+    icon: notificationIcon,
     badge: notificationBadge,
     image: notificationImage,
     vibrate: [300, 100, 400],
     requireInteraction: parsedActions.length > 0,
     data: {
       click_action: clickAction,
-      token: payload.data.token || null,
-      ...payload.data
+      token: payload.data?.token || null,
+      ...payload.data,
     },
-    actions: parsedActions
+    actions: parsedActions,
+    tag: notificationTag, // Collapse duplicates
   };
 
   // Show the notification
@@ -64,14 +68,13 @@ messaging.onBackgroundMessage((payload) => {
 // Handle notification click events
 self.addEventListener('notificationclick', (event) => {
   const { notification, action } = event;
-  const clickAction = notification.data.click_action || '/';
+  const clickAction = notification.data?.click_action || '/';
 
   event.notification.close();
 
   if (action === 'open_url' || action === '' || !action) {
-    // Open or focus the client tab with the URL
     event.waitUntil(
-      clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
         for (const client of windowClients) {
           if (client.url === clickAction && 'focus' in client) {
             return client.focus();
@@ -83,13 +86,12 @@ self.addEventListener('notificationclick', (event) => {
       })
     );
   } else if (action === 'unsubscribe') {
-    // Send unsubscribe request to your backend
     event.waitUntil(
       fetch('/api/unsubscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: notification.data.token })
-      }).then(response => {
+        body: JSON.stringify({ token: notification.data?.token }),
+      }).then((response) => {
         if (!response.ok) {
           console.error('Unsubscribe API failed');
         }

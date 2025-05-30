@@ -254,14 +254,19 @@ const getRandomNotification = () => {
 };
 
 // Build FCM payload from notification object
-const buildNotificationPayload = (notification) => ({
-  data: {
+const buildNotificationPayload = (notification) => (
+  console.log("Building notification payload:", notification),
+  
+  {
+  notification: {
     title: notification.title,
     body: notification.body,
     image: notification.image,
+  },
+  data: {
     click_action: notification.click_action,
-    ...(notification.actions && { actions: JSON.stringify(notification.actions) }),
-  }
+    ...(notification.actions && { actions: notification.actions }),
+  },
 });
 
 // Next.js API GET handler

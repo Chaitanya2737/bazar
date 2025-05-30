@@ -7,6 +7,7 @@ import { getToken, onMessage, getMessaging } from "firebase/messaging";
 import Navbar from "@/component/navBar/page";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import Maincomp from "@/component/mainpage/main";
 
 const NOTIF_STORAGE_KEY = "notif_prompted";
 
@@ -255,6 +256,7 @@ export default function Home() {
       </div>
       <Navbar />
       {/* Your other page content here */}
+      <Maincomp />
     </div>
   );
 }
