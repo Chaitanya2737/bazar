@@ -52,60 +52,59 @@ const Navbar = () => {
               <Menu size={20} />
             </Button>
           </DrawerTrigger>
-         <DrawerContent
-  className="bg-white text-black dark:bg-gray-900 dark:text-white w-screen h-screen p-6 shadow-lg"
-  side="left"
->
-  <DrawerHeader>
-    <DrawerTitle className="text-2xl font-semibold border-b border-gray-300 dark:border-gray-700 pb-2">
-      Menu
-    </DrawerTitle>
-  </DrawerHeader>
+          <DrawerContent
+            className="bg-white text-black dark:bg-gray-900 dark:text-white w-screen h-screen p-6 shadow-lg"
+            side="left"
+          >
+            <DrawerHeader>
+              <DrawerTitle className="text-2xl font-semibold border-b border-gray-300 dark:border-gray-700 pb-2">
+                Menu
+              </DrawerTitle>
+            </DrawerHeader>
 
-  <ul className="flex flex-col gap-6 mt-6 text-lg">
-    {!isAuthenticated ? (
-      <>
-        <li>
-          <button
-            className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-            onClick={() => handleNavigation("/sign-in")}
-          >
-            <User className="inline text-gray-700 dark:text-gray-300" />
-            User Login
-          </button>
-        </li>
-        <li>
-          <button
-            className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-            onClick={() => handleNavigation("/admin/signin")}
-          >
-            <UserCog className="inline text-gray-700 dark:text-gray-300" />
-            Admin Login
-          </button>
-        </li>
-        <li>
-          <button
-            className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-            onClick={() => handleNavigation("/system")}
-          >
-            <Settings className="inline text-gray-700 dark:text-gray-300" />
-            System
-          </button>
-        </li>
-      </>
-    ) : (
-      <li>
-        <button
-          className="px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-          onClick={() => handleNavigation("/sign-in")}
-        >
-          Go to dashboard
-        </button>
-      </li>
-    )}
-  </ul>
-</DrawerContent>
-
+            <ul className="flex flex-col gap-6 mt-6 text-lg">
+              {!isAuthenticated ? (
+                <>
+                  <li>
+                    <button
+                      className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                      onClick={() => handleNavigation("/sign-in")}
+                    >
+                      <User className="inline text-gray-700 dark:text-gray-300" />
+                      User Login
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                      onClick={() => handleNavigation("/admin/signin")}
+                    >
+                      <UserCog className="inline text-gray-700 dark:text-gray-300" />
+                      Admin Login
+                    </button>
+                  </li>
+                  <li>
+                    <button
+                      className="flex items-center gap-3 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                      onClick={() => handleNavigation("/system")}
+                    >
+                      <Settings className="inline text-gray-700 dark:text-gray-300" />
+                      System
+                    </button>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <button
+                    className="px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+                    onClick={() => handleNavigation("/sign-in")}
+                  >
+                    Go to dashboard
+                  </button>
+                </li>
+              )}
+            </ul>
+          </DrawerContent>
         </Drawer>
       </div>
 
@@ -153,6 +152,20 @@ const Navbar = () => {
         )}
       </div>
     </div>
+  );
+};
+export const SupportNavForLaptop = () => {
+  return (
+   <nav className="w-[80%] max-w-[700px] mx-auto fixed bottom-4 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-inner z-50 rounded-xl px-2">
+  <ul className="flex flex-wrap justify-around gap-y-2 px-3 py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300">
+    <li className="hover:text-blue-500 cursor-pointer">Help</li>
+    <li className="hover:text-blue-500 cursor-pointer">Contact</li>
+    <li className="hover:text-blue-500 cursor-pointer">FAQ</li>
+    <li className="hover:text-blue-500 cursor-pointer">Support</li>
+  </ul>
+</nav>
+
+
   );
 };
 

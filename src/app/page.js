@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMessagingInstance } from "@/lib/firebase.config";
 import { getToken, onMessage, getMessaging } from "firebase/messaging";
-import Navbar from "@/component/navBar/page";
+import Navbar, { SupportNavForLaptop } from "@/component/navBar/page";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Maincomp from "@/component/mainpage/main";
@@ -38,14 +38,16 @@ export default function Home() {
     setMounted(true);
   }, []);
 
-
   useEffect(() => {
-   navigator.serviceWorker.register('/firebase-messaging-sw.js')
-  .then((registration) => {
-    console.log('Service Worker registered with scope:', registration.scope);
-  });
-  }, [])
-  
+    navigator.serviceWorker
+      .register("/firebase-messaging-sw.js")
+      .then((registration) => {
+        console.log(
+          "Service Worker registered with scope:",
+          registration.scope
+        );
+      });
+  }, []);
 
   // Clear prompt and reset localStorage
   const clearLocalStorage = useCallback(() => {
@@ -72,7 +74,6 @@ export default function Home() {
       navigator.serviceWorker
         .register("/firebase-messaging-sw.js")
         .then((registration) => {
-
           if (Notification.permission === "granted") {
             getToken(getMessagingInstance(), {
               vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
@@ -173,8 +174,8 @@ export default function Home() {
             </div>
 
             <p className="text-gray-700 dark:text-gray-300">
-              We’d love to send you <strong>important updates</strong> and helpful tips.
-              Enable notifications to never miss out!
+              We’d love to send you <strong>important updates</strong> and
+              helpful tips. Enable notifications to never miss out!
             </p>
 
             <div className="flex gap-3">
@@ -255,8 +256,12 @@ export default function Home() {
         <button onClick={clearLocalStorage}>Clear data</button>
       </div>
       <Navbar />
-      {/* Your other page content here */}
-      <Maincomp />
+
+      {/* Add padding-bottom here to prevent content hiding behind SupportNavForLaptop */}
+      <div className="pb-16 md:pb-16">
+        <Maincomp />
+      </div>
+      <SupportNavForLaptop />
     </div>
   );
 }
