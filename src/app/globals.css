@@ -1,7 +1,8 @@
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Afacad+Flux:wght@100..1000&family=Arya:wght@400;700&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Oswald:wght@200&family=Tiro+Devanagari+Sanskrit:ital@0;1&family=Yatra+One&display=swap');@import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
+
 
 .dark {
   --background: #0b0d17;

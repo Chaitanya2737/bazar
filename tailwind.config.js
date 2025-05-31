@@ -17,6 +17,11 @@ module.exports = {
       },
       fontFamily: {
         poppins: ['Poppins', 'sans-serif'],
+        fontFamily: {
+        afacad: ['"Afacad Flux"', 'sans-serif'],
+        noto: ['"Noto Sans"', 'sans-serif'],
+        oswald: ['Oswald', 'sans-serif'],
+      },
       },
       animation: {
         fadeInUp: 'fadeInUp 1s ease-out',
