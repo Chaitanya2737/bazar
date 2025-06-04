@@ -21,15 +21,15 @@ const TypingIndicator = ({ isSender }) => (
           repeatDelay: 0.2,
           delay: dot * 0.2,
         }}
-        style={{ display: "inline-block" }}
       />
     ))}
   </motion.div>
 );
 
 const Message = ({ text, isSender }) => (
-  <motion.div
-    tabIndex={0}
+  <motion.article
+    role="article"
+    aria-label={isSender ? "Sender message" : "Receiver message"}
     initial={{ opacity: 0, y: 15 }}
     animate={{ opacity: 1, y: 0 }}
     exit={{ opacity: 0, y: -15 }}
@@ -46,21 +46,20 @@ const Message = ({ text, isSender }) => (
     `}
   >
     {text}
-  </motion.div>
+  </motion.article>
 );
 
 const ChatSimulator = () => {
-  // receiver = user, sender = system
   const senderMessages = [
-    "नमस्कार! आम्ही तुमच्या व्यवसायासाठी कस्टम वेबसाइट तयार करतो, ज्यामध्ये Whatapp शेअर नोटिफिकेशन, फेसबुक ॲडसाठी पुश नोटिफिकेशन आणि एफसीएम नोटिफिकेशनचा समावेश आहे.",
+    "नमस्कार! आम्ही तुमच्या व्यवसायासाठी कस्टम वेबसाइट तयार करतो...",
     "Whatapp नोटिफिकेशनमुळे तुम्ही थेट तुमच्या ग्राहकांशी संवाद साधू शकता.",
-    "एफसीएम म्हणजे Firebase Cloud Messaging. हे मोबाईल अ‍ॅप आणि वेबवरील पुश नोटिफिकेशनसाठी वापरलं जातं.",
-    "आम्ही तुमची वेबसाइट आणि ऑफर्स सोशल मीडिया प्लॅटफॉर्मवर प्रभावीपणे दाखवतो, ज्यामुळे तुमच्या व्यवसायाचा प्रसार वाढतो.",
-    "तुम्ही आमच्या प्लॅटफॉर्मवरून सहजपणे ऑफर्स तयार करू शकता आणि ग्राहकांना पाठवू शकता.",
-    "कस्टम डिझाईन, रेस्पॉन्सिव्ह लेआउट, ग्राहक फीडबॅक फॉर्म, ऑनलाईन बुकिंग आणि नोटिफिकेशन सेटींग्स उपलब्ध आहेत.",
-    "योग्य वेळ आणि योग्य ग्राहकांसाठी लक्ष केंद्रीत ऑफर्स पाठवणे महत्वाचे आहे. आम्ही सर्वोत्तम रणनीती सुचवतो.",
-    "तुमची व्यवसाय माहिती द्या, मग आम्ही वेबसाइट तयार करतो आणि सेवा सेट करतो.",
-    "किंमत तुमच्या व्यवसायाच्या गरजांवर अवलंबून आहे. विविध पॅकेजेस ऑफर करतो.",
+    "एफसीएम म्हणजे Firebase Cloud Messaging...",
+    "आम्ही तुमची वेबसाइट आणि ऑफर्स सोशल मीडिया प्लॅटफॉर्मवर दाखवतो...",
+    "तुम्ही आमच्या प्लॅटफॉर्मवरून सहजपणे ऑफर्स तयार करू शकता...",
+    "कस्टम डिझाईन, रेस्पॉन्सिव्ह लेआउट, ग्राहक फीडबॅक फॉर्म...",
+    "योग्य वेळ आणि योग्य ग्राहकांसाठी ऑफर्स पाठवणे महत्त्वाचे आहे...",
+    "तुमची व्यवसाय माहिती द्या, मग आम्ही वेबसाइट तयार करतो...",
+    "किंमत तुमच्या व्यवसायाच्या गरजांवर अवलंबून आहे...",
     "धन्यवाद! आम्हाला तुमच्याशी काम करण्याची उत्सुकता आहे.",
   ];
 
@@ -69,24 +68,22 @@ const ChatSimulator = () => {
     "Whatapp नोटिफिकेशन कसे काम करतात?",
     "एफसीएम नोटिफिकेशन म्हणजे काय?",
     "तुम्ही मार्केटिंग कसे कराल?",
-    "मी माझ्या व्यवसायासाठी खास ऑफर्स कशा तयार करू शकतो?",
+    "मी ऑफर्स कशा तयार करू शकतो?",
     "तुमच्या वेबसाइटमध्ये कोणते फीचर्स असतील?",
-    "माझ्या व्यवसायासाठी यशस्वी प्रमोशन्स कसे कराल?",
-    "मी या सेवांसाठी कशी सुरुवात करावी?",
-    "तुमच्या सेवा वापरण्यासाठी काही किंमत आहे का?",
-    "धन्यवाद! मला लवकरच संपर्क साधायचा आहे.",
+    "प्रमोशन्स कसे कराल?",
+    "मी कशी सुरुवात करू?",
+    "किंमत काय आहे?",
+    "धन्यवाद! मला संपर्क साधायचा आहे.",
   ];
 
-  // chat array holds {text, isSender}
   const [chat, setChat] = useState([]);
-  // typing indicates who is typing: "receiver", "sender" or null when finished
-  const [typing, setTyping] = useState("receiver");
-  // index to track which pair of messages to send next
+  const [typing, setTyping] = useState(null);
+  const [isclicked, setClicked] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
 
   const containerRef = useRef();
+  const hasStartedRef = useRef(false);
 
-  // Scroll chat to bottom on new message
   useEffect(() => {
     if (containerRef.current) {
       const timeout = setTimeout(() => {
@@ -99,73 +96,89 @@ const ChatSimulator = () => {
   useEffect(() => {
     if (!typing) return;
 
-    // durations
     const typingDuration = 1000;
     const pauseAfterMessage = 500;
 
     const timer = setTimeout(() => {
-      // Determine message and sender based on who is typing
       const isReceiverTyping = typing === "receiver";
+      const maxIndex = Math.min(senderMessages.length, receiverMessages.length);
 
-      // Check if message index is valid for current typing side
-      const hasMoreMessages = isReceiverTyping
-        ? messageIndex < receiverMessages.length
-        : messageIndex < senderMessages.length;
-
-      if (!hasMoreMessages) {
-        // No more messages, stop typing
+      if (messageIndex >= maxIndex) {
         setTyping(null);
         return;
       }
 
-      // Get the message to add
       const newMessage = isReceiverTyping
         ? { text: receiverMessages[messageIndex], isSender: false }
         : { text: senderMessages[messageIndex], isSender: true };
 
-      setChat((c) => [...c, newMessage]);
+      setChat((prev) => [...prev, newMessage]);
 
       if (isReceiverTyping) {
-        // After receiver message, set sender typing if sender has messages left
-        if (messageIndex < senderMessages.length) {
-          setTimeout(() => setTyping("sender"), pauseAfterMessage);
-        } else {
-          setTyping(null);
-        }
+        setTyping("sender");
       } else {
-        // After sender message, set receiver typing if receiver has messages left
-        if (messageIndex + 1 < receiverMessages.length) {
-          setTimeout(() => setTyping("receiver"), pauseAfterMessage);
-        } else {
-          setTyping(null);
-        }
-      }
-
-      // Increase messageIndex only after sender message to keep pair in sync
-      if (!isReceiverTyping) {
         setMessageIndex((i) => i + 1);
+        setTyping("receiver");
       }
     }, typingDuration);
 
     return () => clearTimeout(timer);
   }, [typing, messageIndex]);
 
+  const handleFocus = () => {
+    if (!hasStartedRef.current) {
+      hasStartedRef.current = true;
+      setChat([]);
+      setMessageIndex(0);
+      setTyping("receiver");
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center bg-gray-100 px-4 py-2 my-2 dark:bg-gray-900">
+    <section className="max-w-xl mx-auto px-4 py-8" aria-label="ग्राहक संवाद चॅट सिम्युलेटर">
+      <h1 className="text-3xl font-bold text-center mb-6 dark:text-white text-gray-900">
+        स्मार्ट ग्राहक संवाद सिम्युलेटर
+      </h1>
+      <p className="text-center mb-8 text-gray-700 dark:text-gray-300">
+        आमचा चॅट सिम्युलेटर तुमच्या व्यवसायाच्या ग्राहकांशी प्रभावी संवाद साधण्यासाठी आहे. येथे तुम्ही WhatsApp नोटिफिकेशन्स, पुश सूचनांद्वारे तुमचा व्यवसाय वाढवू शकता.
+      </p>
+
       <div
         ref={containerRef}
-         style={{ fontFamily: "'Oswald', sans-serif", fontWeight:"500" }}
-        className="flex flex-col justify-start w-full max-w-xl h-[500px] p-4 dark:bg-gray-900 overflow-y-auto bg-gray-50 font-sans border border-gray-300 rounded-lg shadow-lg"
+        tabIndex={0}
+        onFocus={handleFocus}
+        style={{ fontFamily: "'Oswald', sans-serif", fontWeight: "500" }}
+        className="flex flex-col justify-start w-full h-[500px] p-4 dark:bg-gray-900 overflow-y-auto bg-gray-50 font-sans border border-gray-300 rounded-lg shadow-lg outline-none"
+        role="log"
+        aria-live="polite"
       >
-        <AnimatePresence initial={false}>
-          {chat.map(({ text, isSender }, idx) => (
-            <Message key={idx} text={text} isSender={isSender} />
-          ))}
-        </AnimatePresence>
+        {!isclicked && (
+          <div className="flex flex-col justify-center items-center h-full">
+            <p className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300 font-sans font-semibold">
+              To know more
+            </p>
+            <button
+              className="font-sans bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 focus:bg-blue-700 transition-colors duration-200"
+              onClick={() => setClicked(true)}
+            >
+              Click me
+            </button>
+          </div>
+        )}
 
-        {typing && <TypingIndicator isSender={typing === "sender"} />}
+        {isclicked && (
+          <>
+            <AnimatePresence initial={false}>
+              {chat.map(({ text, isSender }, idx) => (
+                <Message key={idx} text={text} isSender={isSender} />
+              ))}
+            </AnimatePresence>
+
+            {typing && <TypingIndicator isSender={typing === "sender"} />}
+          </>
+        )}
       </div>
-    </div>
+    </section>
   );
 };
 

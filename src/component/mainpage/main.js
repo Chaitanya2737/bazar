@@ -7,9 +7,11 @@ import Head from "next/head";
 import { useState } from "react";
 import PricingToggle from "./PricingToggle";
 import ChatApp from "./ChatApp";
+import AdminSponsorCard from "./AdminSponsorCard";
+import Pricing from "./pricing";
+import Testimonials from "./Testimonials";
 
 export default function Maincomp() {
-  const [isYearly, setIsYearly] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
@@ -97,7 +99,7 @@ className="bg-blue-600 dark:bg-orange-500 hover:bg-blue-700 dark:hover:bg-orange
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 px-4 bg-gray-50 dark:bg-gray-900">
+      <section className="py-16 px-4 bg-gray-50 dark:bg-gray-900  ">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white mb-12">
           How It Works
         </h2>
@@ -105,104 +107,24 @@ className="bg-blue-600 dark:bg-orange-500 hover:bg-blue-700 dark:hover:bg-orange
       <ChatApp />
       </section>
 
-
-
-      {/* Call to Action Section */}
-      <section className="py-20 px-4 bg-blue-600 text-white text-center">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">
-          Ready to Launch Your Digital Business?
-        </h2>
-        <p className="text-lg mb-8 max-w-xl mx-auto">
-          Join our platform and unlock powerful tools to connect with your
-          customers like never before.
-        </p>
-        <Button
-          variant="outline"
-          size="lg"
-          className="bg-transparent border-white text-white hover:bg-white hover:text-blue-600"
-        >
-          Get Your Subdomain Now
-        </Button>
+      <section className="py-16 px-4">
+        <AdminSponsorCard />
       </section>
+
       {/* Pricing Section */}
-      <section className="py-20 px-4 bg-white dark:bg-gray-800">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white mb-8">
-          Flexible Pricing for Every Need
-        </h2>
+  
+  <section>
+    <Pricing />
+  </section>
 
-        {/* Toggle */}
-        <PricingToggle
-          isYearly={isYearly}
-          setIsYearly={setIsYearly}
-          className="mb-12"
-        />
+  <section>
+    <Testimonials />
+  </section>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {/* Basic Plan */}
-          <Card className="shadow-md bg-gray-50 dark:bg-gray-700">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-center text-gray-900 dark:text-white">
-                Basic
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-4xl font-bold text-blue-600">$0</p>
-              <ul className="text-gray-600 dark:text-gray-300 space-y-2">
-                <li>✔️ Custom Subdomain</li>
-                <li>✔️ WhatsApp Sharing</li>
-                <li>✖️ Push Notifications</li>
-              </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                Get Started
-              </Button>
-            </CardContent>
-          </Card>
+      
 
-          {/* Pro Plan */}
-          <Card className="shadow-lg border-2 border-blue-600 bg-white dark:bg-gray-800">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-center text-gray-900 dark:text-white">
-                Pro
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-4xl font-bold text-blue-600">
-                {isYearly ? "$190/yr" : "$19/mo"}
-              </p>
-              <ul className="text-gray-600 dark:text-gray-300 space-y-2">
-                <li>✔️ Custom Subdomain</li>
-                <li>✔️ WhatsApp Sharing</li>
-                <li>✔️ Push Notifications</li>
-                <li>✔️ Email Support</li>
-              </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                {isYearly ? "Start Yearly" : "Start Pro"}
-              </Button>
-            </CardContent>
-          </Card>
+      
 
-          {/* Enterprise Plan */}
-          <Card className="shadow-md bg-gray-50 dark:bg-gray-700">
-            <CardHeader>
-              <CardTitle className="text-xl font-semibold text-center text-gray-900 dark:text-white">
-                Enterprise
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-4xl font-bold text-blue-600">Custom</p>
-              <ul className="text-gray-600 dark:text-gray-300 space-y-2">
-                <li>✔️ Everything in Pro</li>
-                <li>✔️ Custom Integrations</li>
-                <li>✔️ Dedicated Support</li>
-              </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                Contact Sales
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="py-8 px-4 text-center text-gray-600 dark:text-gray-300">
