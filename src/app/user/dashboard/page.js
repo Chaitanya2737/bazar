@@ -1,32 +1,24 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import React, { useEffect, useCallback, useMemo } from "react";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { userLogout, userLogin } from "@/redux/slice/user/userSlice";
 import { useRouter } from "next/navigation";
 import { getUserDataApi } from "@/redux/slice/user/serviceApi";
 import ThemeToggle from "@/component/themeToggle/themeToggle";
-import Image from "next/image";
+import MainSection from "@/component/preview/MainSection";
 
 const UserDashboardPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const user = useSelector((state) => state.userAuth);
-  const userdata = useSelector((state) => state.userdata);
   const { data: session, status } = useSession();
-  const [mounted, setMounted] = useState(false); // State for controlling visibility
+
+  const user = useSelector((state) => state.userAuth, shallowEqual);
+  const userdata = useSelector((state) => state.userdata, shallowEqual);
   const darkMode = useSelector((state) => state.theme.darkMode);
 
-  const { businessName, mobileNumber, businessIcon } = userdata?.userData || {};
-  
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const isRoleValid = useMemo(() => {
-    return session?.user?.role === "user";
-  }, [session?.user?.role]);
+  const isRoleValid = useMemo(() => session?.user?.role === "user", [session]);
 
   useEffect(() => {
     if (session?.user && !user?.id) {
@@ -37,18 +29,17 @@ const UserDashboardPage = () => {
 
   useEffect(() => {
     if (user?.id && !userdata?.data) {
-      const fetchUserData = async () => {
-        try {
-          const data = await dispatch(getUserDataApi(user?.id));
-        } catch (error) {
-          console.error("API Fetch Error:", error);
-        }
-      };
-      fetchUserData();
+      dispatch(getUserDataApi(user?.id)).catch((err) =>
+        console.error("User Data Fetch Error:", err)
+      );
     }
   }, [dispatch, user?.id, userdata?.data]);
 
-  const logout = useCallback(() => {
+const handleEditSite = useCallback(() => { 
+  router.push(`/user/dashboard/edit/${user?.id}`); 
+}, [router, user?.id]);
+
+  const handleLogout = useCallback(() => {
     dispatch(userLogout());
     signOut({ redirect: true, callbackUrl: "/" });
   }, [dispatch]);
@@ -61,6 +52,7 @@ const UserDashboardPage = () => {
     return <div className="text-center mt-10">You are not authenticated.</div>;
   }
 
+
   if (!isRoleValid) {
     return (
       <div className="text-center mt-10">
@@ -69,70 +61,70 @@ const UserDashboardPage = () => {
     );
   }
 
+  const {
+    businessName,
+    mobileNumber,
+    businessIcon,
+    email,
+    handlerName,
+    socialMediaLinks,
+    businessLocation,
+    bio,
+  } = userdata?.userData || {};
+
   return (
-    <div className={`relative text-black dark:bg-gray-800 dark:text-white min-h-screen overflow-x-hidden`}>
-    <div
-      className="text-start mt-7 mx-3 bg-neutral-200 dark:bg-gray-700 rounded-lg shadow-md"
-      style={{
-        background: !darkMode
-          ? "radial-gradient(circle, #f6c4ed 0%, #caefd7 50%, #b5c6e0 100%)"
-          : "linear-gradient(316deg, #523a78 0%, #caefd7 30%, #ee696b 120%)",
-      }}
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2  gap-4 items-center">
-        {mounted && (
-          <Image
-            src={businessIcon || "/Sample_User_Icon.png"}
-            alt="Business Icon"
-            width={100}
-            height={100}
-            className="w-24 h-24 rounded-full object-cover mx-auto"
-            loading="lazy"
-            decoding="async"
-          />
+    <div className="relative text-black dark:bg-gray-800 dark:text-white min-h-screen overflow-x-hidden">
+      <div
+        className="text-start mt-7 mx-3 rounded-lg shadow-md"
+        style={{
+          background: darkMode
+            ? "linear-gradient(316deg, #523a78 0%, #caefd7 30%, #ee696b 120%)"
+            : "radial-gradient(circle, #f6c4ed 0%, #caefd7 50%, #b5c6e0 100%)",
+        }}
+      >
+        <MainSection
+          businessName={businessName}
+          icon={businessIcon}
+          mobileNumber={mobileNumber}
+          bio={bio}
+          email={email}
+          handlerName={handlerName}
+          socialMediaLinks={socialMediaLinks}
+          location={businessLocation || ""}
+        />
+      </div>
+
+      <section className="mt-4 px-4">
+        <h2 className="text-2xl font-semibold">User Details</h2>
+      </section>
+
+      <section>
+        <button onClick={handleEditSite} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          edit site 
+        </button>
+      </section>
+
+      <div className="flex flex-col items-center mt-10 gap-4">
+        {user?.email ? (
+          <>
+            <h2 className="text-xl font-semibold text-center">
+              Hello,<br /> {user.email}!
+            </h2>
+            <p className="text-gray-500">Role: {user.role || "User"}</p>
+            <button
+              onClick={handleLogout}
+              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <p>You are not logged in.</p>
         )}
-        <h1 className="text-4xl text-center md:text-left font-semibold">
-          {businessName || "Business Name"}
-        </h1>
       </div>
-      <div className="flex gap-1 items-center justify-center text-[#003049] text-lg mt-4">
-        {mobileNumber?.map((number, index) => (
-          <div key={index} className="flex items-center">
-            <h1>
-              {number}
-              {index < mobileNumber.length - 1 && " |"}
-            </h1>
-          </div>
-        ))}
-      </div>
+
+      <ThemeToggle />
     </div>
-  
-    <section>
-      <div>
-        <h2 className="text-2xl font-semibold mt-4">User Details</h2>
-      </div>
-    </section>
-  
-    <div className="flex flex-col items-center mt-10 gap-4">
-      {user?.email ? (
-        <>
-          <h2 className="text-xl font-semibold">Hello,<br /> {user.email}!</h2>
-          <p className="text-gray-500">Role: {user.role || "User"}</p>
-          <button
-            onClick={logout}
-            className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-          >
-            Logout
-          </button>
-        </>
-      ) : (
-        <p>You are not logged in.</p>
-      )}
-    </div>
-  
-    <ThemeToggle />
-  </div>
-  
   );
 };
 

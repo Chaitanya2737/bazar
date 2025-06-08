@@ -17,7 +17,7 @@ function generateSlug(name) {
 
   return slugify(name, {
     lower: true,
-    strict: true, // Ensures that special characters are removed
+    strict: true,
   });
 }
 
@@ -52,6 +52,8 @@ export async function POST(req) {
       "email",
       "password",
     ];
+
+    console.log(user.businessName);
     const missingFields = required.filter((field) => !user[field]);
     if (missingFields.length) {
       return NextResponse.json(
@@ -119,6 +121,7 @@ export async function POST(req) {
         );
       }
 
+
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
       const base64 = buffer.toString("base64");
@@ -126,7 +129,7 @@ export async function POST(req) {
 
       try {
         const uploaded = await cloudinary.uploader.upload(dataUri, {
-          folder: "business-icons",
+          folder: user.businessName || "business-icons",
         });
         businessIconUrl = uploaded.secure_url;
       } catch (uploadErr) {

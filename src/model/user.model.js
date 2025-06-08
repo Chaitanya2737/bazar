@@ -88,6 +88,11 @@ const userSchema = new mongoose.Schema({
     required: true,
     default: false,
   },
+
+  carauselImages: {
+    type: [String],
+    default: [],
+  },
   visitCount: {
     type: Number,
     default: 0,

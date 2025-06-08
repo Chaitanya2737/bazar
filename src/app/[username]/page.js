@@ -14,8 +14,9 @@ import Navbar from "@/component/preview/Navbar";
 import MainSection from "@/component/preview/MainSection";
 import Userpreviewcount from "@/component/preview/Userpreviewcount";
 import { Skeleton } from "@/components/ui/skeleton";
-import Authorized from "../error/not-authorized/page";
 import { useRouter } from "next/navigation";
+import Carusel from "@/component/user/Carusel";
+import ScrollCards from "@/component/user/OverlappingCards";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -149,6 +150,14 @@ const UserPreview = () => {
 
 
   const data = userPreview?.data;
+  console.log(userPreview?.data?.carauselImages);
+
+
+  const image = data?.carauselImages || [];
+  if (!image) {
+   toast.error("No images found for the carousel.");
+   return null;
+  }
 
   // Conditionally render skeleton for components
   const renderUserDataSkeleton = loading || !data;
@@ -172,6 +181,8 @@ const UserPreview = () => {
         </>
       )}
 
+
+
       <Navbar />
 
       {/* Skeleton for Main Section */}
@@ -192,7 +203,16 @@ const UserPreview = () => {
         )
       )}
 
+
+
+
+
+      <ScrollCards />
       <Userpreviewcount count={backendVisitCount} />
+
+
+      <Carusel  image={image} />
+
       <ThemeToggle />
     </div>
   );

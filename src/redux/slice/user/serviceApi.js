@@ -120,3 +120,36 @@ export const getUserPreview = createAsyncThunk(
     }
   }
 );
+
+export const updateUsercarousel = async (userId , businessName, formData) => {
+  try {
+    formData.append("businessName", businessName); // attach id to FormData if your API expects it
+ formData.append("id", userId);
+    const response = await axios.post("/api/user/carousel", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating user carousel:", error);
+    throw error;
+  }
+};
+
+export const deleteUserCarouselImage = async (userId, businessName, imageUrl) => {
+  try {
+    const response = await axios.delete("/api/user/carousel", {
+      data: { userId, imageUrl , businessName },
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting carousel image:", error);
+    throw error;
+  }
+}
