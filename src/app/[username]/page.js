@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation";
 import Carusel from "@/component/user/Carusel";
 import ScrollCards from "@/component/user/OverlappingCards";
+import HeroSection from "@/component/user/HeroSection";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -185,6 +186,7 @@ const UserPreview = () => {
 
       <Navbar />
 
+      <ThemeToggle />
       {/* Skeleton for Main Section */}
       {renderMainSectionSkeleton ? (
         <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
@@ -204,16 +206,14 @@ const UserPreview = () => {
       )}
 
 
+      <HeroSection />
 
-
-
-      <ScrollCards />
-      <Userpreviewcount count={backendVisitCount} />
+      {/* <Userpreviewcount count={backendVisitCount} /> */}
 
 
       <Carusel  image={image} />
 
-      <ThemeToggle />
+      <ScrollCards />
     </div>
   );
 };
