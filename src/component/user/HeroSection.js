@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function HeroSection() {
   return (
     <section
@@ -24,7 +26,7 @@ export default function HeroSection() {
         </div>
       </div>
       <div className="md:w-1/2 mb-10 md:mb-0">
-        <img
+        <Image
           src="/horizontal-shot-happy-friends-point-fingers-you-gesture-indoor-make-choice-have-positive-expressions.jpg"
           alt="आनंदी ग्राहक आणि खरेदीदार"
           className="w-full rounded-lg shadow-lg"
