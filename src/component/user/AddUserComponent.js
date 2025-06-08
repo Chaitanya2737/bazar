@@ -21,10 +21,9 @@ const AddUserComponent = () => {
   const selector = useSelector((state) => state.user);
   console.log(selector);
 
-  
-
   const [formData, setFormData] = useState(userAddingField);
   const [localFile, setLocalFile] = useState(null);
+  const [submitError, setSubmitError] = useState(null); // For user feedback
 
   const [isOpen, setIsOpen] = useState(() => {
     if (typeof window !== "undefined") {
@@ -47,52 +46,42 @@ const AddUserComponent = () => {
   useEffect(() => {
     localStorage.setItem("collapse", JSON.stringify(isOpen));
   }, [isOpen]);
-  
 
-  const setValue = (e) => {
+  const setValue = useCallback((e) => {
     const { name, value, files } = e.target;
-
     if (name === "businessIcon") {
       setFormData((prev) => ({ ...prev, [name]: files[0] }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
-  };
-
-  const setToStore = () => {
-    try {
-      dispatch(updateUser(formData));
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  }, []);
 
   const handleSubmit = async () => {
     try {
       if (!localFile) {
-        console.warn("No file selected.");
+        setSubmitError("Please select a business icon file.");
         return;
       }
-  
-      // Step 1: Update the user info
-      await dispatch(updateUser(formData));
-  
-      // Step 2: Prepare new FormData for file upload
+
+      // Prepare FormData for file upload and user data
       const newFormData = new FormData();
-      newFormData.append("businessIcon", localFile)
+      newFormData.append("businessIcon", localFile);
       newFormData.append("userdata", JSON.stringify(formData));
-  
-      // Step 3: Dispatch the file + userdata
+
+      // Dispatch the file + userdata
       await dispatch(createUserApi(newFormData));
-  
-      // Step 4: Reset after success
+
+      // Reset after success
       await dispatch(resetUser());
-  
+      setFormData(userAddingField);
+      setLocalFile(null);
+      setSubmitError(null);
     } catch (error) {
       console.error("Error in handleSubmit:", error);
+      setSubmitError("Failed to create user. Please try again.");
     }
   };
-  
+
   return (
     <div className="text-black dark:bg-gray-800 dark:text-white p-4">
       <div className="md:col-span-2 mt-5">
@@ -101,11 +90,7 @@ const AddUserComponent = () => {
         </h2>
       </div>
       {isOpen.BasicCategories && (
-        <BasicCategories
-          formData={formData}
-          setValue={setValue}
-          setIsOpen={setIsOpen}
-        />
+        <BasicCategories formData={formData} setValue={setValue} setIsOpen={setIsOpen} />
       )}
 
       <div className="md:col-span-2 mt-5">
@@ -132,31 +117,22 @@ const AddUserComponent = () => {
           formData={formData}
           setValue={setValue}
           setIsOpen={setIsOpen}
-          setToStore={setToStore}
           handleSubmit={handleSubmit}
         />
+      )}
+      {submitError && (
+        <p className="text-sm text-red-500 mt-3 text-center">{submitError}</p>
       )}
     </div>
   );
 };
 
 export default AddUserComponent;
+
 // Basic Categories
-export const BasicCategories = ({
-  formData,
-  setValue,
-  setIsOpen,
-  onMobileChange,
-}) => {
+export const BasicCategories = ({ formData, setValue, setIsOpen }) => {
   const [errors, setErrors] = useState({});
   const [mobileNumbers, setMobileNumbers] = useState([""]);
-
-  //  Notify parent when mobileNumbers change
-  useEffect(() => {
-    if (onMobileChange) {
-      onMobileChange(mobileNumbers);
-    }
-  }, [mobileNumbers]);
 
   const validate = () => {
     const newErrors = {};
@@ -174,12 +150,18 @@ export const BasicCategories = ({
       }
     });
 
-    if (!String(formData.email).trim()) {
+    const emailTrimmed = String(formData.email).trim();
+    if (!emailTrimmed) {
       newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
+      newErrors.email = "Invalid email format";
     }
 
-    if (!String(formData.password).trim()) {
+    const passwordTrimmed = String(formData.password).trim();
+    if (!passwordTrimmed) {
       newErrors.password = "Password is required";
+    } else if (passwordTrimmed.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
     }
 
     setErrors(newErrors);
@@ -215,9 +197,7 @@ export const BasicCategories = ({
         {/* Handler Name */}
         <div>
           <Label
-            className={`${
-              errors.handlerName ? "text-red-400 p-1 rounded" : ""
-            }`}
+            className={errors.handlerName ? "text-red-400 p-1 rounded" : ""}
             htmlFor="handlerName"
           >
             Handler Name
@@ -238,9 +218,7 @@ export const BasicCategories = ({
         {mobileNumbers.map((number, idx) => (
           <div key={`mobile_${idx}`} className="relative">
             <Label
-              className={`${
-                errors.handlerName ? "text-red-400 p-1 rounded" : ""
-              }`}
+              className={errors[`mobile_${idx}`] ? "text-red-400 p-1 rounded" : ""}
               htmlFor={`mobile_${idx}`}
             >
               Mobile Number {idx + 1}
@@ -277,9 +255,7 @@ export const BasicCategories = ({
         {/* Email */}
         <div>
           <Label
-            className={`${
-              errors.handlerName ? "text-red-400 p-1 rounded" : ""
-            }`}
+            className={errors.email ? "text-red-400 p-1 rounded" : ""}
             htmlFor="email"
           >
             Email
@@ -299,9 +275,7 @@ export const BasicCategories = ({
         {/* Password */}
         <div>
           <Label
-            className={`${
-              errors.handlerName ? "text-red-400 p-1 rounded" : ""
-            }`}
+            className={errors.password ? "text-red-400 p-1 rounded" : ""}
             htmlFor="password"
           >
             Password
@@ -334,8 +308,8 @@ export const BasicCategories = ({
     </>
   );
 };
-// Business Categories
 
+// Business Categories
 export const BusinessCategories = ({
   formData,
   setValue,
@@ -364,6 +338,7 @@ export const BusinessCategories = ({
       newErrors.categories = "Categories is required";
     if (!String(formData.admin).trim())
       newErrors.admin = "Admin name is required";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -552,12 +527,10 @@ export const BusinessCategories = ({
 };
 
 // Social Media Link
-
 export const SocialMediaLink = ({
   formData,
   setValue,
   setIsOpen,
-  setToStore,
   handleSubmit,
 }) => {
   const back = () =>
@@ -566,21 +539,6 @@ export const SocialMediaLink = ({
       BusinessCategories: true,
       SocialMediaLink: false,
     }));
-
-  const next = () => {
-    try {
-      setToStore();
-      setIsOpen((prev) => ({
-        ...prev,
-        BasicCategories: false,
-        BusinessCategories: false,
-        SocialMediaLink: true,
-      }));
-      handleSubmit();
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   return (
     <>
@@ -638,11 +596,11 @@ export const SocialMediaLink = ({
         </Button>
 
         <Button
-          onClick={next}
+          onClick={handleSubmit}
           variant="secondary"
           className="w-full flex items-center justify-center gap-2 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800"
         >
-          <span>Make Payment</span>
+          <span>Submit</span>
           <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-2" />
         </Button>
       </div>

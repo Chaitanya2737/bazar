@@ -18,7 +18,6 @@ const TypingIndicator = ({ isSender }) => (
           repeat: Infinity,
           duration: 1.4,
           ease: "easeInOut",
-          repeatDelay: 0.2,
           delay: dot * 0.2,
         }}
       />
@@ -73,12 +72,12 @@ const ChatSimulator = () => {
     "प्रमोशन्स कसे कराल?",
     "मी कशी सुरुवात करू?",
     "किंमत काय आहे?",
-    "धन्यवाद! मला संपर्क साधायचा आहे.",
+    "धन्यवाद! मला संपर्क साधायचा आहे。",
   ];
 
   const [chat, setChat] = useState([]);
   const [typing, setTyping] = useState(null);
-  const [isclicked, setClicked] = useState(false);
+  const [isClicked, setClicked] = useState(false);
   const [messageIndex, setMessageIndex] = useState(0);
 
   const containerRef = useRef();
@@ -97,7 +96,6 @@ const ChatSimulator = () => {
     if (!typing) return;
 
     const typingDuration = 1000;
-    const pauseAfterMessage = 500;
 
     const timer = setTimeout(() => {
       const isReceiverTyping = typing === "receiver";
@@ -123,7 +121,7 @@ const ChatSimulator = () => {
     }, typingDuration);
 
     return () => clearTimeout(timer);
-  }, [typing, messageIndex]);
+  }, [typing, messageIndex, senderMessages, receiverMessages]);
 
   const handleFocus = () => {
     if (!hasStartedRef.current) {
@@ -140,7 +138,7 @@ const ChatSimulator = () => {
         स्मार्ट ग्राहक संवाद सिम्युलेटर
       </h1>
       <p className="text-center mb-8 text-gray-700 dark:text-gray-300">
-        आमचा चॅट सिम्युलेटर तुमच्या व्यवसायाच्या ग्राहकांशी प्रभावी संवाद साधण्यासाठी आहे. येथे तुम्ही WhatsApp नोटिफिकेशन्स, पुश सूचनांद्वारे तुमचा व्यवसाय वाढवू शकता.
+        आमचा चॅट सिम्युलेटर तुमच्या व्यवसायाच्या ग्राहकांशी प्रभावी संवाद साधण्यासाठी आहे। येथे तुम्ही WhatsApp नोटिफिकेशन्स, पुश सूचनांद्वारे तुमचा व्यवसाय वाढवू शकता।
       </p>
 
       <div
@@ -152,7 +150,7 @@ const ChatSimulator = () => {
         role="log"
         aria-live="polite"
       >
-        {!isclicked && (
+        {!isClicked && (
           <div className="flex flex-col justify-center items-center h-full">
             <p className="mb-2 text-lg font-semibold text-gray-700 dark:text-gray-300 font-sans font-semibold">
               To know more
@@ -166,7 +164,7 @@ const ChatSimulator = () => {
           </div>
         )}
 
-        {isclicked && (
+        {isClicked && (
           <>
             <AnimatePresence initial={false}>
               {chat.map(({ text, isSender }, idx) => (
