@@ -1,7 +1,7 @@
 "use client"
 import AddUserComponent from '@/component/user/AddUserComponent'
 import { setDarkMode } from '@/redux/slice/theme/themeSlice';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState  } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 
 const AddUser = () => {

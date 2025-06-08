@@ -1,7 +1,7 @@
 'use client';
 
 import { signIn, useSession } from 'next-auth/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect , useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function SignInPage() {
