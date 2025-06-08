@@ -3,109 +3,86 @@
 import React, { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 
-function useCardTransforms(scrollYProgress, index, total) {
-  const rangeSize = 1 / total;
-  const start = index * rangeSize;
-  const end = start + rangeSize;
-
-  const y = useTransform(scrollYProgress, [start, end], [50, 0], { clamp: true });
-  const opacity = useTransform(scrollYProgress, [start, end], [0, 1], { clamp: true });
-  const scale = useTransform(scrollYProgress, [start, end], [0.9, 1], { clamp: true });
-
-  return { y, opacity, scale };
-}
-
-export default function ScrollCards() {
-  const totalCards = 5;
+export default function ScrollCardsManual() {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end start"],
   });
 
- const cardsContent = [
-  {
-    title: "आम्हाला तुमची काळजी आहे",
-    description:
-      "आम्ही फक्त उत्पादन विकत नाही, तर तुमच्या गरजा आणि अपेक्षा समजून घेऊन त्यानुसार सेवा देतो. तुमची समाधान ही आमची प्रेरणा आहे.",
-  },
-  {
-    title: "ग्राहकांचा अनुभव",
-    description:
-      "“मी खूप काळापासून या दुकानाचा ग्राहक आहे. येथे नेहमीच वेळेवर मदत मिळते आणि उत्पादनांचा दर्जा अप्रतिम आहे.”",
+  // Define transforms for each card
+  const y = [
+    useTransform(scrollYProgress, [0.0, 0.2], [50, 0]),
+    useTransform(scrollYProgress, [0.2, 0.4], [50, 0]),
+    useTransform(scrollYProgress, [0.4, 0.6], [50, 0]),
+    useTransform(scrollYProgress, [0.6, 0.8], [50, 0]),
+    useTransform(scrollYProgress, [0.8, 1.0], [50, 0]),
+  ];
 
-  },
-  {
-    title: "तुमच्यासाठी खास सेवा",
-    description:
-      "तुमच्या गरजेनुसार योग्य सल्ला आणि उत्तम उत्पादने देण्यासाठी आम्ही सदैव तयार आहोत. तुमचा अनुभव आमच्यासाठी महत्त्वाचा आहे.",
-    
-  },
-  {
-    title: "ग्राहकांचे मनापासून अभिप्राय",
-    description:
-      "“तुम्ही नेहमीच उत्कृष्ट सेवा देता. मला खूप आवडते की येथे ग्राहकांना खरी काळजी घेतली जाते.”",
+  const opacity = [
+    useTransform(scrollYProgress, [0.0, 0.2], [0, 1]),
+    useTransform(scrollYProgress, [0.2, 0.4], [0, 1]),
+    useTransform(scrollYProgress, [0.4, 0.6], [0, 1]),
+    useTransform(scrollYProgress, [0.6, 0.8], [0, 1]),
+    useTransform(scrollYProgress, [0.8, 1.0], [0, 1]),
+  ];
 
-  },
-  {
-    title: "तुमच्या सेवेत सदैव तत्पर",
-    description:
-      "आम्ही तुमच्यासाठी नेहमीच हजर आहोत. आमच्या सेवा वापरून बघा आणि आमच्या समाधानी ग्राहकांचा भाग बना.",
- 
-  },
-];
+  const scale = [
+    useTransform(scrollYProgress, [0.0, 0.2], [0.9, 1]),
+    useTransform(scrollYProgress, [0.2, 0.4], [0.9, 1]),
+    useTransform(scrollYProgress, [0.4, 0.6], [0.9, 1]),
+    useTransform(scrollYProgress, [0.6, 0.8], [0.9, 1]),
+    useTransform(scrollYProgress, [0.8, 1.0], [0.9, 1]),
+  ];
 
+  const cards = [
+    {
+      title: "आम्हाला तुमची काळजी आहे",
+      text: "आम्ही फक्त उत्पादन विकत नाही, तर तुमच्या गरजा आणि अपेक्षा समजून घेऊन सेवा देतो.",
+    },
+    {
+      title: "ग्राहकांचे मनापासून अभिप्राय",
+      text: "तुम्ही नेहमीच उत्कृष्ट सेवा देता. येथे ग्राहकांची खरी काळजी घेतली जाते.",
+    },
+    {
+      title: "तुमच्यासाठी खास सेवा",
+      text: "तुमच्या गरजेनुसार योग्य सल्ला आणि उत्तम उत्पादने देण्यासाठी आम्ही तयार आहोत.",
+    },
+    {
+      title: "सर्वोत्तम ग्राहक अनुभव",
+      text: "प्रत्येक वेळी तुम्ही आमच्या सेवेचा आनंद घ्यावा, यासाठी आम्ही प्रयत्नशील असतो.",
+    },
+    {
+      title: "तुमच्या सेवेत सदैव तत्पर",
+      text: "आम्ही तुमच्यासाठी नेहमीच हजर आहोत. आमच्या समाधानी ग्राहकांचा भाग बना.",
+    },
+  ];
 
   return (
     <div
       ref={ref}
-      className="relative w-full mt-20 px-4"
-      style={{ height: `${totalCards * 400}px`, perspective: 1000 }}
+      className="relative w-full mt-20 px-4 backdrop-blur-md bg-white/30 rounded-xl py-10"
+      style={{ height: "2000px" }}
     >
+      <h1 className="text-3xl text-center font-bold text-gray-800 mb-10">ग्राहक अनुभव</h1>
 
-      <h1 className="text-3xl text-gray-800 sm:text-4xl font-bold  mb-6  ">Client Success Stories</h1>
-      {cardsContent.map((card, index) => {
-        const { y, opacity, scale } = useCardTransforms(scrollYProgress, index, totalCards);
-        return (
-          <motion.div
-            key={index}
-            style={{
-              position: "sticky",
-              top: 60 + index * 95,
-              y,
-              opacity,
-              scale,
-              color: card.color || "#111",
-              minHeight: 220,
-              borderRadius: 12,
-              boxShadow: "0 4px 15px rgba(0,0,0,0.15)",
-              padding: 32,
-              textAlign: "center",
-              marginBottom: 30,
-              zIndex: index,
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-            }}
-              className="bg-white dark:bg-gray-500 text-black dark:text-white"
-
-            transition={{ type: "spring", stiffness: 150, damping: 30 }}
-            whileHover={{ boxShadow: "0 8px 25px rgba(0,0,0,0.35)" }}
-          >
-            <h2 className="text-2xl font-bold mb-4">{card.title}</h2>
-            <p className="mb-6 text-lg leading-relaxed">{card.description}</p>
-
-            {card.customerName && (
-              <div className="flex items-center justify-center gap-4 mt-auto">
-              
-                <div className="text-left">
-      
-                </div>
-              </div>
-            )}
-          </motion.div>
-        );
-      })}
+      {cards.map((card, index) => (
+        <motion.div
+          key={index}
+          style={{
+            position: "sticky",
+            top: 60 * index,
+            y: y[index],
+            opacity: opacity[index],
+            scale: scale[index],
+          }}
+          className="bg-white text-black dark:bg-gray-700 dark:text-white p-8 rounded-lg shadow-lg mb-20"
+          transition={{ type: "spring", stiffness: 120 }}
+        >
+          <h2 className="text-2xl font-bold mb-4">{card.title}</h2>
+          <p className="text-lg">{card.text}</p>
+        </motion.div>
+      ))}
     </div>
   );
 }
