@@ -1,7 +1,6 @@
 import cloudinary from "@/lib/cloudinaryConfig";
 import UserModel from "@/model/user.model";
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
 
 export async function POST(request) {
   console.log("POST /api/user/detail called");
@@ -42,7 +41,7 @@ export async function POST(request) {
         if (file.size > MAX_FILE_SIZE) {
           return {
             name: file.name,
-            reason: "File size exceeds 1MB",
+            reason: "File size exceeds 100MB",
             success: false,
           };
         }

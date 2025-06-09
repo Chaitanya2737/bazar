@@ -119,29 +119,6 @@ const MainSection = ({
           ) : (
             <Skeleton className="w-32 h-4 bg-gray-800 dark:bg-gray-200" />
           )}
-
-          {/* Social Media Links */}
-          {socialMediaLinks.length > 0 ? (
-            <div className="flex gap-4 pt-4">
-              {socialMediaLinks.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-indigo-600 dark:text-indigo-300 font-semibold hover:underline hover:text-indigo-800 dark:hover:text-indigo-100 transition"
-                >
-                  {link.platform}
-                </a>
-              ))}
-            </div>
-          ) : (
-            <div className="flex gap-4 pt-4">
-              {[...Array(2)].map((_, i) => (
-                <Skeleton key={i} className="w-24 h-4 bg-gray-800 dark:bg-gray-200" />
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </section>

@@ -18,12 +18,12 @@ import { useRouter } from "next/navigation";
 import Carusel from "@/component/user/Carusel";
 import ScrollCards from "@/component/user/OverlappingCards";
 import HeroSection from "@/component/user/HeroSection";
+import Contact from "@/component/user/Contact";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
 
 const UserPreview = () => {
-
   const router = useRouter();
   const dispatch = useDispatch();
   const pathname = usePathname();
@@ -92,29 +92,29 @@ const UserPreview = () => {
         .split("/")
         .filter(Boolean);
       const subdomain = parts[0];
-  
+
       if (!subdomain) {
         toast.error("Subdomain not found in URL");
         return;
       }
-  
+
       localStorage.setItem("subdomain", subdomain);
       localStorage.removeItem("userPreview");
       dispatch(resetUserPreview());
-  
+
       const action = await dispatch(getUserPreview(subdomain));
-  
+
       if (getUserPreview.rejected.match(action)) {
         const message = action.payload || "Authorization failed.";
-  
+
         // Redirect first to avoid visual delay
         router.replace("/error/not-authorized");
-  
+
         // Then optionally toast (if still needed)
         toast.error(message);
         return;
       }
-  
+
       if (action.payload) {
         localStorage.setItem("userPreview", JSON.stringify(action.payload));
         toast.success("User data fetched successfully!");
@@ -123,14 +123,12 @@ const UserPreview = () => {
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-  
+
       // Redirect immediately on unexpected error
       router.replace("/error/not-authorized");
       toast.error("Unexpected error occurred while fetching user data.");
     }
   }, [dispatch, router]);
-  
-
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -148,16 +146,13 @@ const UserPreview = () => {
     }
   }, [trackPageVisit, fetchUserData, dispatch, pathname]);
 
-
-
   const data = userPreview?.data;
   console.log(userPreview?.data?.carauselImages);
 
-
   const image = data?.carauselImages || [];
   if (!image) {
-   toast.error("No images found for the carousel.");
-   return null;
+    toast.error("No images found for the carousel.");
+    return null;
   }
 
   // Conditionally render skeleton for components
@@ -168,21 +163,7 @@ const UserPreview = () => {
     <div className="bg-white text-black dark:bg-gray-800 dark:text-white min-h-screen p-4 relative">
       <Toaster />
 
-      {/* Skeleton for User Data */}
-      {renderUserDataSkeleton ? (
-        <div>
-          <Skeleton className="w-40 h-6 bg-gray-800 dark:bg-gray-200 rounded mb-2" />
-          <Skeleton className="w-60 h-6 bg-gray-800 dark:bg-gray-200 rounded mb-4" />
-        </div>
-      ) : (
-        <>
-          <h2 className="text-xl font-semibold mb-2">User Preview</h2>
-          <p><strong>Business Name:</strong> {data.businessName ?? "N/A"}</p>
-          <p><strong>Email:</strong> {data.email ?? "N/A"}</p>
-        </>
-      )}
-
-
+   
 
       <Navbar />
 
@@ -199,21 +180,41 @@ const UserPreview = () => {
             bio={data.bio}
             email={data.email}
             handlerName={data.handlerName}
-            socialMediaLinks={data.socialMediaLinks}
-            location={data.businessLocation || ""}
+           
           />
         )
       )}
 
+          {renderMainSectionSkeleton ? (
+        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+      ) : (
+        <Contact  socialMediaLinks={data.socialMediaLinks || []} 
+         email={data.email}
+          location={data.businessLocation || ""}
+           mobileNumber={data.mobileNumber}
+/>
+      )}
 
-      <HeroSection />
+      {renderMainSectionSkeleton ? (
+        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+      ) : (
+        <HeroSection />
+      )}
 
       {/* <Userpreviewcount count={backendVisitCount} /> */}
+      {renderMainSectionSkeleton ? (
+        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+      ) : (
+        <Carusel image={image} />
+      )}
+
+      {renderMainSectionSkeleton ? (
+        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+      ) : (
+        <ScrollCards />
+      )}
 
 
-      <Carusel  image={image} />
-
-      <ScrollCards />
     </div>
   );
 };

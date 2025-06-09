@@ -31,6 +31,9 @@ export default function HeroSection() {
           alt="आनंदी ग्राहक आणि खरेदीदार"
           className="w-full rounded-lg shadow-lg"
           loading="lazy"
+
+          width={500}
+          height={500}
         />
       </div>
     </section>

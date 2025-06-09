@@ -3,15 +3,14 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
+
 } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 
 const Carusel = ({ image }) => {
   return (
-    <Carousel className="w-full h-[500px] py-12    mx-auto dark:bg-gray-800 dark:text-white">
+    <Carousel className="w-full h-[500px] py-12  w-[90%]   mx-auto dark:bg-gray-800 dark:text-white">
       <h1 className="text-3xl sm:text-4xl font-bold  mb-6  ">
         Runway Reels
       </h1>
@@ -25,7 +24,7 @@ const Carusel = ({ image }) => {
                   <Image
                     src={image[index] || "/placeholder-image.png"}
                     alt={`Carousel Image ${index + 1}`}
-                    width={600}
+                     width={600}
                     height={400}
                     className="object-cover h-[300px] w-fit rounded-lg"
                   />
