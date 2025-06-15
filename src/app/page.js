@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef , useMemo } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMessagingInstance } from "@/lib/firebase.config";
 import { getToken, onMessage, getMessaging } from "firebase/messaging";
@@ -255,7 +255,8 @@ export default function Home() {
       <div>
         <button onClick={clearLocalStorage}>Clear data</button>
       </div>
-      <Navbar />
+
+           <Navbar />
 
       {/* Add padding-bottom here to prevent content hiding behind SupportNavForLaptop */}
       <div className="pb-16 md:pb-16">

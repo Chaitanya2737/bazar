@@ -153,3 +153,19 @@ export const deleteUserCarouselImage = async (userId, businessName, imageUrl) =>
     throw error;
   }
 }
+
+
+
+export async function generateMetadata({ params }) {
+  const res = await fetch(`/api/seo/${params.username}`);
+  
+  if (!res.ok) {
+    return {
+      title: "User Not Found",
+      description: "The business page you're looking for does not exist.",
+    };
+  }
+
+  const data = await res.json();
+  return generateMetadata(data); // your custom logic that returns SEO metadata
+}

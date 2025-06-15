@@ -152,7 +152,7 @@ export async function POST(req) {
       address: user.address,
       businessLocation: user.businessLocation,
       state: user.state,
-      GstNumber: user.GstNumber,
+      gstNumber: user.GstNumber,
       language: user.language,
       categories: category._id,
       admin: adminDoc._id,

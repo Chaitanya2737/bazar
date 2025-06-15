@@ -3,7 +3,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-
 .dark {
   --background: #0b0d17;
   --foreground: #F6F6F6;
@@ -208,3 +207,21 @@ button:hover {
   animation: bellBounce 1.5s ease-in-out infinite;
   display: inline-block;
 }
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-animation {
+  background: linear-gradient(-45deg, #97a5c7, #302076, #000000, #729dd9, #a46b3d , #729dd9);
+  background-size: 600% 600%;
+  animation: gradientMove 12s ease infinite;
+}
+

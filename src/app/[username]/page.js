@@ -9,7 +9,6 @@ import { toast, Toaster } from "sonner";
 import { loadFromStorage, resetUserPreview } from "@/redux/slice/user/preview";
 import { getUserPreview } from "@/redux/slice/user/serviceApi";
 
-import ThemeToggle from "@/component/themeToggle/themeToggle";
 import Navbar from "@/component/preview/Navbar";
 import MainSection from "@/component/preview/MainSection";
 import Userpreviewcount from "@/component/preview/Userpreviewcount";
@@ -19,6 +18,8 @@ import Carusel from "@/component/user/Carusel";
 import ScrollCards from "@/component/user/OverlappingCards";
 import HeroSection from "@/component/user/HeroSection";
 import Contact from "@/component/user/Contact";
+import Footer from "@/component/user/Footer";
+import Head from "next/head";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -147,7 +148,6 @@ const UserPreview = () => {
   }, [trackPageVisit, fetchUserData, dispatch, pathname]);
 
   const data = userPreview?.data;
-  console.log(userPreview?.data?.carauselImages);
 
   const image = data?.carauselImages || [];
   if (!image) {
@@ -155,67 +155,69 @@ const UserPreview = () => {
     return null;
   }
 
-  // Conditionally render skeleton for components
   const renderUserDataSkeleton = loading || !data;
   const renderMainSectionSkeleton = loading || !data;
 
   return (
-    <div className="bg-white text-black dark:bg-gray-800 dark:text-white min-h-screen p-4 relative">
-      <Toaster />
+    <>
+      <div className="bg-white text-black dark:bg-gray-800 dark:text-white min-h-screen p-4 relative">
+        <Toaster />
+        <Navbar />
+        {/* Skeleton for Main Section */}
+        {renderMainSectionSkeleton ? (
+          <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+        ) : (
+          data && (
+            <MainSection
+              businessName={data.businessName}
+              icon={data.businessIcon}
+              mobileNumber={data.mobileNumber}
+              bio={data.bio}
+              email={data.email}
+              handlerName={data.handlerName}
+              categories={data.categories}
+              gstNumber={data.gstNumber}
+            />
+          )
+        )}
 
-   
-
-      <Navbar />
-
-      <ThemeToggle />
-      {/* Skeleton for Main Section */}
-      {renderMainSectionSkeleton ? (
-        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
-      ) : (
-        data && (
-          <MainSection
-            businessName={data.businessName}
-            icon={data.businessIcon}
-            mobileNumber={data.mobileNumber}
-            bio={data.bio}
+        {renderMainSectionSkeleton ? (
+          <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+        ) : (
+          <Contact
+            socialMediaLinks={data.socialMediaLinks || []}
             email={data.email}
-            handlerName={data.handlerName}
-           
+            location={data.businessLocation || ""}
+            mobileNumber={data.mobileNumber}
           />
-        )
-      )}
+        )}
 
-          {renderMainSectionSkeleton ? (
-        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
-      ) : (
-        <Contact  socialMediaLinks={data.socialMediaLinks || []} 
-         email={data.email}
-          location={data.businessLocation || ""}
-           mobileNumber={data.mobileNumber}
-/>
-      )}
+        {renderMainSectionSkeleton ? (
+          <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+        ) : (
+          <HeroSection />
+        )}
 
-      {renderMainSectionSkeleton ? (
-        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
-      ) : (
-        <HeroSection />
-      )}
+        {/* <Userpreviewcount count={backendVisitCount} /> */}
+        {renderMainSectionSkeleton ? (
+          <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+        ) : (
+          <Carusel image={image} />
+        )}
 
-      {/* <Userpreviewcount count={backendVisitCount} /> */}
-      {renderMainSectionSkeleton ? (
-        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
-      ) : (
-        <Carusel image={image} />
-      )}
+        {renderMainSectionSkeleton ? (
+          <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+        ) : (
+          <ScrollCards />
+        )}
 
-      {renderMainSectionSkeleton ? (
-        <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
-      ) : (
-        <ScrollCards />
-      )}
-
-
-    </div>
+        {renderMainSectionSkeleton ? (
+          <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+        ) : (
+          <Footer businessName={data.businessName} />
+        )}
+      </div>
+    </>
   );
 };
 

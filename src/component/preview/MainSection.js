@@ -9,10 +9,9 @@ const MainSection = ({
   icon,
   mobileNumber = [],
   bio,
-  email,
   handlerName,
-  socialMediaLinks = [],
   location,
+  gstNumber,
 }) => {
   const [loading, setLoading] = useState(true);
 
@@ -45,7 +44,10 @@ const MainSection = ({
 
             <div className="flex gap-4 pt-4">
               {[...Array(2)].map((_, i) => (
-                <Skeleton key={i} className="w-24 h-4 bg-gray-800 dark:bg-gray-200" />
+                <Skeleton
+                  key={i}
+                  className="w-24 h-4 bg-gray-800 dark:bg-gray-200"
+                />
               ))}
             </div>
           </div>
@@ -74,52 +76,60 @@ const MainSection = ({
         </div>
 
         {/* Right: Info */}
-        <div className="space-y-4 text-gray-800 dark:text-white">
-          <h1 className="text-4xl font-extrabold tracking-tight">
-            {businessName ? (
-              businessName
-            ) : (
-              <Skeleton className="w-48 h-8 bg-gray-800 dark:bg-gray-200" />
-            )}
-          </h1>
 
-          {bio && (
-            <div className="text-gray-600 dark:text-gray-300 text-md leading-relaxed">
-              {bio ? (
-                bio
-              ) : (
-                <Skeleton className="w-full h-6 bg-gray-800 dark:bg-gray-200" />
-              )}
-            </div>
-          )}
+     <div className="space-y-5 text-gray-800 dark:text-white md:pl-10 md:ml-6 md:border-l-2 md:border-gray-200 dark:md:border-gray-700">
+  {/* Business Name */}
+  <h1 className="text-4xl font-extrabold tracking-tight leading-tight bg-gradient-to-r from-blue-600 to-purple-500 dark:from-orange-400 dark:to-pink-500 text-transparent bg-clip-text animate-fadeIn">
+    {businessName || (
+      <Skeleton className="w-48 h-8 bg-gray-800 dark:bg-gray-200" />
+    )}
+  </h1>
 
-          {/* Mobile Numbers */}
-          {mobileNumber.length > 0 ? (
-            <div className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-              <Phone className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-300" />
-              <span>
-                {mobileNumber.map((number, index) => (
-                  <span key={index}>
-                    {number}
-                    {index < mobileNumber.length - 1 && " | "}
-                  </span>
-                ))}
-              </span>
-            </div>
-          ) : (
-            <Skeleton className="w-32 h-4 bg-gray-800 dark:bg-gray-200" />
-          )}
+  {/* Bio */}
+  {bio && (
+    <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed animate-fadeIn">
+      {bio}
+    </p>
+  )}
 
-          {/* Location */}
-          {location ? (
-            <div className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
-              <MapPin className="w-4 h-4 mr-2 text-pink-500 dark:text-pink-300" />
-              <span>{location}</span>
-            </div>
-          ) : (
-            <Skeleton className="w-32 h-4 bg-gray-800 dark:bg-gray-200" />
-          )}
-        </div>
+  {/* Handler Name */}
+  {handlerName && (
+    <p className="text-sm text-gray-700 dark:text-gray-300 animate-fadeIn">
+      <span className="font-semibold text-gray-900 dark:text-white">Handler:</span> {handlerName}
+    </p>
+  )}
+
+  {/* GST Number */}
+  {gstNumber && (
+    <p className="text-sm text-gray-700 dark:text-gray-300 animate-fadeIn">
+      <span className="font-semibold text-gray-900 dark:text-white">GSTIN:</span> {gstNumber}
+    </p>
+  )}
+
+  {/* Location */}
+  {location && (
+    <div className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 animate-fadeIn">
+      <MapPin className="w-4 h-4 mr-2 text-rose-500 dark:text-rose-300" />
+      {location}
+    </div>
+  )}
+
+  {/* Mobile Numbers */}
+  {mobileNumber.length > 0 && (
+    <div className="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 animate-fadeIn">
+      <Phone className="w-4 h-4 mr-2 text-indigo-500 dark:text-indigo-300" />
+      <span className="space-x-2">
+        {mobileNumber.map((number, index) => (
+          <span key={index} className="hover:underline cursor-pointer">
+            {number}
+            {index < mobileNumber.length - 1 && " | "}
+          </span>
+        ))}
+      </span>
+    </div>
+  )}
+</div>
+
       </div>
     </section>
   );

@@ -1,3 +1,4 @@
+"use client"
 import React, { useState } from "react";
 import ThemeToggle from "../themeToggle/themeToggle";
 import {

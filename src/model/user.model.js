@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
   },
   gstNumber: {
     type: String,
+    default:null
   },
   email: {
     type: String,

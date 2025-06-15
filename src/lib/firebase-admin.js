@@ -10,10 +10,6 @@ try {
     adminApp = initializeApp({
       credential: cert(serviceAccount),
     });
-    console.log(
-      "Firebase Admin SDK initialized with project ID:",
-      serviceAccount.projectId
-    );
   } else {
     adminApp = getApps()[0];
   }

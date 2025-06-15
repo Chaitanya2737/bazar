@@ -14,16 +14,18 @@ import {
 } from "lucide-react";
 import { resetUser, updateUser } from "@/redux/slice/user/addUserSlice";
 import { createUserApi } from "@/redux/slice/user/serviceApi";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 // Parent Component
 const AddUserComponent = () => {
   const dispatch = useDispatch();
   const selector = useSelector((state) => state.user);
-  console.log(selector);
-
   const [formData, setFormData] = useState(userAddingField);
   const [localFile, setLocalFile] = useState(null);
   const [submitError, setSubmitError] = useState(null); // For user feedback
+
+  const navigation = useRouter();
 
   const [isOpen, setIsOpen] = useState(() => {
     if (typeof window !== "undefined") {
@@ -57,30 +59,50 @@ const AddUserComponent = () => {
   }, []);
 
   const handleSubmit = async () => {
-    try {
-      if (!localFile) {
-        setSubmitError("Please select a business icon file.");
-        return;
-      }
-
-      // Prepare FormData for file upload and user data
-      const newFormData = new FormData();
-      newFormData.append("businessIcon", localFile);
-      newFormData.append("userdata", JSON.stringify(formData));
-
-      // Dispatch the file + userdata
-      await dispatch(createUserApi(newFormData));
-
-      // Reset after success
-      await dispatch(resetUser());
-      setFormData(userAddingField);
-      setLocalFile(null);
-      setSubmitError(null);
-    } catch (error) {
-      console.error("Error in handleSubmit:", error);
-      setSubmitError("Failed to create user. Please try again.");
+  try {
+    if (!localFile) {
+      setSubmitError("Please select a business icon file.");
+      return;
     }
-  };
+
+    // Prepare FormData for file upload and user data
+    const newFormData = new FormData();
+    newFormData.append("businessIcon", localFile);
+    newFormData.append("userdata", JSON.stringify(formData));
+
+    // Dispatch the file + userdata
+    await dispatch(createUserApi(newFormData));
+
+    // Get businessName BEFORE resetting state
+    const businessName = formData.businessName;
+
+    console.log(businessName);
+    const status = "success";
+
+    // Reset state after saving name
+    await dispatch(resetUser());
+    setFormData(userAddingField);
+    setLocalFile(null);
+    setSubmitError(null);
+    toast.success("User created successfully!");
+
+    // Reset collapse state
+    setIsOpen({
+      BasicCategories: true,
+      BusinessCategories: false,
+      SocialMediaLink: false,
+    });
+    console.log(businessName);
+
+    // Navigate using saved businessName
+    navigation.push(`/adduser/success/${businessName}/${status}`);
+  } catch (error) {
+    setSubmitError("Failed to create user. Please try again.");
+    toast.error("Failed to create user. Please try again. " + error.message);
+    console.log(error);
+  }
+};
+
 
   return (
     <div className="text-black dark:bg-gray-800 dark:text-white p-4">
@@ -90,7 +112,11 @@ const AddUserComponent = () => {
         </h2>
       </div>
       {isOpen.BasicCategories && (
-        <BasicCategories formData={formData} setValue={setValue} setIsOpen={setIsOpen} />
+        <BasicCategories
+          formData={formData}
+          setValue={setValue}
+          setIsOpen={setIsOpen}
+        />
       )}
 
       <div className="md:col-span-2 mt-5">
@@ -218,7 +244,9 @@ export const BasicCategories = ({ formData, setValue, setIsOpen }) => {
         {mobileNumbers.map((number, idx) => (
           <div key={`mobile_${idx}`} className="relative">
             <Label
-              className={errors[`mobile_${idx}`] ? "text-red-400 p-1 rounded" : ""}
+              className={
+                errors[`mobile_${idx}`] ? "text-red-400 p-1 rounded" : ""
+              }
               htmlFor={`mobile_${idx}`}
             >
               Mobile Number {idx + 1}

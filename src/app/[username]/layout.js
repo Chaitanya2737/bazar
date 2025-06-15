@@ -7,6 +7,10 @@ export const metadata = {
   description: "Preview the personalized bazar for a user",
 };
 
+
+
+
+
 export default function UserLayout({ children }) {
   return (
     <>
