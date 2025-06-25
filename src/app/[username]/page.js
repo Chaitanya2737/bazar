@@ -19,7 +19,6 @@ import ScrollCards from "@/component/user/OverlappingCards";
 import HeroSection from "@/component/user/HeroSection";
 import Contact from "@/component/user/Contact";
 import Footer from "@/component/user/Footer";
-import Head from "next/head";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -180,6 +179,8 @@ const UserPreview = () => {
             />
           )
         )}
+        
+        <Userpreviewcount count={backendVisitCount} />
 
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />

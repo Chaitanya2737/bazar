@@ -1,36 +1,61 @@
-import { Skeleton } from '@/components/ui/skeleton';
-import React, { useState, useEffect } from 'react';
+import { Skeleton } from "@/components/ui/skeleton";
+import React, { useEffect, useRef, useState } from "react";
 
-const UserPreviewCount = ({ count }) => {
-  const [loading, setLoading] = useState(true);
+const AnimatedCount = ({ target }) => {
+  const [count, setCount] = useState(0);
+  const frame = useRef();
 
   useEffect(() => {
-    if (count !== undefined) {
-      setLoading(false);
-    }
-  }, [count]);
+    let start = 0;
+    const duration = 800;
+    const startTime = performance.now();
+
+    const animate = (time) => {
+      const progress = Math.min((time - startTime) / duration, 1);
+      const current = Math.floor(progress * target);
+      setCount(current);
+
+      if (progress < 1) {
+        frame.current = requestAnimationFrame(animate);
+      }
+    };
+
+    frame.current = requestAnimationFrame(animate);
+
+    return () => cancelAnimationFrame(frame.current);
+  }, [target]);
 
   return (
-    <div className="p-4">
-      {loading ? (
-        // Show Skeleton when data is loading
-        <Skeleton className="w-full h-24 bg-gray-300 dark:bg-gray-700 animate-pulse rounded-lg" />
+    <div className="w-20 h-20 rounded-full bg-[#161212] dark:bg-gray-700 flex flex-col items-center justify-center shadow-xl text-center p-2">
+      <span className="text-white text-xl font-bold leading-none">{count}</span>
+      <p className="text-[10px] text-gray-400 leading-tight">Visited users</p>
+    </div>
+  );
+};
+
+const UserPreviewCount = ({ count }) => {
+  const [show, setShow] = useState(true);
+  const isValid = typeof count === "number";
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollY = window.scrollY;
+      const screenHeight = window.innerHeight;
+      setShow(scrollY <= screenHeight);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  if (!show) return null;
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      {isValid ? (
+        <AnimatedCount target={count} />
       ) : (
-        <div className="flex justify-center items-center">
-          <div
-            className="w-60 p-6 bg-[#161212] dark:bg-gray-700 rounded-lg shadow-xl transform transition-all duration-500 hover:scale-105 hover:shadow-2xl opacity-100 transition-opacity ease-in-out"
-            style={{ opacity: loading ? 0 : 1 }}
-          >
-            <div className="text-center text-gray-900 dark:text-gray-100">
-              <h2 className="text-4xl font-extrabold text-white">{count}</h2>
-              <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">User Previews</p>
-            </div>
-            {/* Optional progress bar */}
-            <div className="mt-4 h-1 w-full bg-gray-400 dark:bg-gray-600 rounded-full">
-              <div className="h-full bg-gray-500 dark:bg-gray-400" style={{ width: `${(count % 100)}%` }}></div>
-            </div>
-          </div>
-        </div>
+        <Skeleton className="w-16 h-16 rounded-full bg-gray-300 dark:bg-gray-700 animate-pulse" />
       )}
     </div>
   );

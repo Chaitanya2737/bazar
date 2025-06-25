@@ -94,7 +94,7 @@ const Contact = ({ socialMediaLinks, email, location, mobileNumber }) => {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center text-neutral-600 dark:text-neutral-300 w-[70]"
+                  className="flex items-center overflow-hidden text-neutral-600 dark:text-neutral-300 w-[70]"
                 >
                   {iconMap[link.platform] || <Globe className="mr-2 h-5 w-5" />}
                   {link.platform.charAt(0).toUpperCase() +

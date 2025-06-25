@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -15,6 +15,20 @@ import ThemeToggle from "../themeToggle/themeToggle";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShow(window.scrollY >= window.innerHeight);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Trigger once on load
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  if (!show) return null;
 
   return (
     <TooltipProvider>
@@ -37,11 +51,6 @@ export default function Navbar() {
             </TooltipContent>
           </Tooltip>
 
-
-            <div className="ml-auto ">
-          <ThemeToggle />
-        </div>
-
           <Tooltip>
             <TooltipTrigger asChild>
               <Link href="/contact">
@@ -60,7 +69,9 @@ export default function Navbar() {
           </Tooltip>
         </div>
 
-      
+        <div className="ml-auto">
+          <ThemeToggle />
+        </div>
       </nav>
     </TooltipProvider>
   );
