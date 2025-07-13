@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  slug: { type: String, unique: true },
   bio: {
     type: String,
   },
@@ -106,16 +105,7 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-// Pre-save hook to generate the slug
-userSchema.pre("save", function (next) {
-  if (this.businessName) {
-    this.slug = slugify(this.businessName, {
-      lower: true,
-      strict: true,
-    });
-  }
-  next();
-});
+
 
 const UserModel = mongoose.models.User || mongoose.model("User", userSchema);
 

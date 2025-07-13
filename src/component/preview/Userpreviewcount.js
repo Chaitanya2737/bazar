@@ -43,6 +43,7 @@ const UserPreviewCount = ({ count }) => {
       const screenHeight = window.innerHeight;
       setShow(scrollY <= screenHeight);
     };
+    
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
