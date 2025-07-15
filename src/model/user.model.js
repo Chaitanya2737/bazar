@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import slugify from "slugify";  // Make sure you have slugify installed
-
 const userSchema = new mongoose.Schema({
   businessName: {
     type: String,
