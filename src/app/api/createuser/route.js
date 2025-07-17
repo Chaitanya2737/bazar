@@ -185,17 +185,34 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Unhandled error:", error);
+  console.error("Unhandled error:", error);
+
+  // Handle MongoDB Duplicate Key Error
+  if (error.code === 11000) {
+    const duplicateField = Object.keys(error.keyPattern)[0]; // e.g., "businessName"
+    const duplicateValue = error.keyValue[duplicateField];
+
     return NextResponse.json(
       {
         success: false,
-        message: "Internal Server Error",
-        error:
-          process.env.NODE_ENV === "development" ? error.message : undefined,
+        message: `${duplicateField} "${duplicateValue}" already exists.`,
       },
-      { status: 500 }
+      { status: 400 }
     );
   }
+
+  // Generic fallback
+  return NextResponse.json(
+    {
+      success: false,
+      message: "Internal Server Error",
+      error:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    },
+    { status: 500 }
+  );
+}
+
 }
 
 export async function GET() {

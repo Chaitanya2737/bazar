@@ -30,7 +30,7 @@ export const createUserApi = createAsyncThunk(
       console.error("Error creating user:", error);
 
       // If response has JSON error
-      return rejectWithValue(error.response?.data || "Unknown error occurred.");
+      return rejectWithValue(error.response?.data?.message || "Unknown error occurred.");
     }
   }
 );

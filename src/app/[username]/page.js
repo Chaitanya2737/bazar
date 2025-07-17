@@ -19,6 +19,7 @@ import ScrollCards from "@/component/user/OverlappingCards";
 import HeroSection from "@/component/user/HeroSection";
 import Contact from "@/component/user/Contact";
 import Footer from "@/component/user/Footer";
+import Video from "@/component/user/Video";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -197,6 +198,13 @@ const UserPreview = () => {
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <HeroSection />
+        )}
+
+
+        {renderMainSectionSkeleton ? (
+          <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+        ) : (
+          <Video Video={data.videoUrl} />
         )}
 
         {/* <Userpreviewcount count={backendVisitCount} /> */}

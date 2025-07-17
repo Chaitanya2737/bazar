@@ -9,6 +9,18 @@ import { getUserDataApi } from "@/redux/slice/user/serviceApi";
 import ThemeToggle from "@/component/themeToggle/themeToggle";
 import MainSection from "@/component/preview/MainSection";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import VideoDialog from "@/component/user/VideoDialog";
+
 const UserDashboardPage = () => {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -35,14 +47,16 @@ const UserDashboardPage = () => {
     }
   }, [dispatch, user?.id, userdata?.data]);
 
-const handleEditSite = useCallback(() => { 
-  router.push(`/user/dashboard/edit/${user?.id}`); 
-}, [router, user?.id]);
+  const handleEditSite = useCallback(() => {
+    router.push(`/user/dashboard/edit/${user?.id}`);
+  }, [router, user?.id]);
 
   const handleLogout = useCallback(() => {
     dispatch(userLogout());
     signOut({ redirect: true, callbackUrl: "/" });
   }, [dispatch]);
+
+  const handleAddVideo = useCallback(() => {}, [router, user?.id]);
 
   if (status === "loading") {
     return <div className="text-center mt-10">Loading...</div>;
@@ -51,7 +65,6 @@ const handleEditSite = useCallback(() => {
   if (!session) {
     return <div className="text-center mt-10">You are not authenticated.</div>;
   }
-
 
   if (!isRoleValid) {
     return (
@@ -99,16 +112,23 @@ const handleEditSite = useCallback(() => {
       </section>
 
       <section>
-        <button onClick={handleEditSite} className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          edit site 
+        <button
+          onClick={handleEditSite}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          edit site
         </button>
       </section>
+      <div className="flex flex-col items-center mt-4 gap-4">
+        <VideoDialog />
+      </div>
 
       <div className="flex flex-col items-center mt-10 gap-4">
         {user?.email ? (
           <>
             <h2 className="text-xl font-semibold text-center">
-              Hello,<br /> {user.email}!
+              Hello,
+              <br /> {user.email}!
             </h2>
             <p className="text-gray-500">Role: {user.role || "User"}</p>
             <button

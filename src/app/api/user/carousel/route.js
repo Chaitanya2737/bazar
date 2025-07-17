@@ -6,7 +6,7 @@ export async function POST(request) {
   console.log("POST /api/user/detail called");
 
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-  const MAX_FILE_SIZE = 1024 * 1024;
+  const MAX_FILE_SIZE = 1024 * 1024  * 100;
   const MAX_FILES = 5;
 
   try {

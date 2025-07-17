@@ -14,6 +14,11 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
+videoUrl: {
+  type: [String],
+  default: [],
+},
+
   mobileNumber: {
     type: [String],
     required: [true, "At least one mobile number is required."],

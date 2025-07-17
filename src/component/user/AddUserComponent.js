@@ -58,50 +58,66 @@ const AddUserComponent = () => {
     }
   }, []);
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
   try {
+    // 1. File validation
     if (!localFile) {
       setSubmitError("Please select a business icon file.");
       return;
     }
 
-    // Prepare FormData for file upload and user data
+    // 2. Prepare form data
     const newFormData = new FormData();
     newFormData.append("businessIcon", localFile);
     newFormData.append("userdata", JSON.stringify(formData));
 
-    // Dispatch the file + userdata
-    await dispatch(createUserApi(newFormData));
-
-    // Get businessName BEFORE resetting state
+    // 3. Save values before reset
     const businessName = formData.businessName;
-
-    console.log(businessName);
     const status = "success";
 
-    // Reset state after saving name
+    // 4. Dispatch thunk
+    const result = await dispatch(createUserApi(newFormData));
+
+    // 5. Handle rejection manually
+    if (createUserApi.rejected.match(result)) {
+      // Safely extract error message from payload
+      const errorMessage =
+        typeof result.payload === "string"
+          ? result.payload
+          : result.payload?.message || "Failed to create user.";
+      throw new Error(errorMessage);
+    }
+
+    // 6. On success: reset everything
     await dispatch(resetUser());
     setFormData(userAddingField);
     setLocalFile(null);
     setSubmitError(null);
-    toast.success("User created successfully!");
+    toast.success(`User "${businessName}" created successfully!`);
 
-    // Reset collapse state
+    // 7. Reset UI state
     setIsOpen({
       BasicCategories: true,
       BusinessCategories: false,
       SocialMediaLink: false,
     });
-    console.log(businessName);
 
-    // Navigate using saved businessName
-    navigation.push(`/adduser/success/${businessName}/${status}`);
+    // 8. Navigate to success page
+    navigation.push(`/adduser/success/${encodeURIComponent(businessName)}/${status}`);
   } catch (error) {
-    setSubmitError("Failed to create user. Please try again.");
-    toast.error("Failed to create user. Please try again. " + error.message);
-    console.log(error);
+    // 9. Show friendly error message
+    const message =
+      typeof error?.message === "string"
+        ? error.message
+        : "Something went wrong.";
+    setSubmitError(message);
+    toast.error(`❌ ${message}`);
+    console.error("User creation failed:", error);
   }
 };
+
+
+
 
 
   return (

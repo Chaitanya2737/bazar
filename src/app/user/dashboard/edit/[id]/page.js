@@ -118,7 +118,7 @@ export default function EditUserPage() {
       try {
         const formData = new FormData();
         for (let i = 0; i < files.length; i++) {
-          if (files[i].size >  1024 * 1024) {
+          if (files[i].size >  1024 * 1024 *100) {
             toast.error(`File "${files[i].name}" is larger than 1 MB.`);
             setUploading(false);
             return;
