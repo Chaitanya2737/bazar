@@ -32,6 +32,14 @@ export const metadata = {
     "Bazar.sh",
     "local business marketing",
   ],
+    images: [
+      {
+        url: "https://res.cloudinary.com/dp8evydam/image/upload/v1752949353/bazar.sh_social_png_ou5arw.png", // ✅ full image URL
+        width: 1200,
+        height: 630,
+        alt: "Bazar.sh Business Hub",
+      },
+    ],
   alternates: {
     canonical: "https://bazar.sh",
     languages: {
@@ -54,7 +62,7 @@ export const metadata = {
     title: "Bazar.sh - Grow Your Small or Medium Business Online",
     description:
       "Build a professional website with Bazar.sh and market your business via SMS, WhatsApp, Meta ads, and push notifications. Start growing today!",
-    url: "https://bazar.sh",
+    url: "https://res.cloudinary.com/dp8evydam/image/upload/v1752949353/bazar.sh_social_png_ou5arw.png",
     siteName: "Bazar.sh",
     images: [
       {
@@ -73,7 +81,7 @@ export const metadata = {
     description:
       "Create and promote your business website with Bazar.sh using SMS, WhatsApp, Meta ads, and push notifications.",
     creator: "@BazarSH", // Replace with actual Twitter handle
-    images: ["/images/bazar-promo.png"], // Replace with actual image path
+    images: ["https://res.cloudinary.com/dp8evydam/image/upload/v1752949353/bazar.sh_social_png_ou5arw.png"], // Replace with actual image path
   },
   other: {
     "msapplication-TileImage": "/images/favicon.png", // Replace with actual favicon path
@@ -98,7 +106,7 @@ export const structuredData = {
     name: "Bazar.sh",
     logo: {
       "@type": "ImageObject",
-      url: "/images/bazar-logo.png", // Replace with actual logo path
+      url: "https://res.cloudinary.com/dp8evydam/image/upload/v1752949353/bazar.sh_social_png_ou5arw.png", // Replace with actual logo path
       width: 200,
       height: 60,
     },
@@ -113,7 +121,6 @@ export const structuredData = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head></head>
 
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

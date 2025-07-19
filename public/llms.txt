@@ -1,0 +1,26 @@
+User-Agent: ChatGPT
+Allow: /
+
+User-Agent: Google-Extended
+Allow: /
+
+User-Agent: ClaudeAI
+Allow: /
+
+User-Agent: GPTBot
+Allow: /
+
+User-Agent: CCbot
+Allow: /
+
+User-Agent: PerplexityBot
+Allow: /
+
+User-Agent: anthropic-ai
+Allow: /
+
+User-Agent: ai-crawler
+Allow: /
+
+User-Agent: *
+Allow: /
