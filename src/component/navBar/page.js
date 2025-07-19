@@ -21,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@radix-ui/react-dropdown-menu";
+import Image from "next/image";
 
 const Navbar = () => {
   const router = useRouter();
@@ -37,10 +38,16 @@ const Navbar = () => {
   return (
     <div className="flex justify-between items-center px-4 py-2 bg-white text-black dark:bg-gray-800 dark:text-white">
       <div
-        className="text-xl font-bold cursor-pointer"
+        className="text-xl font-bold cursor-pointer "
         onClick={() => handleNavigation("/")}
       >
-        MyLogo
+<Image
+  src="/image.png"
+  alt="Bazar.sh Logo"
+  width={75}
+  height={120}
+  className="p-0 m-0"
+/>
       </div>
 
       <ThemeToggle />

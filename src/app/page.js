@@ -256,8 +256,7 @@ export default function Home() {
         <button onClick={clearLocalStorage}>Clear data</button>
       </div>
 
-           <Navbar />
-
+      <Navbar />
       {/* Add padding-bottom here to prevent content hiding behind SupportNavForLaptop */}
       <div className="pb-16 md:pb-16">
         <Maincomp />
