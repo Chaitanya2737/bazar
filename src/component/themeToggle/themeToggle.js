@@ -31,7 +31,7 @@ const ThemeToggle = () => {
   };
 
   return (
-    <div className="flex items-center gap-3 p-4 rounded-xl bg-gray-100 dark:bg-gray-800 transition-all">
+    <div className="flex items-center gap-2 p-3 rounded-xl bg-gray-100 dark:bg-gray-800 transition-all">
       <Sun
         className={`w-5 h-5 text-yellow-400 transition-opacity ${
           darkMode ? "opacity-40" : "opacity-100"
