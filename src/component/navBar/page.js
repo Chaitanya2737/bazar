@@ -42,7 +42,7 @@ const Navbar = () => {
         onClick={() => handleNavigation("/")}
       >
         <Image
-          src="/image.png"
+          src="/favicon.png"
           alt="Bazar.sh Logo"
           width={75}
           height={120}
