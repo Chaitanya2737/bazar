@@ -32,6 +32,11 @@ export const metadata = {
     "Bazar.sh",
     "local business marketing",
   ],
+  icons: {
+    icon: "/favicon.ioc", // or "/favicon.ico" if using .ico
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
+  },
     images: [
       {
         url: "https://res.cloudinary.com/dp8evydam/image/upload/v1752949353/bazar.sh_social_png_ou5arw.png", // ✅ full image URL
@@ -121,6 +126,10 @@ export const structuredData = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+
+      <head>
+        <link rel="icon" href="/favicon.png" type="image/png" />
+      </head>
 
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

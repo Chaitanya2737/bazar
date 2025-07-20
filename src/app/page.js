@@ -49,12 +49,7 @@ export default function Home() {
       });
   }, []);
 
-  // Clear prompt and reset localStorage
-  const clearLocalStorage = useCallback(() => {
-    localStorage.removeItem(NOTIF_STORAGE_KEY);
-    setPermissionStatus("default");
-    setShowPrompt(true);
-  }, []);
+
 
   // Listen for foreground messages (ignored here)
   useEffect(() => {
@@ -252,9 +247,6 @@ export default function Home() {
         darkMode ? "dark" : ""
       }`}
     >
-      <div>
-        <button onClick={clearLocalStorage}>Clear data</button>
-      </div>
 
       <Navbar />
       {/* Add padding-bottom here to prevent content hiding behind SupportNavForLaptop */}

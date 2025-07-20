@@ -79,7 +79,7 @@ const Pricing = () => {
       </h2>
 
       {/* Pricing Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto py-10">
         {/* Basic Plan */}
        <Card className="rounded-2xl transform scale-95 opacity-90 transition-all shadow-md bg-gray-50 dark:bg-gray-700 w-full">
           <CardHeader>
@@ -88,7 +88,6 @@ const Pricing = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-4xl font-bold text-blue-600 dark:text-white">₹{prices.basic}</p>
             <div className="space-y-2">{renderFeatures("basic")}</div>
             <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
               Get Started
@@ -97,22 +96,19 @@ const Pricing = () => {
         </Card>
 
         {/* Pro Plan */}
-        <Card className="rounded-2xl transform scale-105 z-10 -translate-y-2 transition-all bg-gradient-to-br from-[#DAF7A6] via-indigo-300 to-pink-300 dark:from-gray-900 dark:via-slate-800 dark:to-gray-700 shadow-xl w-full">
+        <Card className="rounded-2xl transform scale-105 z-10 -translate-y-2 transition-all bg-gray-100 dark:bg-gray-800 shadow-xl w-full">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center text-gray-900 dark:text-white">
               Pro
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4 text-gray-900 dark:text-white">
-            <p className="text-4xl font-bold">₹{prices.pro}</p>
             <div className="space-y-2">{renderFeatures("pro")}</div>
-            <Button className="w-full bg-white text-blue-700 font-semibold hover:bg-gray-100">
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-amber-500 text-white font-semibold">
               Start Pro
             </Button>
           </CardContent>
         </Card>
-
-        {/* Enterprise Plan */}
        <Card className="rounded-2xl transform scale-95 opacity-90 transition-all shadow-md bg-gray-50 dark:bg-gray-700 w-full">
           <CardHeader>
             <CardTitle className="text-xl font-semibold text-center text-gray-900 dark:text-white">
@@ -120,7 +116,6 @@ const Pricing = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-4xl font-bold text-blue-600 dark:text-white">₹{prices.enterprise}</p>
             <div className="space-y-2">{renderFeatures("enterprise")}</div>
             <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white">
               Contact Sales

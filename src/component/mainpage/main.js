@@ -2,7 +2,13 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@radix-ui/react-switch";
-import { ArrowRight, Globe, MessageSquare, Bell } from "lucide-react";
+import {
+  ArrowRight,
+  Globe,
+  MessageSquare,
+  Bell,
+  Instagram,
+} from "lucide-react";
 import Head from "next/head";
 import { useState } from "react";
 import PricingToggle from "./PricingToggle";
@@ -12,9 +18,8 @@ import Pricing from "./pricing";
 import Testimonials from "./Testimonials";
 
 export default function Maincomp() {
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 rounded-2xl shadow-lg ">
       <Head>
         <title>Your Digital Platform - Custom Subdomains & More</title>
         <meta
@@ -41,7 +46,7 @@ export default function Maincomp() {
         </p>
         <Button
           size="lg"
-className="bg-blue-600 dark:bg-orange-500 hover:bg-blue-700 dark:hover:bg-orange-600 hover:cursor-pointer text-white transform transition duration-300 ease-in-out hover:scale-105 shadow-lg"
+          className="bg-blue-600 dark:bg-orange-500 hover:bg-blue-700 dark:hover:bg-orange-600 hover:cursor-pointer text-white transform transition duration-300 ease-in-out hover:scale-105 shadow-lg"
         >
           Start Building Now <ArrowRight className="ml-2 h-5 w-5" />
         </Button>
@@ -50,20 +55,23 @@ className="bg-blue-600 dark:bg-orange-500 hover:bg-blue-700 dark:hover:bg-orange
       {/* Features Section */}
       <section className="py-16 px-4">
         <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white mb-12 ">
-          Powerful Features for Your Business
+          Powerful Features for Your Business{" "}
+          <span className="text-blue-600 dark:text-orange-500">
+            || marketing tools for business
+          </span>
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           <Card className="shadow-lg hover:shadow-xl transition-shadow bg-white dark:bg-gray-800">
             <CardHeader>
               <CardTitle className="text-xl font-semibold flex items-center text-gray-900 dark:text-white">
-                <Globe className="mr-2 h-6 w-6 text-blue-600" />
-                Custom Subdomains
+                <Instagram className="mr-2 h-6 w-6 text-blue-600" />
+                Instagram Ads
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 dark:text-gray-300">
-                Get a personalized subdomain for your business, fully
-                customizable and ready to go live in minutes.
+                Boost Your Product Visibility and Sales with Facebook &
+                Instagram Ads
               </p>
             </CardContent>
           </Card>
@@ -103,28 +111,21 @@ className="bg-blue-600 dark:bg-orange-500 hover:bg-blue-700 dark:hover:bg-orange
         <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 dark:text-white mb-12">
           How It Works
         </h2>
-        
-      <ChatApp />
+        <ChatApp />
       </section>
 
+      <section>
+        <Pricing />
+      </section>
       <section className="py-16 px-4">
         <AdminSponsorCard />
       </section>
 
       {/* Pricing Section */}
-  
-  <section>
-    <Pricing />
-  </section>
 
-  <section>
-    <Testimonials />
-  </section>
-
-      
-
-      
-
+      <section>
+        <Testimonials />
+      </section>
 
       {/* Footer */}
       <footer className="py-8 px-4 text-center text-gray-600 dark:text-gray-300">

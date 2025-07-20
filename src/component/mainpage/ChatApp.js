@@ -134,7 +134,7 @@ const receiverMessages = useMemo(() => [
   };
 
   return (
-    <section className="max-w-xl mx-auto px-4 py-8" aria-label="ग्राहक संवाद चॅट सिम्युलेटर">
+    <section className="max-w-5xl mx-auto px-4 py-8" aria-label="ग्राहक संवाद चॅट सिम्युलेटर">
       <h1 className="text-3xl font-bold text-center mb-6 dark:text-white text-gray-900">
         स्मार्ट ग्राहक संवाद सिम्युलेटर
       </h1>

@@ -1,105 +1,73 @@
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Crown, TrendingUp, Settings, Activity } from "lucide-react";
-import { motion } from "framer-motion";
+import { ShieldCheck, HandCoins, Users, Zap } from "lucide-react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
-export default function AdminSponsorCard() {
+const FEATURES = [
+  {
+    icon: <ShieldCheck className="text-blue-950 dark:text-blue-300 w-6 h-6" />,
+    title: "Admin-Only Control",
+    desc: "Only the admin has access to create & manage users — ensuring tighter control and accountability.",
+  },
+  {
+    icon: <HandCoins className="text-green-950 dark:text-green-300 w-6 h-6" />,
+    title: "No Bulk Payments",
+    desc: "We don’t force you into 10-user plans. Use our flexible pay-as-you-go model — scale only when you're ready.",
+  },
+  {
+    icon: <Zap className="text-yellow-950 dark:text-yellow-300 w-6 h-6" />,
+    title: "Instant Setup",
+    desc: "No waiting or manual delays. Once your admin is active, you're good to go — fast and frictionless.",
+  },
+  {
+    icon: <Users className="text-purple-950 dark:text-purple-300 w-6 h-6" />,
+    title: "Transparent Pricing",
+    desc: "Admin setup starts from ₹2500 – ₹3500. No hidden fees, no surprises. Just clear value.",
+  },
+];
+
+export default function AdminInfoPro() {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="px-4 py-6"
-    >
-      <Card
-        className="
-          bg-gradient-to-br from-[#DAF7A6] via-indigo-300 to-pink-300
-          dark:from-gray-900 dark:via-slate-800 dark:to-gray-700
-          text-black dark:text-white
-          shadow-2xl rounded-2xl p-5 sm:p-6
-          max-w-xl w-full mx-auto
-          backdrop-blur-sm
-          font-semibold
-          hover:shadow-lg transition-shadow duration-300 ease-in-out
-          focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-400
-          focus-within:outline-none
-          hover:scale-[1.01] transform
-          hover:bg-gradient-to-br hover:from-[#B0F2B6] hover:via-indigo-400 hover:to-pink-400
-          dark:hover:from-gray-800 dark:hover:via-slate-700 dark:hover:to-gray-600
-        "
-      >
-        {/* Header */}
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-          <CardTitle className="text-lg sm:text-xl font-bold flex items-center gap-2">
-            <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-yellow-300 flex-shrink-0" />
-            Premium Sponsor
-          </CardTitle>
-          <span className="text-xs sm:text-sm bg-white/20 dark:bg-white/10 px-2.5 py-1 rounded-full self-start sm:self-auto whitespace-nowrap">
-            Admin Access
-          </span>
-        </CardHeader>
+    <>
+      <div>
+        <h2 className="text-3xl sm:text-4xl font-bold text-blue-600 dark:text-orange-500 mb-6 text-center tracking-tight">
+          Admin Features & Benefits
+        </h2>
+      </div>
 
-        {/* Description */}
-        <CardContent>
-          <p className="text-sm sm:text-base mt-2 leading-relaxed">
-            Full access to campaign metrics, live user activity, and advanced
-            management tools to optimize your sponsorship impact.
-          </p>
+      <section className="relative bg-gradient-to-br from-[#F0F9FF] via-white to-[#F0F9FF] dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 rounded-2xl shadow-lg p-6 sm:p-10 lg:p-12 overflow-hidden border border-blue-100 dark:border-gray-700 max-w-5xl mx-auto ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-blue-950">
+          {FEATURES.map((feature) => (
+            <FeatureBox key={feature.title} {...feature} />
+          ))}
+        </div>
 
-          {/* Stats */}
-          <div className="mt-5 flex flex-col sm:flex-row justify-between text-center gap-4 sm:gap-0">
-            {[
-              { label: "New Signups", value: "350+" },
-              { label: "Campaigns", value: "8 Active" },
-              { label: "Engagement", value: "87%" },
-            ].map(({ label, value }) => (
-              <div key={label}>
-                <p className="text-xs sm:text-sm text-white/70">{label}</p>
-                <p className="text-lg sm:text-xl font-semibold">{value}</p>
-              </div>
-            ))}
-          </div>
+        <div className="mt-10 text-center">
+          <Button size="lg">Get Started Now</Button>
+        </div>
 
-          {/* Features */}
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2 bg-white/10 dark:bg-white/5 p-2.5 sm:p-3 rounded-xl shadow-inner">
-              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-green-300 flex-shrink-0" />
-              <span>Live User Monitoring</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 dark:bg-white/5 p-2.5 sm:p-3 rounded-xl shadow-inner">
-              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-orange-300 flex-shrink-0" />
-              <span>Performance Reports</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 dark:bg-white/5 p-2.5 sm:p-3 rounded-xl shadow-inner">
-              <Settings className="w-4 h-4 sm:w-5 sm:h-5 text-blue-300 flex-shrink-0" />
-              <span>Admin Controls</span>
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 dark:bg-white/5 p-2.5 sm:p-3 rounded-xl shadow-inner">
-              <Crown className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-300 flex-shrink-0" />
-              <span>Priority Support</span>
-            </div>
-          </div>
+        <p className="mt-8 text-center text-gray-700 dark:text-gray-300 text-sm sm:text-base max-w-2xl mx-auto">
+          Skip overpriced platforms. Choose smart control, real flexibility, and
+          transparent pricing.
+        </p>
+      </section>
+    </>
+  );
+}
 
-          {/* Buttons */}
-          <div className="mt-6 flex flex-col gap-3">
-            <button
-              className="w-full bg-white/20 hover:bg-white/30 dark:bg-white/10 dark:hover:bg-white/20 text-white font-semibold py-2 rounded-lg text-sm sm:text-base transition
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
-              focus:ring-offset-[#DAF7A6] dark:focus:ring-offset-gray-900"
-              aria-label="View Dashboard"
-            >
-              View Dashboard
-            </button>
-            <button
-              className="w-full bg-white/30 hover:bg-white/40 dark:bg-white/10 dark:hover:bg-white/30 text-white font-semibold py-2 rounded-lg text-sm sm:text-base transition
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400
-              focus:ring-offset-[#DAF7A6] dark:focus:ring-offset-gray-900"
-              aria-label="Go to Admin Settings"
-            >
-              Admin Settings
-            </button>
-          </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+function FeatureBox({ icon, title, desc }) {
+  return (
+    <Card className="p-5 sm:p-6 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm hover:shadow-lg focus-within:shadow-lg transition-all duration-200 group">
+      <div className="flex items-center gap-3 mb-3">
+        <span className="flex items-center justify-center rounded-full bg-blue-50 dark:bg-gray-700 p-2 group-hover:bg-blue-100 dark:group-hover:bg-gray-600 transition">
+          {icon}
+        </span>
+        <h3 className="font-semibold text-lg text-gray-800 dark:text-white">
+          {title}
+        </h3>
+      </div>
+      <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">
+        {desc}
+      </p>
+    </Card>
   );
 }

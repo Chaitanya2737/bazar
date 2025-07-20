@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import ThemeToggle from "../themeToggle/themeToggle";
 import {
@@ -41,13 +41,27 @@ const Navbar = () => {
         className="text-xl font-bold cursor-pointer "
         onClick={() => handleNavigation("/")}
       >
-<Image
-  src="/image.png"
-  alt="Bazar.sh Logo"
-  width={75}
-  height={120}
-  className="p-0 m-0"
-/>
+        <Image
+          src="/image.png"
+          alt="Bazar.sh Logo"
+          width={75}
+          height={120}
+          className="p-0 m-0"
+        />
+
+        <span
+          className="text-xl cursor-pointer text-zinc-400"
+          style={{
+            fontFamily: '"Caveat Brush", cursive',
+            fontOpticalSizing: "auto",
+            fontWeight: 700,
+            fontStyle: "normal",
+            fontVariationSettings: '"slnt" 0',
+          }}
+        >
+          Bazar
+          <span className="text-blue-500">Hub</span>
+        </span>
       </div>
 
       <ThemeToggle />
@@ -164,16 +178,14 @@ const Navbar = () => {
 };
 export const SupportNavForLaptop = () => {
   return (
-   <nav className="w-[80%] max-w-[700px] mx-auto fixed bottom-4 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-inner z-50 rounded-xl px-2">
-  <ul className="flex flex-wrap justify-around gap-y-2 px-3 py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300">
-    <li className="hover:text-blue-500 cursor-pointer">Help</li>
-    <li className="hover:text-blue-500 cursor-pointer">Contact</li>
-    <li className="hover:text-blue-500 cursor-pointer">FAQ</li>
-    <li className="hover:text-blue-500 cursor-pointer">Support</li>
-  </ul>
-</nav>
-
-
+    <nav className="w-[80%] max-w-[700px] mx-auto fixed bottom-4 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-inner z-50 rounded-xl px-2">
+      <ul className="flex flex-wrap justify-around gap-y-2 px-3 py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300">
+        <li className="hover:text-blue-500 cursor-pointer">Help</li>
+        <li className="hover:text-blue-500 cursor-pointer">Contact</li>
+        <li className="hover:text-blue-500 cursor-pointer">FAQ</li>
+        <li className="hover:text-blue-500 cursor-pointer">Support</li>
+      </ul>
+    </nav>
   );
 };
 
