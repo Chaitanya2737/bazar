@@ -16,6 +16,7 @@ import ChatApp from "./ChatApp";
 import AdminSponsorCard from "./AdminSponsorCard";
 import Pricing from "./pricing";
 import Testimonials from "./Testimonials";
+import Footer from "../user/Footer";
 
 export default function Maincomp() {
   return (
@@ -127,10 +128,12 @@ export default function Maincomp() {
         <Testimonials />
       </section>
 
+        <section>
+        
+      </section>
+
       {/* Footer */}
-      <footer className="py-8 px-4 text-center text-gray-600 dark:text-gray-300">
-        <p>© 2025 Your Digital Platform. All rights reserved.</p>
-      </footer>
+      <Footer />
     </div>
   );
 }

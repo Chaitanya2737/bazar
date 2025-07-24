@@ -24,8 +24,7 @@ const Video = ({ Video }) => {
       {Video.map((url, index) => {
         const videoId = getYouTubeID(url);
         if (!videoId) return null;
-
-        const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+        const embedUrl = `https://www.youtube.com/embed/${videoId}?mute=1`;
 
         return (
           <div
@@ -37,7 +36,7 @@ const Video = ({ Video }) => {
               src={embedUrl}
               title={`YouTube Video ${index + 1}`}
               frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
             ></iframe>
           </div>
