@@ -20,6 +20,7 @@ import HeroSection from "@/component/user/HeroSection";
 import Contact from "@/component/user/Contact";
 import Footer from "@/component/user/Footer";
 import Video from "@/component/user/Video";
+import Product from "@/component/user/Product";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -180,7 +181,7 @@ const UserPreview = () => {
             />
           )
         )}
-        
+
         <Userpreviewcount count={backendVisitCount} />
 
         {renderMainSectionSkeleton ? (
@@ -194,12 +195,14 @@ const UserPreview = () => {
           />
         )}
 
+             {/* <Userpreviewcount count={backendVisitCount} /> */}
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
-          <HeroSection />
+          <Carusel image={image} />
         )}
 
+     
 
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
@@ -207,12 +210,19 @@ const UserPreview = () => {
           <Video Video={data.videoUrl} />
         )}
 
-        {/* <Userpreviewcount count={backendVisitCount} /> */}
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
-          <Carusel image={image} />
+          <Product />
         )}
+
+           {renderMainSectionSkeleton ? (
+          <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+        ) : (
+          <HeroSection />
+        )}
+
+   
 
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />

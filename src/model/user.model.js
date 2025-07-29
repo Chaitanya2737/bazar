@@ -14,10 +14,10 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
   },
-videoUrl: {
-  type: [String],
-  default: [],
-},
+  videoUrl: {
+    type: [String],
+    default: [],
+  },
 
   mobileNumber: {
     type: [String],
@@ -31,7 +31,7 @@ videoUrl: {
   },
   gstNumber: {
     type: String,
-    default:null
+    default: null,
   },
   email: {
     type: String,
@@ -78,10 +78,6 @@ videoUrl: {
   businessIcon: {
     type: String,
   },
-  componentIndexation: {
-    type: [Number],
-    default: [1, 2, 3, 4, 5],
-  },
   categories: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Categories",
@@ -106,10 +102,11 @@ videoUrl: {
     unique: true,
     sparse: true, // Allows null values without uniqueness conflict
   },
+  products: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "UserProduct",
+  },
 });
 
-
-
 const UserModel = mongoose.models.User || mongoose.model("User", userSchema);
-
 export default UserModel;

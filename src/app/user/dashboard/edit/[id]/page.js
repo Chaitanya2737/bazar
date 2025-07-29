@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback , useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -118,7 +118,7 @@ export default function EditUserPage() {
       try {
         const formData = new FormData();
         for (let i = 0; i < files.length; i++) {
-          if (files[i].size >  1024 * 1024 *100) {
+          if (files[i].size > 1024 * 1024 * 100) {
             toast.error(`File "${files[i].name}" is larger than 1 MB.`);
             setUploading(false);
             return;
@@ -260,9 +260,8 @@ export default function EditUserPage() {
 
   return (
     <main className="min-h-screen font-sans text-black dark:bg-gray-900 dark:text-white transition-all duration-300 bg-[url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2720%27 viewBox=%270 0 20 20%27%3E%3Cg opacity=%270.05%27%3E%3Ccircle cx=%2710%27 cy=%2710%27 r=%271%27 fill=%27%23a1a1aa%27/%3E%3C/g%3E%3C/svg%3E%27')] dark:bg-[url('data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2720%27 height=%2720%27 viewBox=%270 0 20 20%27%3E%3Cg opacity=%270.1%27%3E%3Ccircle cx=%2710%27 cy=%2710%27 r=%271%27 fill=%27%23e2e8f0%27/%3E%3C/g%3E%3C/svg%3E%27')]">
-     
-     {/* carousel section  */}
-     
+      {/* carousel section  */}
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex justify-end mb-8">
           <ThemeToggle />
@@ -537,9 +536,6 @@ export default function EditUserPage() {
           </div>
         )}
       </div>
-
-       
-
 
       {/* Confirm Delete Modal */}
 

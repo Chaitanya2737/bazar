@@ -20,6 +20,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import VideoDialog from "@/component/user/VideoDialog";
+import AddUserComponent from "@/component/user/AddUserComponent";
+import UserProduct from "@/component/user/UserProduct";
 
 const UserDashboardPage = () => {
   const dispatch = useDispatch();
@@ -121,6 +123,10 @@ const UserDashboardPage = () => {
       </section>
       <div className="flex flex-col items-center mt-4 gap-4">
         <VideoDialog />
+      </div>
+
+         <div className="flex flex-col items-center mt-4 gap-4">
+       <UserProduct />
       </div>
 
       <div className="flex flex-col items-center mt-10 gap-4">
