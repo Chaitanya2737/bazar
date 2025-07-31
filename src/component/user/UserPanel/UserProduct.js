@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -20,13 +22,14 @@ const UserProduct = () => {
     thumbnail: null,
   });
 
+  const [open, setOpen] = useState(false);
+
   const selector = useSelector((state) => state.userAuth);
   const user = useSelector((state) => state.userdata?.userData);
-  const [open, setOpen] = useState(false); // Controls Dialog open state
 
   const id = user?._id || selector?._id;
   const businessName = user?.businessName || "default-business";
-  const isLogedIn = useSelector((state) => state.userAuth.isAuthenticated);
+  const isLoggedIn = useSelector((state) => state.userAuth.isAuthenticated);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
@@ -53,7 +56,7 @@ const UserProduct = () => {
 
   const handleSubmit = async () => {
     if (!product.title || !product.thumbnail) {
-      toast.error("All fields are required.");
+      toast.error("Title and image are required.");
       return;
     }
 
@@ -65,7 +68,7 @@ const UserProduct = () => {
     formData.append("businessName", businessName);
 
     try {
-      if (!isLogedIn) {
+      if (!isLoggedIn) {
         toast.error("You must be logged in to upload a product.");
         return;
       }
@@ -81,19 +84,15 @@ const UserProduct = () => {
       } else {
         toast.success("Product uploaded successfully!");
         setProduct({ title: "", description: "", thumbnail: null });
-
-        // ✅ Close dialog
         setOpen(false);
       }
     } catch (err) {
       console.error("Upload error:", err);
 
       if (err.response) {
-        toast.error(
-          err.response.data?.message || "Server responded with error"
-        );
+        toast.error(err.response.data?.message || "Server error occurred.");
       } else if (err.request) {
-        toast.error("No response from server. Please check your connection.");
+        toast.error("No response from server.");
       } else {
         toast.error("Unexpected error occurred.");
       }
@@ -101,37 +100,58 @@ const UserProduct = () => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={setOpen} >
       <DialogTrigger asChild>
-        <Button variant="outline">Add Product</Button>
+        <Button variant="outline" className="text-sm font-medium">
+          + Add Product
+        </Button>
       </DialogTrigger>
 
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Upload Product</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">
+            Upload New Product
+          </DialogTitle>
         </DialogHeader>
 
-        <Input
-          type="file"
-          className={"w-full h-30"}
-          accept="image/*"
-          onChange={handleFileChange}
-        />
-        <Input
-          type="text"
-          name="title"
-          placeholder="Enter Product Title"
-          onChange={handleOnChange}
-        />
-        <Input
-          type="text"
-          name="description"
-          placeholder="Enter Product Description"
-          onChange={handleOnChange}
-        />
+        <div className="space-y-4 py-2">
+          <div>
+            <label className="block text-sm font-medium mb-1">Thumbnail</label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full cursor-pointer"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Title</label>
+            <Input
+              type="text"
+              name="title"
+              placeholder="Product Title"
+              value={product.title}
+              onChange={handleOnChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">Description</label>
+            <Input
+              type="text"
+              name="description"
+              placeholder="Product Description"
+              value={product.description}
+              onChange={handleOnChange}
+            />
+          </div>
+        </div>
 
         <DialogFooter>
-          <Button onClick={handleSubmit}>Add Product</Button>
+          <Button onClick={handleSubmit} className="w-full">
+            Submit Product
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

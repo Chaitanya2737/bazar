@@ -6,22 +6,9 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { userLogout, userLogin } from "@/redux/slice/user/userSlice";
 import { useRouter } from "next/navigation";
 import { getUserDataApi } from "@/redux/slice/user/serviceApi";
-import ThemeToggle from "@/component/themeToggle/themeToggle";
 import MainSection from "@/component/preview/MainSection";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import VideoDialog from "@/component/user/VideoDialog";
-import AddUserComponent from "@/component/user/AddUserComponent";
-import UserProduct from "@/component/user/UserProduct";
+import HeroMarketing from "@/component/user/UserPanel/HeroForUser";
+import Referral from "@/component/user/UserPanel/Referral";
 
 const UserDashboardPage = () => {
   const dispatch = useDispatch();
@@ -48,10 +35,6 @@ const UserDashboardPage = () => {
       );
     }
   }, [dispatch, user?.id, userdata?.data]);
-
-  const handleEditSite = useCallback(() => {
-    router.push(`/user/dashboard/edit/${user?.id}`);
-  }, [router, user?.id]);
 
   const handleLogout = useCallback(() => {
     dispatch(userLogout());
@@ -89,7 +72,7 @@ const UserDashboardPage = () => {
 
   return (
     <div className="relative text-black dark:bg-gray-800 dark:text-white min-h-screen overflow-x-hidden">
-      <div
+      {/* <div
         className="text-start mt-7 mx-3 rounded-lg shadow-md"
         style={{
           background: darkMode
@@ -107,49 +90,18 @@ const UserDashboardPage = () => {
           socialMediaLinks={socialMediaLinks}
           location={businessLocation || ""}
         />
+      </div> */}
+
+      
+
+      <div>
+        <HeroMarketing />
       </div>
 
-      <section className="mt-4 px-4">
-        <h2 className="text-2xl font-semibold">User Details</h2>
-      </section>
 
-      <section>
-        <button
-          onClick={handleEditSite}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          edit site
-        </button>
-      </section>
-      <div className="flex flex-col items-center mt-4 gap-4">
-        <VideoDialog />
+      <div>
+        <Referral />
       </div>
-
-         <div className="flex flex-col items-center mt-4 gap-4">
-       <UserProduct />
-      </div>
-
-      <div className="flex flex-col items-center mt-10 gap-4">
-        {user?.email ? (
-          <>
-            <h2 className="text-xl font-semibold text-center">
-              Hello,
-              <br /> {user.email}!
-            </h2>
-            <p className="text-gray-500">Role: {user.role || "User"}</p>
-            <button
-              onClick={handleLogout}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
-            >
-              Logout
-            </button>
-          </>
-        ) : (
-          <p>You are not logged in.</p>
-        )}
-      </div>
-
-      <ThemeToggle />
     </div>
   );
 };

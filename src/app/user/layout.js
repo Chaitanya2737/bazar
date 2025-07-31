@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../../app/globals.css";
 import UserCompNav from "@/component/user/userCompNav";
 import Head from "next/head"; // Import Next.js Head for metadata management
+import UserNav from "@/component/user/UserPanel/UserNav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,8 @@ export default function RootLayout({ children }) {
         <title>{metadata.title}</title>
         <meta name="description" content={metadata.description} />
       </Head>
+
+      <UserNav />
       <div
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative bottom-1.5  z-50`}
       >
