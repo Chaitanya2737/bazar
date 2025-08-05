@@ -23,7 +23,6 @@ export const authOptions = {
         else if (referer.includes("/admin/signin")) expectedRole = "admin";
         else if (referer.includes("system")) expectedRole = "system";
         else throw new Error("Invalid authentication route");
-        console.log(expectedRole);
 
         if (expectedRole === "user") {
           const user = await UserModel.findOne({ email: credentials.email });
@@ -77,8 +76,6 @@ export const authOptions = {
             role: user.role,
           };
         }
-
-      
       },
     }),
   ],

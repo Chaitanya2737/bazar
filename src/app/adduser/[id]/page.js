@@ -1,6 +1,7 @@
 "use client"
 import AddUserComponent from '@/component/user/AddUserComponent'
 import { setDarkMode } from '@/redux/slice/theme/themeSlice';
+import { useParams } from 'next/navigation';
 import React, { useEffect, useState  } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -11,6 +12,9 @@ const AddUser = () => {
   console.log(darkMode); // Access theme state from Redux
   const [mounted, setMounted] = useState(false);
 
+  const {id} = useParams()
+  console.log(id);
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -18,7 +22,7 @@ const AddUser = () => {
 
   return (
     <div className={`bg-light text-foregroundLight dark:bg-gray-800 dark:text-foregroundDark min-h-screen p-4`}>
-    <AddUserComponent/>
+    <AddUserComponent />
     </div>
   )
 }

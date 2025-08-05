@@ -38,7 +38,7 @@ const chartConfig = {
 
 export function ChartBarDefault() {
   return (
-    <Card>
+    <Card className={"p-4"}>
       <CardHeader>
         <CardTitle>Bar Chart</CardTitle>
         <CardDescription>January - June 2024</CardDescription>

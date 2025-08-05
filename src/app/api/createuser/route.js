@@ -82,7 +82,7 @@ export async function POST(req) {
 
 
     // Validate references
-    const adminDoc = await AdminModel.findOne({ name: user.admin });
+    const adminDoc = await AdminModel.findById(user.admin );
     if (!adminDoc) {
       return NextResponse.json(
         { success: false, message: "Admin not found" },
@@ -90,7 +90,7 @@ export async function POST(req) {
       );
     }
 
-    const category = await CategoryModel.findOne({ name: user.categories });
+    const category = await CategoryModel.findById(user.categories);
     if (!category) {
       return NextResponse.json(
         { success: false, message: "Category not found" },

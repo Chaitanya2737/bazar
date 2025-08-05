@@ -7,6 +7,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { userAddingField } from "@/constant/helper";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   ArrowLeftFromLine,
   ArrowRightFromLine,
   Trash2,
@@ -15,7 +22,8 @@ import {
 import { resetUser, updateUser } from "@/redux/slice/user/addUserSlice";
 import { createUserApi } from "@/redux/slice/user/serviceApi";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import axios from "axios";
 
 // Parent Component
 const AddUserComponent = () => {
@@ -58,67 +66,65 @@ const AddUserComponent = () => {
     }
   }, []);
 
-const handleSubmit = async () => {
-  try {
-    // 1. File validation
-    if (!localFile) {
-      setSubmitError("Please select a business icon file.");
-      return;
+  const handleSubmit = async () => {
+    try {
+      // 1. File validation
+      if (!localFile) {
+        setSubmitError("Please select a business icon file.");
+        return;
+      }
+
+      // 2. Prepare form data
+      const newFormData = new FormData();
+      newFormData.append("businessIcon", localFile);
+      newFormData.append("userdata", JSON.stringify(formData));
+
+      // 3. Save values before reset
+      const businessName = formData.businessName;
+      const status = "success";
+
+      // 4. Dispatch thunk
+      const result = await dispatch(createUserApi(newFormData));
+
+      // 5. Handle rejection manually
+      if (createUserApi.rejected.match(result)) {
+        // Safely extract error message from payload
+        const errorMessage =
+          typeof result.payload === "string"
+            ? result.payload
+            : result.payload?.message || "Failed to create user.";
+        throw new Error(errorMessage);
+      }
+
+      // 6. On success: reset everything
+      await dispatch(resetUser());
+      setFormData(userAddingField);
+      setLocalFile(null);
+      setSubmitError(null);
+      toast.success(`User "${businessName}" created successfully!`);
+
+      // 7. Reset UI state
+      setIsOpen({
+        BasicCategories: true,
+        BusinessCategories: false,
+        SocialMediaLink: false,
+      });
+
+      // 8. Navigate to success page
+      navigation.push(
+        `/adduser/success/${encodeURIComponent(businessName)}/${status}`
+      );
+    } catch (error) {
+      // 9. Show friendly error message
+      const message =
+        typeof error?.message === "string"
+          ? error.message
+          : "Something went wrong.";
+      setSubmitError(message);
+      toast.error(`❌ ${message}`);
+      console.error("User creation failed:", error);
     }
-
-    // 2. Prepare form data
-    const newFormData = new FormData();
-    newFormData.append("businessIcon", localFile);
-    newFormData.append("userdata", JSON.stringify(formData));
-
-    // 3. Save values before reset
-    const businessName = formData.businessName;
-    const status = "success";
-
-    // 4. Dispatch thunk
-    const result = await dispatch(createUserApi(newFormData));
-
-    // 5. Handle rejection manually
-    if (createUserApi.rejected.match(result)) {
-      // Safely extract error message from payload
-      const errorMessage =
-        typeof result.payload === "string"
-          ? result.payload
-          : result.payload?.message || "Failed to create user.";
-      throw new Error(errorMessage);
-    }
-
-    // 6. On success: reset everything
-    await dispatch(resetUser());
-    setFormData(userAddingField);
-    setLocalFile(null);
-    setSubmitError(null);
-    toast.success(`User "${businessName}" created successfully!`);
-
-    // 7. Reset UI state
-    setIsOpen({
-      BasicCategories: true,
-      BusinessCategories: false,
-      SocialMediaLink: false,
-    });
-
-    // 8. Navigate to success page
-    navigation.push(`/adduser/success/${encodeURIComponent(businessName)}/${status}`);
-  } catch (error) {
-    // 9. Show friendly error message
-    const message =
-      typeof error?.message === "string"
-        ? error.message
-        : "Something went wrong.";
-    setSubmitError(message);
-    toast.error(`❌ ${message}`);
-    console.error("User creation failed:", error);
-  }
-};
-
-
-
-
+  };
 
   return (
     <div className="text-black dark:bg-gray-800 dark:text-white p-4">
@@ -362,6 +368,12 @@ export const BusinessCategories = ({
 }) => {
   const [errors, setErrors] = useState({});
 
+  const [categorie, setCategorie] = useState([]);
+  const { id } = useParams();
+  const [adminId, setAdminId] = useState(id || "");
+
+  console.log(adminId);
+
   const back = () =>
     setIsOpen((prev) => ({
       ...prev,
@@ -380,8 +392,6 @@ export const BusinessCategories = ({
       newErrors.businessLocation = "Business location is required";
     if (!String(formData.categories).trim())
       newErrors.categories = "Categories is required";
-    if (!String(formData.admin).trim())
-      newErrors.admin = "Admin name is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -393,6 +403,27 @@ export const BusinessCategories = ({
       setIsOpen((prev) => ({ ...prev, SocialMediaLink: true }));
     }
   };
+
+  const fetchData = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:3000/api/categorie/preview"
+      );
+      setCategorie(res.data.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (id) {
+      setValue({ target: { name: "admin", value: id } });
+    }
+  }, [id, setValue]);
 
   return (
     <>
@@ -518,13 +549,34 @@ export const BusinessCategories = ({
           >
             Categories
           </Label>
-          <Input
+
+          {/* Give the input a unique id so it doesn't conflict with the select */}
+          {/* <Input
             className="bg-gray-100 dark:bg-gray-700 mt-1"
-            id="categories"
+            id="categoriesInput"
             name="categories"
             value={formData.categories}
-            onChange={setValue}
-          />
+            onChange={setValue} // <-- OK if setValue expects an event
+          /> */}
+
+          <Select
+            value={formData.categories}
+            onValueChange={(val) =>
+              setValue({ target: { name: "categories", value: val } })
+            }
+          >
+            <SelectTrigger className="w-full text-black dark:text-white">
+              <SelectValue placeholder="-- Select category --" className="" />
+            </SelectTrigger>
+            <SelectContent>
+              {categorie.map((item) => (
+                <SelectItem key={item._id} value={item._id}>
+                  {item.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           {errors.categories && (
             <p className="text-sm text-red-500 mt-1">{errors.categories}</p>
           )}
@@ -538,8 +590,8 @@ export const BusinessCategories = ({
             className="bg-gray-100 dark:bg-gray-700 mt-1"
             id="admin"
             name="admin"
-            value={formData.admin}
-            onChange={setValue}
+            value={formData.admin ?? id ?? ""} // preferred: show formData.admin if already set
+            readOnly
           />
           {errors.admin && (
             <p className="text-sm text-red-500 mt-1">{errors.admin}</p>
