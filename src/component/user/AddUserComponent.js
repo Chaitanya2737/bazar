@@ -567,7 +567,7 @@ export const BusinessCategories = ({
             <SelectTrigger className="w-full text-black dark:text-white">
               <SelectValue placeholder="-- Select category --" className="" />
             </SelectTrigger>
-            <SelectContent className="max-h-60 overflow-y-auto select-scroll">
+            <SelectContent style={{ WebkitOverflowScrolling: "touch" }} className="max-h-[60vh] select-scroll overflow-auto rounded-md shadow-lg select-scroll">
               {categorie.map((item) => (
                 <SelectItem className={"h-10"} key={item._id} value={item._id}>
                   {item.name}
