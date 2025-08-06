@@ -558,23 +558,20 @@ export const BusinessCategories = ({
             onChange={setValue} // <-- OK if setValue expects an event
           /> */}
 
-          <Select
-            value={formData.categories}
-            onValueChange={(val) =>
-              setValue({ target: { name: "categories", value: val } })
-            }
+          <select
+            id="categories"
+            name="categories"
+            value={formData.categories || ""}
+            onChange={setValue} // your setValue expects an event {target: {name, value}}
+            className="w-full mt-1 p-2 rounded bg-white dark:bg-gray-700 text-black dark:text-white border"
           >
-            <SelectTrigger className="w-full text-black dark:text-white">
-              <SelectValue placeholder="-- Select category --" className="" />
-            </SelectTrigger>
-            <SelectContent style={{ WebkitOverflowScrolling: "touch" }} className="max-h-[60vh] select-scroll overflow-auto rounded-md shadow-lg select-scroll">
-              {categorie.map((item) => (
-                <SelectItem className={"h-10"} key={item._id} value={item._id}>
-                  {item.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <option value="">-- Select category --</option>
+            {categorie.map((item) => (
+              <option key={item._id} value={item._id}>
+                {item.name}
+              </option>
+            ))}
+          </select>
 
           {errors.categories && (
             <p className="text-sm text-red-500 mt-1">{errors.categories}</p>
