@@ -24,7 +24,6 @@ import { createUserApi } from "@/redux/slice/user/serviceApi";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
-
 // Parent Component
 const AddUserComponent = () => {
   const dispatch = useDispatch();
@@ -568,9 +567,9 @@ export const BusinessCategories = ({
             <SelectTrigger className="w-full text-black dark:text-white">
               <SelectValue placeholder="-- Select category --" className="" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60 overflow-y-auto select-scroll">
               {categorie.map((item) => (
-                <SelectItem key={item._id} value={item._id}>
+                <SelectItem className={"h-10"} key={item._id} value={item._id}>
                   {item.name}
                 </SelectItem>
               ))}
