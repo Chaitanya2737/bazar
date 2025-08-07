@@ -371,7 +371,7 @@ export const BusinessCategories = ({
   const { id } = useParams();
   const [adminId, setAdminId] = useState(id || "");
 
-  console.log(adminId);
+  console.log(categorie);
 
   const back = () =>
     setIsOpen((prev) => ({
@@ -541,42 +541,12 @@ export const BusinessCategories = ({
           />
         </div>
 
-        <div>
-          <Label
-            className={errors.categories ? "text-red-500" : ""}
-            htmlFor="categories"
-          >
-            Categories
-          </Label>
-
-          {/* Give the input a unique id so it doesn't conflict with the select */}
-          {/* <Input
-            className="bg-gray-100 dark:bg-gray-700 mt-1"
-            id="categoriesInput"
-            name="categories"
-            value={formData.categories}
-            onChange={setValue} // <-- OK if setValue expects an event
-          /> */}
-
-          <select
-            id="categories"
-            name="categories"
-            value={formData.categories || ""}
-            onChange={setValue} // your setValue expects an event {target: {name, value}}
-            className="w-full mt-1 p-2 rounded bg-white dark:bg-gray-700 text-black dark:text-white border"
-          >
-            <option value="">-- Select category --</option>
-            {categorie.map((item) => (
-              <option key={item._id} value={item._id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-
-          {errors.categories && (
-            <p className="text-sm text-red-500 mt-1">{errors.categories}</p>
-          )}
-        </div>
+        <CategoryPicker
+          formData={formData}
+          setValue={setValue}
+          categorie={categorie}
+          errors={errors}
+        />
 
         <div>
           <Label className={errors.admin ? "text-red-500" : ""} htmlFor="admin">
@@ -699,3 +669,103 @@ export const SocialMediaLink = ({
     </>
   );
 };
+
+export function CategoryPicker({ formData, setValue, categorie, errors }) {
+  const [open, setOpen] = useState(false);
+
+  // helper to show selected label
+  const selected = categorie.find((c) => c._id === formData.categories);
+
+  return (
+    <div>
+      <Label
+        className={errors?.categories ? "text-red-500" : ""}
+        htmlFor="categories"
+      >
+        Categories
+      </Label>
+
+      {/* Desktop: keep your custom Select (if you have it), hidden on mobile */}
+      {/* If you don't have a custom desktop select, remove this section */}
+      <div className="hidden md:block">
+        {/* Leave your existing desktop Select here or keep a native select for desktop */}
+        <select
+          id="categories-desktop"
+          name="categories"
+          value={formData.categories || ""}
+          onChange={setValue}
+          className="w-full mt-1 p-2 rounded bg-white dark:bg-gray-700 text-black dark:text-white border"
+        >
+          <option value="">-- Select category --</option>
+          {categorie.map((item) => (
+            <option key={item._id} value={item._id}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Mobile trigger (looks like an input/select) */}
+      <div className="md:hidden">
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="w-full mt-1 p-3 text-left rounded bg-white dark:bg-gray-700 border"
+        >
+          {selected?.name ?? "-- Select category --"}
+        </button>
+      </div>
+
+      {/* Mobile bottom-sheet */}
+      {open && (
+        <div className="fixed inset-0 z-50 flex items-end md:hidden">
+          {/* backdrop */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setOpen(false)}
+          />
+
+          {/* sheet */}
+          <div
+            className="relative w-full max-h-[70vh] overflow-auto bg-white dark:bg-gray-800 rounded-t-xl p-4"
+            style={{ WebkitOverflowScrolling: "touch" }}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <strong>Select category</strong>
+              <button
+                onClick={() => setOpen(false)}
+                className="text-sm px-2 py-1"
+              >
+                Close
+              </button>
+            </div>
+
+            <ul>
+              {categorie.map((item) => (
+                <li key={item._id}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setValue({
+                        target: { name: "categories", value: item._id },
+                      });
+                      setOpen(false);
+                    }}
+                    className="w-full text-left py-3 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                  >
+                    {item.name}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* error message */}
+      {errors?.categories && (
+        <p className="text-sm text-red-500 mt-1">{errors.categories}</p>
+      )}
+    </div>
+  );
+}
