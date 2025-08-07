@@ -548,6 +548,12 @@ export const BusinessCategories = ({
           errors={errors}
         />
 
+        {
+          categorie.map((item , index) => (
+            <h1 key={index+1}> {item.name}</h1>
+          ))
+        }
+
         <div>
           <Label className={errors.admin ? "text-red-500" : ""} htmlFor="admin">
             Admin Name
@@ -692,7 +698,7 @@ export function CategoryPicker({ formData, setValue, categorie, errors }) {
         <select
           id="categories-desktop"
           name="categories"
-          value={formData.categories || ""}
+          value={formData.categories}
           onChange={setValue}
           className="w-full mt-1 p-2 rounded bg-white dark:bg-gray-700 text-black dark:text-white border"
         >
