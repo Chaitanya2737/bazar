@@ -121,6 +121,9 @@ export async function POST(req) {
         );
       }
 
+     let folder = (user.businessName || "").trim();
+
+
 
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
@@ -129,7 +132,7 @@ export async function POST(req) {
 
       try {
         const uploaded = await cloudinary.uploader.upload(dataUri, {
-          folder: user.businessName || "business-icons",
+          folder: folder || "business-icons",
         });
         businessIconUrl = uploaded.secure_url;
       } catch (uploadErr) {

@@ -27,6 +27,7 @@ const Carusel = ({ image }) => {
                     width={600}
                     height={400}
                     className="object-cover h-[300px] w-auto rounded-lg"
+                    priority
                   />
                 </CardContent>
               </Card>
