@@ -77,7 +77,7 @@ const MainSection = ({
 
         {/* Right: Info */}
         <div className="space-y-5 text-gray-900 dark:text-white md:pl-10 md:ml-6 md:border-l-2 md:border-gray-200 dark:md:border-gray-700">
-          <h1 className="text-4xl text-center font-extrabold tracking-tight leading-tight text-gray-900 dark:text-gray-100 animate-fadeIn">
+          <h1 className="text-5xl text-center font-extrabold tracking-tight leading-tight text-gray-900 dark:text-gray-100 animate-fadeIn">
             {businessName || (
               <Skeleton className="w-48 h-8 bg-gray-800 dark:bg-gray-200" />
             )}
@@ -86,7 +86,7 @@ const MainSection = ({
             {" "}
             {/* reduced spacing */}
             {bio && (
-              <p className="text-base text-gray-700 dark:text-gray-300 leading-relaxed animate-fadeIn m-0">
+              <p className="text-xl text-gray-700 dark:text-gray-300 leading-relaxed animate-fadeIn m-0">
                 {showFullBio ? bio : shortBio}
               </p>
             )}

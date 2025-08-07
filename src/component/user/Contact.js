@@ -72,7 +72,7 @@ const Contact = ({ socialMediaLinks, email, location, mobileNumber }) => {
             </h2>
 
             <Drawer>
-              <DrawerTrigger asChild >
+              <DrawerTrigger asChild>
                 <Button
                   variant="outline"
                   className="w-full hover:bg-green-100 dark:hover:bg-slate-800 transition-all duration-300"
@@ -81,7 +81,7 @@ const Contact = ({ socialMediaLinks, email, location, mobileNumber }) => {
                 </Button>
               </DrawerTrigger>
 
-              <DrawerContent >
+              <DrawerContent>
                 <DrawerHeader>
                   <DrawerTitle className="text-lg">Choose a Number</DrawerTitle>
                 </DrawerHeader>
@@ -95,7 +95,7 @@ const Contact = ({ socialMediaLinks, email, location, mobileNumber }) => {
                       rel="noopener noreferrer"
                       className="block w-full px-4 py-2 text-center rounded-md bg-green-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-green-200 dark:hover:bg-gray-700 transition"
                     >
-                    {number}
+                      {number}
                     </a>
                   ))}
                 </div>
@@ -136,18 +136,16 @@ const Contact = ({ socialMediaLinks, email, location, mobileNumber }) => {
               <Button
                 key={index}
                 variant="outline"
-                className="w-full flex items-center justify-start hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
+                className="w-full h-auto flex items-center justify-start hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
               >
                 <a
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center text-neutral-700 dark:text-neutral-200 w-full"
+                  className="flex justify-center items-center text-neutral-700 dark:text-neutral-200 w-full h-full"
                   aria-label={`Visit ${link.platform}`}
                 >
-                  {iconMap[link.platform] || <Globe className="mr-2 h-5 w-5" />}
-                  {link.platform.charAt(0).toUpperCase() +
-                    link.platform.slice(1)}
+                  {iconMap[link.platform] || <Globe className="h-6 w-6" />}
                 </a>
               </Button>
             ))}

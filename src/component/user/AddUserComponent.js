@@ -31,7 +31,7 @@ const AddUserComponent = () => {
   const [formData, setFormData] = useState(userAddingField);
   const [localFile, setLocalFile] = useState(null);
   const [submitError, setSubmitError] = useState(null); // For user feedback
-
+  const [isSubmitted, setIsSubmited] = useState(false);
   const navigation = useRouter();
 
   const [isOpen, setIsOpen] = useState(() => {
@@ -67,6 +67,7 @@ const AddUserComponent = () => {
 
   const handleSubmit = async () => {
     try {
+      setIsSubmited(true); // Set submitting state immediately
       // 1. File validation
       if (!localFile) {
         setSubmitError("Please select a business icon file.");
@@ -100,6 +101,7 @@ const AddUserComponent = () => {
       setFormData(userAddingField);
       setLocalFile(null);
       setSubmitError(null);
+      setIsSubmited(false); // Reset submitting state
       toast.success(`User "${businessName}" created successfully!`);
 
       // 7. Reset UI state
@@ -108,7 +110,6 @@ const AddUserComponent = () => {
         BusinessCategories: false,
         SocialMediaLink: false,
       });
-
       // 8. Navigate to success page
       navigation.push(
         `/adduser/success/${encodeURIComponent(businessName)}/${status}`
@@ -119,6 +120,7 @@ const AddUserComponent = () => {
         typeof error?.message === "string"
           ? error.message
           : "Something went wrong.";
+      setIsSubmited(false);
       setSubmitError(message);
       toast.error(`❌ ${message}`);
       console.error("User creation failed:", error);
@@ -165,6 +167,7 @@ const AddUserComponent = () => {
           setValue={setValue}
           setIsOpen={setIsOpen}
           handleSubmit={handleSubmit}
+          isSubmitted={isSubmitted}
         />
       )}
       {submitError && (
@@ -405,9 +408,7 @@ export const BusinessCategories = ({
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(
-        "/api/categorie/preview"
-      );
+      const res = await axios.get("/api/categorie/preview");
       setCategorie(res.data.data);
     } catch (error) {
       console.log(error);
@@ -567,7 +568,10 @@ export const BusinessCategories = ({
             <SelectTrigger className="w-full text-black dark:text-white">
               <SelectValue placeholder="-- Select category --" className="" />
             </SelectTrigger>
-            <SelectContent style={{ WebkitOverflowScrolling: "touch" }} className="max-h-[60vh] select-scroll overflow-auto rounded-md shadow-lg select-scroll">
+            <SelectContent
+              style={{ WebkitOverflowScrolling: "touch" }}
+              className="max-h-[60vh] select-scroll overflow-auto rounded-md shadow-lg select-scroll"
+            >
               {categorie.map((item) => (
                 <SelectItem className={"h-10"} key={item._id} value={item._id}>
                   {item.name}
@@ -627,6 +631,7 @@ export const SocialMediaLink = ({
   setValue,
   setIsOpen,
   handleSubmit,
+  isSubmitted,
 }) => {
   const back = () =>
     setIsOpen((prev) => ({
@@ -684,6 +689,7 @@ export const SocialMediaLink = ({
         <Button
           onClick={back}
           variant="secondary"
+          disabled={isSubmitted}
           className="w-full flex items-center justify-center gap-2 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800"
         >
           <ArrowLeftFromLine className="w-4 h-4 group-hover:translate-x-2" />
@@ -693,9 +699,10 @@ export const SocialMediaLink = ({
         <Button
           onClick={handleSubmit}
           variant="secondary"
+          disabled={isSubmitted} // Add disabled prop here
           className="w-full flex items-center justify-center gap-2 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800"
         >
-          <span>Submit</span>
+          <span>{isSubmitted ? "Submitting..." : "Submit"}</span>
           <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-2" />
         </Button>
       </div>
