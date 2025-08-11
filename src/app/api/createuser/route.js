@@ -5,26 +5,25 @@ import CategoryModel from "@/model/categories.model";
 import AdminModel from "@/model/admin.model";
 import bcrypt from "bcryptjs";
 import cloudinary from "@/lib/cloudinaryConfig";
+import slugify from "slugify";
+
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpeg"];
 
-// Slug generator (only for English names)
 function generateSlug(name) {
-  // Check if the name is entirely in English (no non-English characters)
-  const isEnglish = /^[A-Za-z0-9\s\-]+$/.test(name); // Regex for English letters, numbers, spaces, and hyphens
-  if (!isEnglish) return null; // Don't generate slug if it's not an English name
-
-  return slugify(name, {
-    lower: true,
-    strict: true,
-  });
+  return name
+    .trim()
+    .replace(/\s+/g, "-") // spaces → hyphens
+    .replace(/[~!@#$%^&*()_+={}[\]|\\:;"'<>,.?/]/g, "") // remove unwanted symbols
+    .replace(/-+/g, "-") // collapse multiple hyphens
+    .toLowerCase(); // lowercases only Latin letters, Marathi stays as-is
 }
+
 
 export async function POST(req) {
   try {
     await connectDB();
-
     const formData = await req.formData();
     const userDataJson = formData.get("userdata");
 
@@ -34,6 +33,7 @@ export async function POST(req) {
         { status: 400 }
       );
     }
+  
 
     let user;
     try {
@@ -53,7 +53,6 @@ export async function POST(req) {
       "password",
     ];
 
-    console.log(user.businessName);
     const missingFields = required.filter((field) => !user[field]);
     if (missingFields.length) {
       return NextResponse.json(
@@ -101,6 +100,7 @@ export async function POST(req) {
     
     // Hash the password
     const hashedPassword = await bcrypt.hash(user.password, 10);
+let slugVariable = generateSlug(user.businessName);
 
     // File upload handling
     let businessIconUrl = "";
@@ -144,9 +144,15 @@ export async function POST(req) {
       }
     }
 
+
+  
+
+
+
     // Create new user
     const newUser = new UserModel({
       businessName: user.businessName,
+      slug:slugVariable,
       handlerName: user.handlerName,
       mobileNumber: mobileNumbers,
       email: user.email,

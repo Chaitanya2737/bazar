@@ -47,7 +47,7 @@ export async function POST(request) {
     // Find the user in the database using the subdomain
     let finduser;
     try {
-      finduser = await UserModel.findOne({ businessName: body.subdomain });
+      finduser = await UserModel.findOne({ slug: body.subdomain });
     } catch (error) {
       console.error("Error querying the database:", error);
       return NextResponse.json({ error: 'Database query failed' }, { status: 500 });

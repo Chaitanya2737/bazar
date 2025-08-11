@@ -7,6 +7,8 @@ const userSchema = new mongoose.Schema({
     minlength: 2,
     maxlength: 45,
   },
+  slug: { type: String, unique: true, required: true },
+
   handlerName: {
     type: String,
     required: true,
@@ -102,6 +104,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true, // Allows null values without uniqueness conflict
   },
+
   products: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "UserProduct",
