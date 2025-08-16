@@ -9,6 +9,7 @@ import { getUserDataApi } from "@/redux/slice/user/serviceApi";
 import MainSection from "@/component/preview/MainSection";
 import HeroMarketing from "@/component/user/UserPanel/HeroForUser";
 import Referral from "@/component/user/UserPanel/Referral";
+import SiteOffer from "@/component/user/SiteOffer/SiteOffer";
 
 const UserDashboardPage = () => {
   const dispatch = useDispatch();
@@ -97,7 +98,9 @@ const UserDashboardPage = () => {
       <div>
         <HeroMarketing />
       </div>
-
+      <div>
+        <SiteOffer />
+      </div>
 
       <div>
         <Referral />

@@ -41,7 +41,7 @@ const UserPreviewCount = ({ count }) => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const screenHeight = window.innerHeight;
-      setShow(scrollY <= screenHeight);
+      setShow(scrollY >= screenHeight);
     };
     
 

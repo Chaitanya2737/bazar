@@ -21,6 +21,7 @@ import Contact from "@/component/user/Contact";
 import Footer from "@/component/user/Footer";
 import Video from "@/component/user/Video";
 import Product from "@/component/user/Product";
+import PreviewOffer from "@/component/user/SiteOffer/PreviewOffer";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -165,6 +166,14 @@ const UserPreview = () => {
         <Toaster />
         <Navbar />
         {/* Skeleton for Main Section */}
+
+        {renderMainSectionSkeleton ? (
+          <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
+        ) : (
+          <PreviewOffer userId = {data?._id} />
+        )}
+
+
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
