@@ -5,18 +5,30 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { BadgePercent, Home, Mail } from "lucide-react";
+import { BadgePercent, Home, Mail, Moon, Sun } from "lucide-react";
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { useTheme } from "next-themes";
+import { useDispatch, useSelector } from "react-redux";
+import { setDarkMode } from "@/redux/slice/theme/themeSlice";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [show, setShow] = useState(false);
 
+  const { theme, setTheme } = useTheme();
+  const dispatch = useDispatch();
+  const darkMode = useSelector((state) => state.theme.darkMode ?? false);
+
+  const toggleTheme = () => {
+    const newTheme = darkMode ? "light" : "dark";
+    setTheme(newTheme);
+    dispatch(setDarkMode(newTheme === "dark"));
+  };
   useEffect(() => {
     const handleScroll = () => {
       setShow(window.scrollY <= window.innerHeight);
@@ -108,22 +120,21 @@ export default function Navbar() {
         </Tooltip>
 
         {/* Contact */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Link href="/contact">
-              <Button
-                variant={pathname === "/contact" ? "default" : "ghost"}
-                size="icon"
-                className="h-10 w-10 [&>svg]:!h-6 [&>svg]:!w-6 rounded-full"
-              >
-                <Mail />
-              </Button>
-            </Link>
-          </TooltipTrigger>
-          <TooltipContent side="top">
-            <p>Contact</p>
-          </TooltipContent>
-        </Tooltip>
+       <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10 [&>svg]:!h-6 [&>svg]:!w-6 rounded-full"
+            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+          >
+            {theme === "light" ? <Moon /> : <Sun />}
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p>Toggle Theme</p>
+        </TooltipContent>
+      </Tooltip>
       </motion.nav>
     </TooltipProvider>
   );

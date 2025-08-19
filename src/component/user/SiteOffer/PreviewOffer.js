@@ -22,9 +22,8 @@ const PreviewOffer = ({ userId }) => {
   }, [userId]);
 
   if (!offer) return
-
   return (
-    <div className="flex items-center bg-slate-800 dark:bg-fuchsia-50 p-2 my-3 rounded-lg shadow-md gap-3 text-white">
+    <div className="flex items-center text-white bg-slate-800 dark:bg-fuchsia-300/50 dark:text-neutral-900 p-2 my-3 rounded-lg shadow-md gap-3 ">
       {/* Special Offer Logo — drop from top + blink */}
       <motion.div
         initial={{ y: -50, opacity: 0 }} // start above

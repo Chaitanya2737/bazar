@@ -73,7 +73,6 @@ const handleWhatsAppClick = (product) => {
   window.open(whatsappURL, "_blank");
 };
 
-
   return (
     <div className="p-6 mx-0 md:mx-15 ">
       {products.length >= 0 ? (

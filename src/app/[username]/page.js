@@ -224,7 +224,7 @@ const UserPreview = () => {
         ) : (
           <Product />
         )}
-
+        
            {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (

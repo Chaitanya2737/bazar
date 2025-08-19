@@ -9,10 +9,10 @@ export async function POST(request) {
   try {
     await connectDB();
 
-    const { userId, title, interval , businessNameName,
-      contact , } = await request.json();
+    const { userId, title, interval, businessNameName, contact } =
+      await request.json();
 
-    // Check authentication
+    // ✅ Check authentication
     const session = await getServerSession(authOptions);
     if (!session) {
       return NextResponse.json(
@@ -32,23 +32,36 @@ export async function POST(request) {
       );
     }
 
-    // Calculate dates
+    // ✅ Check if user already has an active offer
+    const existingOffer = await OfferModel.findOne({
+      userId,
+      expiryDate: { $gte: new Date() }, // still valid (not expired)
+    });
+
+    if (existingOffer) {
+      return NextResponse.json(
+        { success: false, message: "You already have an active offer." },
+        { status: 400 }
+      );
+    }
+
+    // ✅ Calculate dates
     const startDate = new Date();
     const expiryDate = new Date();
     expiryDate.setDate(startDate.getDate() + interval);
 
-    // Create offer
+    // ✅ Create offer
     const offer = await OfferModel.create({
       userId,
       title,
-     intervalDays: interval,
+      intervalDays: interval,
       startDate,
       expiryDate,
       businessNameName,
-      contact
+      contact,
     });
 
-    // Update user with the offer reference
+    // ✅ Update user with the offer reference
     await UserModel.findByIdAndUpdate(userId, {
       $push: {
         siteoffer: {

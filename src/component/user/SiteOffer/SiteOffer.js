@@ -27,7 +27,6 @@ export default function OfferDateDrawer() {
   const businessName = user?.businessName;
   const contact = user?.mobileNumber?.[0];
 
-  // Calculate offerDate based on selected interval
   const getOfferDate = () => {
     if (intervalDays) {
       const date = new Date();
@@ -37,46 +36,48 @@ export default function OfferDateDrawer() {
     return "";
   };
 
-  const handleSubmit = async () => {
-    try {
-      setIsSubmitting(true);
+const handleSubmit = async () => {
+  setIsSubmitting(true);
 
-      if (!title.trim()) {
-        toast.error("Offer title is required");
-        return;
-      }
-      if (!intervalDays) {
-        toast.error("Please select an interval (7, 12, 21 days)");
-        return;
-      }
-
-      const offerDate = getOfferDate();
-
-      const payload = {
-        userId,
-        title,
-        interval: intervalDays,
-        offerDate,
-        businessName,
-        contact,
-      };
-
-      const res = await axios.post("/api/user/siteoffer", payload);
-
-      if (res.data.success) {
-        toast.success("Offer added successfully 🎉");
-        setTitle("");
-        setIntervalDays(null);
-      } else {
-        toast.error(res.data.message || "Failed to add offer");
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Something went wrong while saving offer");
-    } finally {
+  try {
+    if (!title.trim()) {
+      toast.error("Offer title is required");
       setIsSubmitting(false);
+      return;
     }
-  };
+    if (!intervalDays) {
+      toast.error("Please select an interval (7, 12, 21 days)");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const payload = {
+      userId,
+      title,
+      interval: intervalDays,
+      businessName,
+      contact,
+    };
+
+    const res = await axios.post("/api/user/siteoffer", payload);
+
+    if (res.data.success) {
+      toast.success("Offer added successfully 🎉");
+      setTitle("");
+      setIntervalDays(null);
+    } else {
+      toast.error(res.data.message || "Failed to add offer");
+    }
+  } catch (error) {
+    console.error(error);
+    toast.error(
+      error.response?.data?.message || "Something went wrong while saving offer"
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <div className="flex justify-center items-center">
