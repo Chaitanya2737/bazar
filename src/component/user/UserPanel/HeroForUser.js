@@ -1,39 +1,37 @@
 "use client";
 
 import React from "react";
-import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { FaWhatsapp, FaInstagram, FaFacebook, FaGoogle } from "react-icons/fa";
 import { Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
+import "../style.css"
 
 const HeroMarketing = () => {
   const router = useRouter();
-
   return (
-    <section className="relative flex flex-col items-center justify-center min-h-screen px-6 text-center bg-gradient-to-br from-[#fdfbfb] to-[#ebedee] dark:from-gray-900 dark:to-gray-800 py-12">
+    <section  className="relative flex flex-col items-center justify-center min-h-screen px-6 text-center bg-gradient-to-br from-[#fdfbfb] to-[#ebedee] dark:from-gray-900 dark:to-gray-800 py-12 font-marathi ">
       {/* Tagline */}
       <div className="mb-4 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
         <span className="text-orange-500 text-lg">📈</span>
         <span className="font-semibold text-base">BazarHub</span>
-        <span className="text-xs">Marketing made easy</span>
+        <span className="text-xs">  Make Marketing Easy</span>
       </div>
 
       {/* Headline */}
       <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white leading-tight mb-4">
-        Promote your{" "}
+        आपल्या{" "}
         <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">
-          business
+          व्यवसायाचे
         </span>
         <br />
-        <span className="text-blue-600 dark:text-yellow-400">like a pro.</span>
+        <span className="text-blue-600 dark:text-yellow-400">प्रोफेशनल प्रमोशन करा</span>
       </h1>
 
       {/* Subheading */}
       <p className="max-w-2xl text-lg text-gray-700 dark:text-gray-300 mb-8">
-        Run Meta Ads, Send Push Notifications, Connect via WhatsApp & SMS, and
-        boost your visibility — all from one platform.
+        मेटा Adds चालवा, पुश नोटिफिकेशन्स पाठवा, WhatsApp आणि SMS द्वारे जोडा, 
+        आणि आपली प्रसार वाढवा — हे सर्व एका प्लॅटफॉर्मवर.
       </p>
 
       {/* Marketing Channels */}
@@ -45,7 +43,7 @@ const HeroMarketing = () => {
           <Card className="hover:shadow-xl transition-all">
             <CardContent className="flex flex-col items-center justify-center p-4">
               <FaWhatsapp size={30} className="text-green-500 mb-2" />
-              <p className="font-medium">WhatsApp</p>
+              <p className="font-medium">व्हॉट्सॲप</p>
             </CardContent>
           </Card>
         </div>
@@ -57,7 +55,7 @@ const HeroMarketing = () => {
           <Card className="hover:shadow-xl transition-all">
             <CardContent className="flex flex-col items-center justify-center p-4">
               <FaInstagram size={30} className="text-pink-500 mb-2" />
-              <p className="font-medium">Instagram</p>
+              <p className="font-medium">इंस्टाग्राम</p>
             </CardContent>
           </Card>
         </div>
@@ -69,7 +67,7 @@ const HeroMarketing = () => {
           <Card className="hover:shadow-xl transition-all">
             <CardContent className="flex flex-col items-center justify-center p-4">
               <FaFacebook size={30} className="text-blue-600 mb-2" />
-              <p className="font-medium">Facebook</p>
+              <p className="font-medium">फेसबुक</p>
             </CardContent>
           </Card>
         </div>
@@ -81,7 +79,7 @@ const HeroMarketing = () => {
           <Card className="hover:shadow-xl transition-all">
             <CardContent className="flex flex-col items-center justify-center p-4">
               <Bell size={28} className="text-yellow-500 mb-2" />
-              <p className="font-medium">Push</p>
+              <p className="font-medium">पुश</p>
             </CardContent>
           </Card>
         </div>
@@ -93,7 +91,7 @@ const HeroMarketing = () => {
           <Card className="hover:shadow-xl transition-all">
             <CardContent className="flex flex-col items-center justify-center p-4">
               <FaGoogle size={30} className="text-red-500 mb-2" />
-              <p className="font-medium">Google</p>
+              <p className="font-medium">गूगल</p>
             </CardContent>
           </Card>
         </div>

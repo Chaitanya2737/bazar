@@ -34,7 +34,7 @@ export async function POST(request) {
   const existingProductCount = await UserProductModel.countDocuments({
     userId: formUserId,
   });
-  if (existingProductCount >= 5) {
+  if (existingProductCount >= 20) {
     return NextResponse.json(
       { success: false, message: "You can only add up to 5 products." },
       { status: 400 }
@@ -77,9 +77,17 @@ export async function POST(request) {
     const base64 = buffer.toString("base64");
     const dataUri = `data:${thumbnail.type};base64,${base64}`;
 
+     const safeBusinessName = (businessName || "business-icons")
+      .trim()
+      .replace(/\s+/g, "-") // replace spaces with hyphens
+      .replace(/[^a-zA-Z0-9-_]/g, "") // remove special chars
+      .toLowerCase();
+
     const uploaded = await cloudinary.uploader.upload(dataUri, {
-      folder: businessName || "business-icons",
+      folder: safeBusinessName,
     });
+
+
 
     businessIconUrl = uploaded.secure_url;
   } catch (uploadErr) {

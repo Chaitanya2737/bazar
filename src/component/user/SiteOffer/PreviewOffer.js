@@ -24,7 +24,7 @@ const PreviewOffer = ({ userId }) => {
   if (!offer) return
 
   return (
-    <div className="flex items-center bg-yellow-100 dark:bg-yellow-400 p-2 my-3 rounded-lg shadow-md gap-3">
+    <div className="flex items-center bg-slate-800 dark:bg-fuchsia-50 p-2 my-3 rounded-lg shadow-md gap-3 text-white">
       {/* Special Offer Logo — drop from top + blink */}
       <motion.div
         initial={{ y: -50, opacity: 0 }} // start above
@@ -40,16 +40,16 @@ const PreviewOffer = ({ userId }) => {
         }}
       >
         <Image
-          src="/yellow-paper-note-with-text-special-offer-D38FDP.jpg"
-          height={10}
-          width={40}
+          src="/f869f0b2dd2ab59a33d10c8f97856251.jpg"
+          height={20}
+          width={50}
           alt="Special Offer"
-          className="rounded-lg border border-yellow-500 shadow"
+          className="rounded-lg border border-cyan-900 shadow"
         />
       </motion.div>
 
       {/* Scrolling Offer Text */}
-      <div className="overflow-hidden whitespace-nowrap text-black flex-1">
+      <div className="overflow-hidden whitespace-nowrap  flex-1">
         <motion.div
           animate={{ x: ["0%", "-100%"] }}
           transition={{
@@ -57,7 +57,7 @@ const PreviewOffer = ({ userId }) => {
             duration: 50,
             ease: "linear",
           }}
-          className="inline-block text-lg font-semibold text-black"
+          className="inline-block text-lg font-semibold text-white"
         >
           <span className="mr-10">{offer.title}</span>
           <span className="mr-10">{offer.title}</span>

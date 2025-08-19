@@ -181,13 +181,13 @@ export const SupportNavForLaptop = () => {
   return (
     <nav className="w-[80%] max-w-[700px] mx-auto fixed bottom-4 left-1/2 -translate-x-1/2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 shadow-inner z-50 rounded-xl px-2">
       <ul className="flex flex-wrap justify-around gap-y-2 px-3 py-3 text-sm sm:text-base text-gray-700 dark:text-gray-300">
-
         <Link href="/about-us">
-
-        <li className="hover:text-blue-500 cursor-pointer">About Us</li>
+          <li className="hover:text-blue-500 cursor-pointer">About Us</li>
+        </Link>
+        <Link href="/offers">
+          <li className="hover:text-blue-500 cursor-pointer">Offers</li>
         </Link>
         <li className="hover:text-blue-500 cursor-pointer">Contact</li>
-        <li className="hover:text-blue-500 cursor-pointer">FAQ</li>
         <li className="hover:text-blue-500 cursor-pointer">Support</li>
       </ul>
     </nav>

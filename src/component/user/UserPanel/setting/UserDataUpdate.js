@@ -6,6 +6,8 @@ import Image from "next/image";
 import { userLogin } from "@/redux/slice/user/userSlice";
 import { getUserDataApi } from "@/redux/slice/user/serviceApi";
 import ChangePassword from "./ChangePassword";
+import { useRouter } from "next/router";
+import Link from "next/link";
 
 const UserDataUpdate = () => {
   const { data: session } = useSession();
@@ -37,13 +39,16 @@ const UserDataUpdate = () => {
 
   useEffect(() => {
     if (session?.user && !userData) {
-      dispatch(getUserDataApi(userId)).unwrap().catch((err) => {
-        console.error("User Data Fetch Error:", err);
-      });
+      dispatch(getUserDataApi(userId))
+        .unwrap()
+        .catch((err) => {
+          console.error("User Data Fetch Error:", err);
+        });
     }
   }, [session, dispatch, userId, userData]);
 
-  if (!userData) return <div className="text-center mt-10">Data is loading...</div>;
+  if (!userData)
+    return <div className="text-center mt-10">Data is loading...</div>;
 
   const {
     businessIcon,
@@ -57,6 +62,7 @@ const UserDataUpdate = () => {
     termsAccepted,
     joiningDate,
     socialMediaLinks,
+    slug,
   } = userData;
 
   const words = bio?.split(" ") || [];
@@ -103,7 +109,9 @@ const UserDataUpdate = () => {
                       key={idx}
                       className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 shadow-sm"
                     >
-                      <p className="text-gray-700 dark:text-gray-100">{number}</p>
+                      <p className="text-gray-700 dark:text-gray-100">
+                        {number}
+                      </p>
                     </div>
                   ))}
                 </div>
@@ -113,6 +121,16 @@ const UserDataUpdate = () => {
                 <p className="text-sm text-gray-500">Email</p>
                 <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
                   {email}
+                </h3>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Website</p>
+                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
+                  <Link href={`/${slug}`}>
+                    {"https://www.bazar.sh/" + slug}{" "}
+                    {/* or display some title instead of slug */}
+                  </Link>
                 </h3>
               </div>
             </div>
@@ -143,7 +161,9 @@ const UserDataUpdate = () => {
               <div>
                 <p className="text-sm text-gray-500">Business Name</p>
                 <p className="text-lg font-medium text-gray-700 dark:text-gray-200">
-                  {businessName || <span className="text-gray-400">Not Provided</span>}
+                  {businessName || (
+                    <span className="text-gray-400">Not Provided</span>
+                  )}
                 </p>
               </div>
 
@@ -203,11 +223,21 @@ const UserDataUpdate = () => {
 
           {isOpen.SocialMediaLink && (
             <div className="mt-4 space-y-2">
-              {renderSocialLink("Instagram", socialMediaLinks?.insta)}
-              {renderSocialLink("Facebook", socialMediaLinks?.facebook)}
-              {renderSocialLink("LinkedIn", socialMediaLinks?.linkedin)}
-              {renderSocialLink("X (Twitter)", socialMediaLinks?.x)}
-              {renderSocialLink("YouTube", socialMediaLinks?.youtube)}
+              <div className="break-words">
+                {renderSocialLink("Instagram", socialMediaLinks?.insta)}
+              </div>
+              <div className="break-words">
+                {renderSocialLink("Facebook", socialMediaLinks?.facebook)}
+              </div>
+              <div className="break-words">
+                {renderSocialLink("LinkedIn", socialMediaLinks?.linkedin)}
+              </div>
+              <div className="break-words">
+                {renderSocialLink("X (Twitter)", socialMediaLinks?.x)}
+              </div>
+              <div className="break-words">
+                {renderSocialLink("YouTube", socialMediaLinks?.youtube)}
+              </div>
             </div>
           )}
         </div>

@@ -1,8 +1,11 @@
+import UnderConstruction from '@/component/user/UnderContruction'
 import React from 'react'
 
 const WhatappMarketing = () => {
   return (
-    <div className='h-screen'>WhatappMarketing</div>
+    <div className='h-screen'>
+      <UnderConstruction />
+    </div>
   )
 }
 

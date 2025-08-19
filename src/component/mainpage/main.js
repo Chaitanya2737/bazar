@@ -122,14 +122,11 @@ export default function Maincomp() {
         <AdminSponsorCard />
       </section>
 
+      {/* offer section  */}
       {/* Pricing Section */}
 
       <section>
         <Testimonials />
-      </section>
-
-        <section>
-        
       </section>
 
       {/* Footer */}

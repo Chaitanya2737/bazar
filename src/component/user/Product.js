@@ -63,21 +63,16 @@ const Product = () => {
     );
   }
 
-  const handleWhatsAppClick = (product) => {
-    const message = `
-Hi 👋, I'm interested in your product:
-
-🛍️ *${product.title}*
-
-🖼️ View Image: ${product.thumbnail}
-
-Could you please share more details?
+const handleWhatsAppClick = (product) => {
+  const message = `
+नमस्कार 🙏, मला आपल्या उत्पादनाबद्दल माहिती हवी आहे:
+कृपया अधिक माहिती देऊ शकाल का?
   `.trim();
+  const encodedMessage = encodeURIComponent(message);
+  const whatsappURL = `https://wa.me/${phone[0]}?text=${encodedMessage}`;
+  window.open(whatsappURL, "_blank");
+};
 
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappURL = `https://wa.me/${phone[0]}?text=${encodedMessage}`;
-    window.open(whatsappURL, "_blank");
-  };
 
   return (
     <div className="p-6 mx-0 md:mx-15 ">

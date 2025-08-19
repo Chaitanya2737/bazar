@@ -6,9 +6,7 @@ import {
   Twitter,
   Linkedin,
   Youtube,
-  Globe,
-  ChevronDown,
-  MessageCircle,
+  Mail,
 } from "lucide-react";
 import {
   Drawer,
@@ -17,141 +15,200 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { FaWhatsapp, FaLocationDot } from "react-icons/fa6";
+import { motion } from "framer-motion";
 
-const iconMap = {
-  facebook: <Facebook className="mr-2 h-5 w-5" />,
-  insta: <Instagram className="mr-2 h-5 w-5" />,
-  linkedin: <Linkedin className="mr-2 h-5 w-5" />,
-  x: <Twitter className="mr-2 h-5 w-5" />,
-  youtube: <Youtube className="mr-2 h-5 w-5" />,
-};
+const iconMap = [
+  {
+    icon: <Facebook className="h-5 w-5 text-white" />,
+    bg: "bg-gradient-to-r from-blue-600 to-blue-800",
+    key: "facebook",
+  },
+  {
+    icon: <Instagram className="h-5 w-5 text-white" />,
+    bg: "bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600",
+    key: "insta",
+  },
+  {
+    icon: <Linkedin className="h-5 w-5 text-white" />,
+    bg: "bg-gradient-to-r from-blue-500 to-cyan-600",
+    key: "linkedin",
+  },
+  {
+    icon: <Twitter className="h-5 w-5 text-white" />,
+    bg: "bg-gradient-to-r from-gray-700 to-black",
+    key: "x",
+  },
+  {
+    icon: <Youtube className="h-5 w-5 text-white" />,
+    bg: "bg-gradient-to-r from-red-500 to-red-700",
+    key: "youtube",
+  },
+];
 
 const Contact = ({ socialMediaLinks, email, location, mobileNumber }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const socialLinksArray = Object.entries(socialMediaLinks || {}).map(
     ([platformKey, url]) => ({
-      platform: platformKey,
+      platform: platformKey.toLowerCase(),
       url: url?.trim() || "#",
     })
   );
 
-  return (
-    <section className="dark:text-white w-[90%] mx-auto my-8 p-6 bg-gray-100 dark:bg-gray-900 rounded-lg shadow-lg transition-colors duration-300">
-      <div>
-        <h1 className="font-semibold text-4xl text-center mb-6">
-          Let&apos;s Connect With Us
-        </h1>
-      </div>
+  const buttonVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    hover: { scale: 1.1, transition: { duration: 0.2 } },
+  };
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+  return (
+    <section className="dark:text-white w-full max-w-5xl mx-auto my-12 p-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl transition-all duration-500">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="font-bold text-4xl md:text-5xl text-center mb-8 text-black dark:text-white">
+        Stay Connected
+        </h1>
+      </motion.div>
+
+      {/* Contact Buttons */}
+      <motion.div
+        className="grid grid-cols-3 gap-6 justify-items-center p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: { transition: { staggerChildren: 0.1 } },
+        }}
+      >
         {email && (
-          <div className="bg-white dark:bg-gray-700 p-5 rounded-lg shadow transition-transform duration-300 hover:scale-[1.02]">
-            <h2 className="text-xl font-semibold mb-3">
-              Connect Through Email
-            </h2>
+          <motion.div variants={buttonVariants}>
             <Button
+              asChild
               variant="outline"
-              className="w-full hover:bg-blue-50 dark:hover:bg-slate-800 transition"
+              className="h-15 w-15 flex items-center justify-center rounded-full shadow-md 
+                hover:bg-blue-100 dark:hover:bg-blue-900/30 hover:scale-110 
+                transition-all duration-300 border-2 border-blue-200 dark:border-blue-700"
             >
-              <a
-                href={`mailto:${email}`}
-                className="w-full text-center text-neutral-700 dark:text-neutral-200"
-                aria-label="Send email"
-              >
-                Send Mail
+              <a href={`mailto:${email}`} aria-label="Send email">
+                <Mail className="h-9 w-9 text-blue-600 dark:text-blue-400" />
               </a>
             </Button>
-          </div>
+          </motion.div>
         )}
 
         {Array.isArray(mobileNumber) && mobileNumber.length > 0 && (
-          <div className="bg-white dark:bg-gray-700 p-5 rounded-lg shadow transition-transform duration-300 hover:scale-[1.02]">
-            <h2 className="text-xl font-semibold mb-3 text-gray-800 dark:text-gray-100">
-              Connect Through WhatsApp
-            </h2>
-
+          <motion.div variants={buttonVariants}>
             <Drawer>
               <DrawerTrigger asChild>
                 <Button
                   variant="outline"
-                  className="w-full hover:bg-green-100 dark:hover:bg-slate-800 transition-all duration-300"
+                  className="h-15 w-15 flex items-center justify-center rounded-full shadow-md 
+                    hover:bg-green-100 dark:hover:bg-green-900/30 hover:scale-110 
+                    transition-all duration-300 border-2 border-green-200 dark:border-green-700"
                 >
-                  Send WhatsApp Message
+                  <FaWhatsapp className="h-9 w-9 text-green-600 dark:text-green-400" />
                 </Button>
               </DrawerTrigger>
 
-              <DrawerContent>
+              <DrawerContent className="bg-white dark:bg-gray-800">
                 <DrawerHeader>
-                  <DrawerTitle className="text-lg">Choose a Number</DrawerTitle>
+                  <DrawerTitle className="text-xl font-semibold text-center">
+                    Contact via WhatsApp
+                  </DrawerTitle>
                 </DrawerHeader>
-
-                <div className="px-4 pb-4 space-y-2">
+                <div className="px-6 pb-6 space-y-3 max-h-60 overflow-y-auto">
                   {mobileNumber.map((number, index) => (
-                    <a
+                    <motion.a
                       key={index}
                       href={`https://wa.me/${number}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block w-full px-4 py-2 text-center rounded-md bg-green-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100 hover:bg-green-200 dark:hover:bg-gray-700 transition"
+                      className="block w-full px-4 py-3 text-center rounded-lg 
+                        bg-green-50 dark:bg-green-900/20 
+                        text-green-800 dark:text-green-200 
+                        hover:bg-green-100 dark:hover:bg-green-800/30 
+                        transition-all duration-200"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                     >
                       {number}
-                    </a>
+                    </motion.a>
                   ))}
                 </div>
               </DrawerContent>
             </Drawer>
-          </div>
+          </motion.div>
         )}
 
         {location && (
-          <div className="bg-white dark:bg-gray-700 p-5 rounded-lg shadow transition-transform duration-300 hover:scale-[1.02]">
-            <h2 className="text-xl font-semibold mb-3">Location</h2>
+          <motion.div variants={buttonVariants}>
             <Button
+              asChild
               variant="outline"
-              className="w-full hover:bg-gray-200 dark:hover:bg-slate-800 transition"
+              className="h-15 w-15 flex items-center justify-center rounded-full shadow-md 
+                hover:bg-gray-100 dark:hover:bg-gray-700/30 hover:scale-110 
+                transition-all duration-300 border-2 border-gray-200 dark:border-gray-600"
             >
               <a
                 href={location}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full text-center text-neutral-700 dark:text-neutral-200"
                 aria-label="View location"
               >
-                View Location
+                <FaLocationDot className="h-9 w-9 text-gray-600 dark:text-gray-300" />
               </a>
             </Button>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {/* Social Media Section */}
-      {socialLinksArray.length > 0 && (
-        <div className="p-4 bg-white dark:bg-gray-700 rounded-lg shadow mt-8">
-          <h2 className="text-xl font-semibold mb-4 text-center">
-            Connect on Social Media
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {socialLinksArray.map((link, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                className="w-full h-auto flex items-center justify-start hover:bg-indigo-50 dark:hover:bg-slate-800 transition"
-              >
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex justify-center items-center text-neutral-700 dark:text-neutral-200 w-full h-full"
-                  aria-label={`Visit ${link.platform}`}
+      <motion.div
+        className="p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg mt-8"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 1.2, delay: 0.2 }}
+      >
+        <motion.div
+          className="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-8 justify-items-center"
+          variants={{
+            visible: { transition: { staggerChildren: 0.1 } },
+          }}
+          initial="hidden"
+          animate="visible"
+        >
+          {socialLinksArray.map((link, index) => {
+            const matchedIcon = iconMap.find(
+              (item) => item.key === link.platform
+            );
+
+            // ⛔ Skip platforms without icons (no default fallback)
+            if (!matchedIcon) return null;
+
+            return (
+              <motion.div key={index} variants={buttonVariants}>
+                <Button
+                  asChild
+                  className={`h-12 w-12 flex items-center justify-center rounded-full shadow-lg 
+                    transition-all duration-300 ${matchedIcon.bg}`}
                 >
-                  {iconMap[link.platform] || <Globe className="h-6 w-6" />}
-                </a>
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Visit ${link.platform}`}
+                  >
+                    {matchedIcon.icon}
+                  </a>
+                </Button>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </motion.div>
     </section>
   );
 };

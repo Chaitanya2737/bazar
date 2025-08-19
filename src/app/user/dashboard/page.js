@@ -6,9 +6,7 @@ import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { userLogout, userLogin } from "@/redux/slice/user/userSlice";
 import { useRouter } from "next/navigation";
 import { getUserDataApi } from "@/redux/slice/user/serviceApi";
-import MainSection from "@/component/preview/MainSection";
 import HeroMarketing from "@/component/user/UserPanel/HeroForUser";
-import Referral from "@/component/user/UserPanel/Referral";
 import SiteOffer from "@/component/user/SiteOffer/SiteOffer";
 
 const UserDashboardPage = () => {
@@ -60,50 +58,42 @@ const UserDashboardPage = () => {
     );
   }
 
-  const {
-    businessName,
-    mobileNumber,
-    businessIcon,
-    email,
-    handlerName,
-    socialMediaLinks,
-    businessLocation,
-    bio,
-  } = userdata?.userData || {};
+  // const {
+  //   businessName,
+  //   mobileNumber,
+  //   businessIcon,
+  //   email,
+  //   handlerName,
+  //   socialMediaLinks,
+  //   businessLocation,
+  //   bio,
+  // } = userdata?.userData || {};
 
   return (
     <div className="relative text-black dark:bg-gray-800 dark:text-white min-h-screen overflow-x-hidden">
-      {/* <div
-        className="text-start mt-7 mx-3 rounded-lg shadow-md"
-        style={{
-          background: darkMode
-            ? "linear-gradient(316deg, #523a78 0%, #caefd7 30%, #ee696b 120%)"
-            : "radial-gradient(circle, #f6c4ed 0%, #caefd7 50%, #b5c6e0 100%)",
-        }}
-      >
-        <MainSection
-          businessName={businessName}
-          icon={businessIcon}
-          mobileNumber={mobileNumber}
-          bio={bio}
-          email={email}
-          handlerName={handlerName}
-          socialMediaLinks={socialMediaLinks}
-          location={businessLocation || ""}
-        />
-      </div> */}
-
-      
 
       <div>
         <HeroMarketing />
       </div>
-      <div>
-        <SiteOffer />
-      </div>
+      <div className="px-4 md:px-8 mt-6">
+        <div
+          className="rounded-2xl shadow-lg p-6 my-3 md:p-8 transition-all duration-300"
+          style={{
+            background: darkMode
+              ? "linear-gradient(160deg, #2d2d3a 0%, #1e1e28 100%)"
+              : "linear-gradient(160deg, #ffffff 0%, #f1f5f9 100%)",
+          }}
+        >
+          <h2 className="text-xl md:text-2xl font-bold mb-2 text-center">
+            🎁 ग्राहकांसाठी खास ऑफर्स जोडा
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-6">
+            आपल्या व्यवसायासाठी मर्यादित कालावधीच्या ऑफर्स तयार करा!
+          </p>
 
-      <div>
-        <Referral />
+          {/* Site Offer Component */}
+          <SiteOffer />
+        </div>
       </div>
     </div>
   );

@@ -1,9 +1,10 @@
+import UnderConstruction from '@/component/user/UnderContruction'
 import React from 'react'
 
 const GoogleMarketing = () => {
   return (
     <div>
-      GoogleMarketing
+      <UnderConstruction />
     </div>
   )
 }

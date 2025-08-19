@@ -1,9 +1,10 @@
+import UnderConstruction from '@/component/user/UnderContruction'
 import React from 'react'
 
 const FacebookMarketing = () => {
   return (
     <div>
-      FacebookMarketing
+      <UnderConstruction />
     </div>
   )
 }
