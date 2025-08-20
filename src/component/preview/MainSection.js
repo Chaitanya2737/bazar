@@ -77,11 +77,17 @@ const MainSection = ({
 
         {/* Right: Info */}
         <div className="space-y-5 text-gray-900 dark:text-white md:pl-10 md:ml-6 md:border-l-2 md:border-gray-200 dark:md:border-gray-700">
-          <h1 className="text-5xl text-center font-extrabold tracking-tight leading-tight text-gray-900 dark:text-gray-100 animate-fadeIn">
-            {businessName || (
-              <Skeleton className="w-48 h-8 bg-gray-800 dark:bg-gray-200" />
-            )}
-          </h1>
+       <h1
+  className="text-5xl text-center font-extrabold tracking-tight leading-tight 
+             text-gray-900 dark:text-gray-100 animate-fadeIn 
+             break-words break-all max-w-full"
+>
+  {businessName || (
+    <Skeleton className="w-48 h-8 bg-gray-800 dark:bg-gray-200" />
+  )}
+</h1>
+
+
           <div className="space-y-1">
             {" "}
             {/* reduced spacing */}

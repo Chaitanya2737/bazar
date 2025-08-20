@@ -8,7 +8,9 @@ const PreviewOffer = ({ userId }) => {
 
   const fetchOffer = async () => {
     try {
-      const response = await axios.post("/api/user/siteoffer/preview", { userId });
+      const response = await axios.post("/api/user/siteoffer/preview", {
+        userId,
+      });
       setOffer(response.data.offer); // store only the offer object
     } catch (error) {
       console.error("Error fetching offer:", error);
@@ -21,7 +23,7 @@ const PreviewOffer = ({ userId }) => {
     }
   }, [userId]);
 
-  if (!offer) return
+  if (!offer) return;
   return (
     <div className="flex items-center text-white bg-slate-800 dark:bg-fuchsia-300/50 dark:text-neutral-900 p-2 my-3 rounded-lg shadow-md gap-3 ">
       {/* Special Offer Logo — drop from top + blink */}
