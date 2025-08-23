@@ -24,11 +24,8 @@ export async function PATCH(request) {
         { status: 401 }
       );
     }
-
     const filter = { _id: userId };
     let updateQuery = {};
-
-   
 
     if (mobileIndex !== undefined && newMobile) {
       // 🔹 Update a specific mobile number at given index

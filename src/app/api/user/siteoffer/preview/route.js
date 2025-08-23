@@ -23,7 +23,6 @@ export async function POST(request) {
       );
     }
 
-    console.log(offer);
 
     return NextResponse.json(
       { success: true, offer },

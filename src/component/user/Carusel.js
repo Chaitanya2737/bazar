@@ -10,9 +10,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 
 const Carusel = ({ image }) => {
+  if (!image || image.length === 0) return null; // Return nothing if no images
+
   return (
     <Carousel className="relative w-[90%] mx-auto py-12 dark:bg-gray-800 dark:text-white">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center">Runway Reels</h1>
+      <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center">
+        Runway Reels
+      </h1>
 
       {/* Carousel Slides */}
       <CarouselContent>
@@ -36,8 +40,8 @@ const Carusel = ({ image }) => {
         ))}
       </CarouselContent>
 
-      {/* Navigation Buttons - Centered */}
-      <CarouselPrevious className=" absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur-md hover:bg-white text-black rounded-full p-5 shadow" />
+      {/* Navigation Buttons */}
+      <CarouselPrevious className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur-md hover:bg-white text-black rounded-full p-5 shadow" />
       <CarouselNext className="absolute right-5 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur-md hover:bg-white text-black rounded-full p-5 shadow" />
     </Carousel>
   );

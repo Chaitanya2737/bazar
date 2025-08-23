@@ -7,7 +7,6 @@ const MAX_FILE_SIZE = 1024 * 1024 * 100; // 100MB
 const MAX_FILES = 5;
 
 export async function POST(request) {
-  console.log("POST /api/user/detail called");
   let id; // define early for catch block
 
   try {

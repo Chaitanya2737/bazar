@@ -14,7 +14,6 @@ const intervalId = setInterval(cleanExpiredCache, 60 * 1000);
 // Cleanup the interval if server is shutting down
 process.on('SIGINT', () => {
   clearInterval(intervalId);
-  console.log("Cache cleanup interval cleared.");
   process.exit();
 });
 
@@ -31,7 +30,6 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid JSON format' }, { status: 400 });
     }
 
-    console.log('Received body:', body);
 
     // Validate subdomain format
     // if (!body?.subdomain || !isValidSubdomain(body.subdomain)) {

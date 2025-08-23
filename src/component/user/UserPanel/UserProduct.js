@@ -27,6 +27,7 @@ const UserProduct = () => {
 
   const selector = useSelector((state) => state.userAuth);
   const user = useSelector((state) => state.userdata?.userData);
+  console.log(user);
 
   const id = user?._id || selector?._id;
   const businessName = user?.businessName || "default-business";
