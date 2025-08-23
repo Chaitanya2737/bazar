@@ -6,8 +6,9 @@ import Image from "next/image";
 import { userLogin } from "@/redux/slice/user/userSlice";
 import { getUserDataApi } from "@/redux/slice/user/serviceApi";
 import ChangePassword from "./ChangePassword";
-import { useRouter } from "next/router";
 import Link from "next/link";
+import Updatedata from "./customehook/Updatedata";
+import { motion, AnimatePresence } from "framer-motion";
 
 const UserDataUpdate = () => {
   const { data: session } = useSession();
@@ -39,11 +40,7 @@ const UserDataUpdate = () => {
 
   useEffect(() => {
     if (session?.user && !userData) {
-      dispatch(getUserDataApi(userId))
-        .unwrap()
-        .catch((err) => {
-          console.error("User Data Fetch Error:", err);
-        });
+      dispatch(getUserDataApi(userId)).unwrap().catch(console.error);
     }
   }, [session, dispatch, userId, userData]);
 
@@ -70,177 +67,168 @@ const UserDataUpdate = () => {
   const shortBio = isLongBio ? words.slice(0, 30).join(" ") + "..." : bio;
 
   return (
-    <div className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Profile Header */}
-      <div className="flex flex-col items-center space-y-4 my-6 border-b pb-6">
+      <div className="flex flex-col items-center space-y-4 my-6">
         <Image
           src={businessIcon}
           alt="Business Icon"
-          width={150}
-          height={150}
-          className="rounded-xl"
+          width={120}
+          height={120}
+          className="rounded-2xl shadow-md"
         />
-        <h1 className="text-xl font-bold text-gray-800 dark:text-white">
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
           {businessName || "Business Name Not Provided"}
         </h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Basic Information */}
-        <div className="border p-6 rounded-2xl shadow-sm bg-white dark:bg-gray-800 space-y-6">
-          <h2 className="text-2xl font-semibold text-gray-900 dark:text-white">
-            Basic Information
-          </h2>
-
-          {isOpen.BasicCategories && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-500">Handler Name</p>
-                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
-                  {handlerName}
-                </h3>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500 mb-2">Mobile Numbers</p>
-                <div className="grid grid-cols-2 md:grid-cols-1 gap-4">
-                  {mobileNumber.map((number, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 rounded-lg bg-gray-50 dark:bg-gray-700 shadow-sm"
-                    >
-                      <p className="text-gray-700 dark:text-gray-100">
-                        {number}
-                      </p>
-                    </div>
-                  ))}
+        {/* Basic Info */}
+        <Card
+          title="Basic Information"
+          open={isOpen.BasicCategories}
+          onToggle={() =>
+            setIsOpen((prev) => ({
+              ...prev,
+              BasicCategories: !prev.BasicCategories,
+            }))
+          }
+        >
+   
+            <InfoRow label="Handler Name" value={handlerName}>
+              <Updatedata
+                userID={userId}
+                fieldKey="handlerName"
+                fieldValue={handlerName}
+                Title="Update handler name"
+              />
+            </InfoRow>
+       
+          <InfoRow label="Mobile Numbers">
+            <div className="flex flex-col gap-2 w-full">
+              {mobileNumber.map((num, idx) => (
+                <div
+                  key={idx}
+                  className="flex justify-between items-center px-3 py-2 rounded-xl bg-gray-100 dark:bg-gray-700"
+                >
+                  <p className="text-gray-800 dark:text-gray-200">{num}</p>
+                  <Updatedata
+                    userID={userId}
+                    fieldKey="mobileNumber" // tell component what field
+                    fieldValue={num} // pass the single number
+                    mobileIndex={idx} // which index in array
+                    Title={`Update Mobile #${idx + 1}`}
+                  />
                 </div>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
-                  {email}
-                </h3>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Website</p>
-                <h3 className="text-lg font-medium text-gray-800 dark:text-gray-200">
-                  <Link href={`/${slug}`}>
-                    {"https://www.bazar.sh/" + slug}{" "}
-                    {/* or display some title instead of slug */}
-                  </Link>
-                </h3>
-              </div>
+              ))}
             </div>
-          )}
-        </div>
+          </InfoRow>
 
-        {/* Business Information */}
-        <div className="border p-6 rounded-2xl shadow-sm bg-white dark:bg-gray-800 space-y-6">
-          <div className="flex justify-between items-center border-b pb-2">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-              Business Information
-            </h2>
-            <button
-              onClick={() =>
-                setIsOpen((prev) => ({
-                  ...prev,
-                  BusinessCategories: !prev.BusinessCategories,
-                }))
-              }
-              className="text-sm text-blue-500 hover:underline"
+          <InfoRow label="Email" value={email}>
+            <Updatedata
+              userID={userId}
+              fieldKey="email"
+              fieldValue={email}
+              Title="Update email"
+            />
+          </InfoRow>
+
+          <InfoRow label="Website">
+            <Link
+              href={`/${slug}`}
+              className="text-blue-600 hover:underline"
+              target="_blank"
             >
-              {isOpen.BusinessCategories ? "Hide" : "Show"}
-            </button>
-          </div>
+              {"https://www.bazar.sh/" + slug}
+            </Link>
+            <Updatedata
+              userID={userId}
+              fieldKey="slug"
+              fieldValue={slug}
+              Title="Update domain name"
+            />
+          </InfoRow>
+        </Card>
 
-          {isOpen.BusinessCategories && (
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-500">Business Name</p>
-                <p className="text-lg font-medium text-gray-700 dark:text-gray-200">
-                  {businessName || (
-                    <span className="text-gray-400">Not Provided</span>
-                  )}
-                </p>
-              </div>
+        {/* Business Info */}
+        <Card
+          title="Business Information"
+          open={isOpen.BusinessCategories}
+          onToggle={() =>
+            setIsOpen((prev) => ({
+              ...prev,
+              BusinessCategories: !prev.BusinessCategories,
+            }))
+          }
+        >
+          <InfoRow
+            label="Business Name"
+            value={businessName || "Not Provided"}
+          />
 
-              {bio && (
-                <div>
-                  <p className="text-sm text-gray-500">Bio</p>
-                  <p className="text-base text-gray-700 dark:text-gray-200 leading-relaxed">
-                    {showFullBio ? bio : shortBio}
-                    {isLongBio && (
-                      <button
-                        onClick={() => setShowFullBio(!showFullBio)}
-                        className="ml-2 text-blue-500 text-sm hover:underline"
-                      >
-                        {showFullBio ? "Show Less" : "Read More"}
-                      </button>
-                    )}
-                  </p>
-                </div>
-              )}
-
-              <Info label="Admin Id" value={admin || "Not Assigned"} />
-              <Info label="GST Number" value={gstNumber || "Not Provided"} />
-              <Info
-                label="Terms & Conditions"
-                value={termsAccepted ? "Accepted" : "Not Accepted"}
+          {bio && (
+            <InfoRow label="Bio">
+              <p className="text-gray-700 dark:text-gray-200">
+                {showFullBio ? bio : shortBio}
+                {isLongBio && (
+                  <button
+                    onClick={() => setShowFullBio(!showFullBio)}
+                    className="ml-2 text-blue-500 text-sm hover:underline"
+                  >
+                    {showFullBio ? "Show Less" : "Read More"}
+                  </button>
+                )}
+              </p>
+              <Updatedata
+                userID={userId}
+                fieldKey="bio"
+                fieldValue={bio}
+                Title="Update bio"
               />
-              <Info
-                label="Joining Date"
-                value={
-                  joiningDate
-                    ? new Date(joiningDate).toLocaleDateString()
-                    : "Not Available"
-                }
-              />
-            </div>
+            </InfoRow>
           )}
-        </div>
+
+          <InfoRow label="Admin Id" value={admin || "Not Assigned"} />
+          <InfoRow label="GST Number" value={gstNumber || "Not Provided"}>
+            <Updatedata
+              userID={userId}
+              fieldKey="gstNumber"
+              fieldValue={gstNumber}
+              Title="Update GST"
+            />
+          </InfoRow>
+
+          <InfoRow
+            label="Terms & Conditions"
+            value={termsAccepted ? "Accepted" : "Not Accepted"}
+          />
+          <InfoRow
+            label="Joining Date"
+            value={
+              joiningDate
+                ? new Date(joiningDate).toLocaleDateString()
+                : "Not Available"
+            }
+          />
+        </Card>
 
         {/* Social Media */}
-        <div className="border p-6 rounded-2xl shadow-sm bg-white dark:bg-gray-800 space-y-6">
-          <div className="flex justify-between items-center border-b pb-2">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Social Media Accounts
-            </h2>
-            <button
-              onClick={() =>
-                setIsOpen((prev) => ({
-                  ...prev,
-                  SocialMediaLink: !prev.SocialMediaLink,
-                }))
-              }
-              className="text-sm text-blue-500 hover:underline"
-            >
-              {isOpen.SocialMediaLink ? "Hide" : "Show"}
-            </button>
-          </div>
-
-          {isOpen.SocialMediaLink && (
-            <div className="mt-4 space-y-2">
-              <div className="break-words">
-                {renderSocialLink("Instagram", socialMediaLinks?.insta)}
-              </div>
-              <div className="break-words">
-                {renderSocialLink("Facebook", socialMediaLinks?.facebook)}
-              </div>
-              <div className="break-words">
-                {renderSocialLink("LinkedIn", socialMediaLinks?.linkedin)}
-              </div>
-              <div className="break-words">
-                {renderSocialLink("X (Twitter)", socialMediaLinks?.x)}
-              </div>
-              <div className="break-words">
-                {renderSocialLink("YouTube", socialMediaLinks?.youtube)}
-              </div>
-            </div>
-          )}
-        </div>
+        <Card
+          title="Social Media Accounts"
+          open={isOpen.SocialMediaLink}
+          onToggle={() =>
+            setIsOpen((prev) => ({
+              ...prev,
+              SocialMediaLink: !prev.SocialMediaLink,
+            }))
+          }
+        >
+          {renderSocialLink("Instagram", socialMediaLinks?.insta)}
+          {renderSocialLink("Facebook", socialMediaLinks?.facebook)}
+          {renderSocialLink("LinkedIn", socialMediaLinks?.linkedin)}
+          {renderSocialLink("X (Twitter)", socialMediaLinks?.x)}
+          {renderSocialLink("YouTube", socialMediaLinks?.youtube)}
+        </Card>
 
         <ChangePassword />
       </div>
@@ -248,11 +236,49 @@ const UserDataUpdate = () => {
   );
 };
 
-// Reusable subcomponents
-const Info = ({ label, value }) => (
+/* ✅ Reusable Components */
+
+const Card = ({ title, children, open, onToggle }) => (
+  <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-sm p-6">
+    <div className="flex justify-between items-center border-b pb-3 mb-4">
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+        {title}
+      </h2>
+      <button
+        onClick={onToggle}
+        className="text-sm text-blue-500 hover:underline"
+      >
+        {open ? "Hide" : "Show"}
+      </button>
+    </div>
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.2 }}
+          className="space-y-5"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  </div>
+);
+const InfoRow = ({ label, value, children }) => (
   <div>
-    <p className="text-sm text-gray-500">{label}</p>
-    <p className="text-gray-700 dark:text-gray-200">{value}</p>
+    {" "}
+    <p className="text-sm text-gray-500">{label}</p>{" "}
+    <div className="flex justify-between items-center gap-2">
+      {" "}
+      {value ? (
+        <p className="text-gray-800 dark:text-gray-200">{value}</p>
+      ) : (
+        <p className="text-gray-400"></p>
+      )}{" "}
+      {children}{" "}
+    </div>{" "}
   </div>
 );
 
@@ -265,7 +291,7 @@ const renderSocialLink = (platform, url) => {
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-600 hover:underline"
+        className="text-blue-600 hover:underline break-words"
       >
         {url}
       </a>

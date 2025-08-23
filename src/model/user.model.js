@@ -103,24 +103,21 @@ const userSchema = new mongoose.Schema({
     ref: "referral",
     unique: true,
     sparse: true, // Allows null values without uniqueness conflict
-  }, 
- siteoffer: [
-  {
-    offerId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Offer",
-     
+  },
+  siteoffer: [
+    {
+      offerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Offer",
+      },
+      offerStartDate: {
+        type: Date,
+      },
+      offerExpiryDate: {
+        type: Date,
+      },
     },
-    offerStartDate: {
-      type: Date,
-      
-    },
-    offerExpiryDate: {
-      type: Date,
-   
-    }
-  }
-],
+  ],
 
   products: {
     type: mongoose.Schema.Types.ObjectId,
