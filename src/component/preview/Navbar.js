@@ -15,6 +15,7 @@ import {
 import { useTheme } from "next-themes";
 import { useDispatch, useSelector } from "react-redux";
 import { setDarkMode } from "@/redux/slice/theme/themeSlice";
+import Image from "next/image";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -76,41 +77,13 @@ export default function Navbar() {
                 size="icon"
                 className="h-10 w-10 [&>svg]:!h-6 [&>svg]:!w-6 rounded-full relative overflow-hidden"
               >
-                {/* Animated background layer */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  {/* Glow Pulse */}
-                  <motion.div
-                    animate={{
-                      scale: [1.5, 1.08, 0.5],
-                      boxShadow: [
-                        "0 0 4px #f59e0b",
-                        "0 0 12px #f59e0b",
-                        "0 0 4px #f59e0b",
-                      ],
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 1,
-                      ease: "easeInOut",
-                    }}
-                    className="absolute h-8 w-8 rounded-full"
-                  />
-
-                  {/* Shiny Sweep */}
-                  {/* <motion.div
-            className="absolute h-8 w-8 rounded-full bg-gradient-to-r from-transparent via-white/40 to-transparent"
-            initial={{ x: "-120%" }}
-            animate={{ x: "120%" }}
-            transition={{
-              repeat: Infinity,
-              duration: 1.2,
-              ease: "linear"
-            }}
-          /> */}
-                </div>
-
-                {/* Icon above animation */}
-                <BadgePercent className="relative z-10" />
+                <Image
+                  src="/offerImage.png"
+                  alt="Offer"
+                  width={55}
+                  height={55}
+                  className="absolute inset-0 m-auto animate-wiggle"
+                />
               </Button>
             </Link>
           </TooltipTrigger>
@@ -120,21 +93,21 @@ export default function Navbar() {
         </Tooltip>
 
         {/* Contact */}
-       <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10 [&>svg]:!h-6 [&>svg]:!w-6 rounded-full"
-            onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-          >
-            {theme === "light" ? <Moon /> : <Sun />}
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="top">
-          <p>Toggle Theme</p>
-        </TooltipContent>
-      </Tooltip>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 [&>svg]:!h-6 [&>svg]:!w-6 rounded-full"
+              onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+            >
+              {theme === "light" ? <Moon /> : <Sun />}
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            <p>Toggle Theme</p>
+          </TooltipContent>
+        </Tooltip>
       </motion.nav>
     </TooltipProvider>
   );

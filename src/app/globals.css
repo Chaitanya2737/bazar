@@ -226,3 +226,11 @@ button:hover {
   background-size: 600% 600%;
   animation: gradientMove 12s ease infinite;
 }
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+.animate-wiggle {
+  animation: wiggle 1s ease-in-out infinite;
+}
