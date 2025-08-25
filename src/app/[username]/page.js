@@ -161,15 +161,35 @@ const UserPreview = () => {
   const renderUserDataSkeleton = loading || !data;
   const renderMainSectionSkeleton = loading || !data;
 
+  console.log(data);
+
   return (
     <>
-     <Head>
+      <Head>
         <title>{data?.businessName || "Bazar SH"}</title>
         <meta
           name="description"
           content={data?.bio || "User profile on Bazar SH"}
         />
+        <meta
+          name="keywords"
+          content={[
+            data?.businessName,
+            "Bazar SH",
+            `${data?.businessName} near me`,
+            ...(data?.bio ? data.bio.split(" ").slice(0, 10) : []),
+            "online marketplace",
+            "buy and sell",
+            "local business",
+            "products",
+            "services",
+            "shop online",
+          ]
+            .filter(Boolean)
+            .join(", ")}
+        />
       </Head>
+
       <div className="bg-white text-black dark:bg-gray-800 dark:text-white min-h-screen p-4 relative">
         <Toaster />
         <Navbar />
@@ -178,9 +198,8 @@ const UserPreview = () => {
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
-          <PreviewOffer userId = {data?._id} />
+          <PreviewOffer userId={data?._id} />
         )}
-
 
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
@@ -212,14 +231,12 @@ const UserPreview = () => {
           />
         )}
 
-             {/* <Userpreviewcount count={backendVisitCount} /> */}
+        {/* <Userpreviewcount count={backendVisitCount} /> */}
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <Carusel image={image} />
         )}
-
-     
 
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
@@ -232,14 +249,12 @@ const UserPreview = () => {
         ) : (
           <Product />
         )}
-        
-           {renderMainSectionSkeleton ? (
+
+        {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <HeroSection />
         )}
-
-   
 
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />

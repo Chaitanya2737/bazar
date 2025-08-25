@@ -7,7 +7,6 @@ import bcrypt from "bcryptjs";
 import cloudinary from "@/lib/cloudinaryConfig";
 import slugify from "slugify";
 
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpeg"];
 
@@ -19,8 +18,6 @@ function generateSlug(name) {
     .replace(/-+/g, "-") // collapse multiple hyphens
     .toLowerCase(); // lowercases only Latin letters, Marathi stays as-is
 }
-
-
 
 export async function POST(req) {
   try {
@@ -34,7 +31,6 @@ export async function POST(req) {
         { status: 400 }
       );
     }
-  
 
     let user;
     try {
@@ -77,12 +73,10 @@ export async function POST(req) {
         },
         { status: 400 }
       );
-
     }
 
-
     // Validate references
-    const adminDoc = await AdminModel.findById(user.admin );
+    const adminDoc = await AdminModel.findById(user.admin);
     if (!adminDoc) {
       return NextResponse.json(
         { success: false, message: "Admin not found" },
@@ -98,10 +92,9 @@ export async function POST(req) {
       );
     }
 
-    
     // Hash the password
     const hashedPassword = await bcrypt.hash(user.password, 10);
-let slugVariable = generateSlug(user.businessName);
+    let slugVariable = generateSlug(user.businessName);
 
     // File upload handling
     let businessIconUrl = "";
@@ -122,9 +115,7 @@ let slugVariable = generateSlug(user.businessName);
         );
       }
 
-     let folder = (user.businessName || "").trim();
-
-
+      let folder = (user.businessName || "").trim();
 
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
@@ -145,15 +136,10 @@ let slugVariable = generateSlug(user.businessName);
       }
     }
 
-
-  
-
-
-
     // Create new user
     const newUser = new UserModel({
       businessName: user.businessName,
-      slug:slugVariable,
+      slug: slugVariable,
       handlerName: user.handlerName,
       mobileNumber: mobileNumbers,
       email: user.email,
@@ -176,7 +162,7 @@ let slugVariable = generateSlug(user.businessName);
         linkedin: user.linkedin || "",
       },
       businessIcon: businessIconUrl,
-      count:0
+      count: 0,
     });
 
     await newUser.save();
@@ -195,34 +181,33 @@ let slugVariable = generateSlug(user.businessName);
       { status: 201 }
     );
   } catch (error) {
-  console.error("Unhandled error:", error);
+    console.error("Unhandled error:", error);
 
-  // Handle MongoDB Duplicate Key Error
-  if (error.code === 11000) {
-    const duplicateField = Object.keys(error.keyPattern)[0]; // e.g., "businessName"
-    const duplicateValue = error.keyValue[duplicateField];
+    // Handle MongoDB Duplicate Key Error
+    if (error.code === 11000) {
+      const duplicateField = Object.keys(error.keyPattern)[0]; // e.g., "businessName"
+      const duplicateValue = error.keyValue[duplicateField];
 
+      return NextResponse.json(
+        {
+          success: false,
+          message: `${duplicateField} "${duplicateValue}" already exists.`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Generic fallback
     return NextResponse.json(
       {
         success: false,
-        message: `${duplicateField} "${duplicateValue}" already exists.`,
+        message: "Internal Server Error",
+        error:
+          process.env.NODE_ENV === "development" ? error.message : undefined,
       },
-      { status: 400 }
+      { status: 500 }
     );
   }
-
-  // Generic fallback
-  return NextResponse.json(
-    {
-      success: false,
-      message: "Internal Server Error",
-      error:
-        process.env.NODE_ENV === "development" ? error.message : undefined,
-    },
-    { status: 500 }
-  );
-}
-
 }
 
 export async function GET() {
