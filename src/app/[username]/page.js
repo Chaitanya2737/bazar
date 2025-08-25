@@ -22,6 +22,7 @@ import Footer from "@/component/user/Footer";
 import Video from "@/component/user/Video";
 import Product from "@/component/user/Product";
 import PreviewOffer from "@/component/user/SiteOffer/PreviewOffer";
+import Head from "next/head";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -162,6 +163,13 @@ const UserPreview = () => {
 
   return (
     <>
+     <Head>
+        <title>{data?.businessName || "Bazar SH"}</title>
+        <meta
+          name="description"
+          content={data?.bio || "User profile on Bazar SH"}
+        />
+      </Head>
       <div className="bg-white text-black dark:bg-gray-800 dark:text-white min-h-screen p-4 relative">
         <Toaster />
         <Navbar />
