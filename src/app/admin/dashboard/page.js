@@ -26,7 +26,7 @@ const UserDashboardPage = () => {
       setIsRoleValid(false);
     }
   }, [session, dispatch, admin?.id]);
-
+  
   // Loading state
   if (status === "loading") {
     return (

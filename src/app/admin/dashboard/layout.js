@@ -24,6 +24,7 @@ export default function RootLayout({ children }) {
       <Head>
         <title>{metadata.title}</title>
         <meta name="description" content={metadata.description} />
+        <meta name="google-site-verification" content="qdEF9AwQZuLr3H3bWxnk8hjpXsgPiOKm5ujetKR0x3k" />
       </Head>
 
       <UserNav />
