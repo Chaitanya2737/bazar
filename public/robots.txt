@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.bazar.sh
+
+# Sitemaps
+Sitemap: https://www.bazar.sh/sitemap.xml
