@@ -22,13 +22,12 @@ const DisplayOffer = () => {
     fetchOffer();
   }, []);
 
-
-
+  
 
 
   const openWhatsApp = (contact) => {
     if (!contact) return;
-    const phone = contact.replace(/\D/g, ""); // sanitize phone number
+    const phone = contact.replace(/\D/g, "");
     window.open(`https://wa.me/${phone}`, "_blank");
   };
 

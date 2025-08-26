@@ -27,6 +27,8 @@ export default function OfferDateDrawer() {
   const businessName = user?.businessName;
   const contact = user?.mobileNumber?.[0];
 
+  console.log(contact, "contact");
+
   const getOfferDate = () => {
     if (intervalDays) {
       const date = new Date();
@@ -60,6 +62,7 @@ const handleSubmit = async () => {
     };
 
     const res = await axios.post("/api/user/siteoffer", payload);
+    console.log(contact, "contact");
 
     if (res.data.success) {
       toast.success("Offer added successfully 🎉");
