@@ -116,29 +116,16 @@ export async function POST(req) {
       }
       let folder = (user.businessName || "").trim();
 
-      // Find unsupported characters first
-      const invalidChars = (user.businessName.match(/[^a-zA-Z0-9\s/_-]/g) || [])
-        .filter((v, i, arr) => arr.indexOf(v) === i) // unique only
-        .join(" ");
-
-      // Sanitize: replace spaces with underscores & remove invalid chars
+      // Sanitize → replace spaces with underscores, remove unsupported chars
       folder = folder
-        .replace(/\s+/g, "_")
-        .replace(/[^a-zA-Z0-9/_-]/g, "")
-        .replace(/^\/+|\/+$/g, "")
-        .replace(/\/{2,}/g, "/");
+        .replace(/\s+/g, "_") // spaces → underscores
+        .replace(/[^a-zA-Z0-9/_-]/g, "") // remove invalid chars
+        .replace(/^\/+|\/+$/g, "") // trim leading/trailing slashes
+        .replace(/\/{2,}/g, "/"); // collapse multiple slashes
 
-      // Validation
+      // Fallback if empty
       if (!folder) {
-        return NextResponse.json(
-          {
-            success: false,
-            message: `Invalid folder name for Cloudinary. Business name contains unsupported characters: ${
-              invalidChars || "N/A"
-            }`,
-          },
-          { status: 400 }
-        );
+        folder = "business-icons";
       }
 
       const arrayBuffer = await file.arrayBuffer();
