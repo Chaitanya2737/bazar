@@ -114,8 +114,32 @@ export async function POST(req) {
           { status: 400 }
         );
       }
-
       let folder = (user.businessName || "").trim();
+
+      // Find unsupported characters first
+      const invalidChars = (user.businessName.match(/[^a-zA-Z0-9\s/_-]/g) || [])
+        .filter((v, i, arr) => arr.indexOf(v) === i) // unique only
+        .join(" ");
+
+      // Sanitize: replace spaces with underscores & remove invalid chars
+      folder = folder
+        .replace(/\s+/g, "_")
+        .replace(/[^a-zA-Z0-9/_-]/g, "")
+        .replace(/^\/+|\/+$/g, "")
+        .replace(/\/{2,}/g, "/");
+
+      // Validation
+      if (!folder) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Invalid folder name for Cloudinary. Business name contains unsupported characters: ${
+              invalidChars || "N/A"
+            }`,
+          },
+          { status: 400 }
+        );
+      }
 
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);

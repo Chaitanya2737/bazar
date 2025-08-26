@@ -158,10 +158,12 @@ const UserPreview = () => {
     return null;
   }
 
+
+  console.log( userPreview?.data?.carauselImages);
+
   const renderUserDataSkeleton = loading || !data;
   const renderMainSectionSkeleton = loading || !data;
 
-  console.log(data);
 
   return (
     <>

@@ -31,10 +31,6 @@ export async function POST(request) {
     }
 
 
-    // Validate subdomain format
-    // if (!body?.subdomain || !isValidSubdomain(body.subdomain)) {
-    //   return NextResponse.json({ error: 'Invalid or missing subdomain' }, { status: 400 });
-    // }
 
     // Check if the user attempt has already failed previously
     const cachedUser = failedUserCache[body.subdomain];

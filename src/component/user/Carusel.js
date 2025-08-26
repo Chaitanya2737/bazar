@@ -10,6 +10,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 
 const Carusel = ({ image }) => {
+
+  console.log(image, "image in carusel");
   return (
     <Carousel className="relative w-[90%] mx-auto py-12 dark:bg-gray-800 dark:text-white">
       <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center">
