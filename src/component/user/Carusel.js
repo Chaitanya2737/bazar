@@ -10,7 +10,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 
 const Carusel = ({ image }) => {
-
   console.log(image, "image in carusel");
   return (
     <Carousel className="relative w-[90%] mx-auto py-12 dark:bg-gray-800 dark:text-white">
@@ -24,13 +23,14 @@ const Carusel = ({ image }) => {
           <CarouselItem key={index}>
             <div className="p-4">
               <Card className="dark:bg-gray-800 dark:text-white">
-                <CardContent className="flex items-center justify-center p-6">
+                <CardContent className="flex items-center justify-center p-6 h-[400px] w-full">
                   <Image
                     src={imgUrl || "/placeholder-image.png"}
                     alt={`Carousel Image ${index + 1}`}
-                    width={600}
-                    height={400}
-                    className="object-cover h-[300px] w-auto rounded-lg"
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    className="max-h-[600px] w-auto object-contain rounded-lg"
                     priority
                   />
                 </CardContent>

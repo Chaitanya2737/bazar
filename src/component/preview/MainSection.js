@@ -67,13 +67,13 @@ const MainSection = ({
         {/* Left: Logo */}
         <div className="grid place-items-center w-full">
           {icon ? (
-            <div className="relative w-48 sm:w-56 md:w-64 aspect-video bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg overflow-hidden p-4">
               <Image
                 src={icon}
                 alt={`${businessName || "Business"} logo`}
-                fill
-                className="object-contain"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 56vw, 256px"
+                width={400} // controls natural size
+                height={200} // keeps ratio from original
+                className="object-contain mx-auto"
                 priority
               />
             </div>

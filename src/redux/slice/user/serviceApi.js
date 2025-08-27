@@ -1,5 +1,6 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { date } from "zod";
 
 export const createUserApi = createAsyncThunk(
   "user/createuser",
@@ -121,10 +122,12 @@ export const getUserPreview = createAsyncThunk(
   }
 );
 
-export const updateUsercarousel = async (userId , businessName, formData) => {
+export const updateUsercarousel = async (userId , businessName, formData ) => {
   try {
     formData.append("businessName", businessName); // attach id to FormData if your API expects it
  formData.append("id", userId);
+ formData.append("lastUpdate", Date.now());
+
     const response = await axios.post("/api/user/carousel", formData, {
       headers: {
         "Content-Type": "multipart/form-data",

@@ -14,6 +14,7 @@ const Product = () => {
   }));
 
   const phone = useMemo(() => previewData?.mobileNumber, [previewData]);
+  console.log(phone);
 
   const id = useMemo(
     () => previewData?._id || userAuth?._id,
@@ -63,15 +64,15 @@ const Product = () => {
     );
   }
 
-const handleWhatsAppClick = (product) => {
-  const message = `
+  const handleWhatsAppClick = (product) => {
+    const message = `
 नमस्कार 🙏, मला आपल्या उत्पादनाबद्दल माहिती हवी आहे:
 कृपया अधिक माहिती देऊ शकाल का?
   `.trim();
-  const encodedMessage = encodeURIComponent(message);
-  const whatsappURL = `https://wa.me/${phone[0]}?text=${encodedMessage}`;
-  window.open(whatsappURL, "_blank");
-};
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappURL = `https://wa.me/${phone[0]}?text=${encodedMessage}`;
+    window.open(whatsappURL, "_blank");
+  };
 
   return (
     <div className="p-6 mx-0 md:mx-15 ">
@@ -86,14 +87,16 @@ const handleWhatsAppClick = (product) => {
             key={product._id}
             className=" bg-white text-black dark:bg-gray-800 dark:text-white   rounded-xl shadow-md p-4 hover:shadow-lg transition"
           >
-            <div className="relative w-full h-48 mb-3 rounded-md overflow-hidden">
+            <div className="w-full mb-3 rounded-md overflow-hidden">
               <Image
                 src={product.thumbnail}
                 alt={product.title}
-                fill
-                className="object-cover"
+                width={500} // you can adjust or remove, Next.js auto-optimizes
+                height={300} // keep aspect ratio of original
+                className="object-contain mx-auto"
               />
             </div>
+
             <h2 className="text-lg font-bold my-2">{product.title}</h2>
             <p className="text-sm text-black dark:text-white/80 my-2 line-clamp-2">
               {product.description}
