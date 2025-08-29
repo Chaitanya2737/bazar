@@ -77,36 +77,6 @@ const handleClick = () => {
 
   return (
     <>
-      <Head>
-        <title>About Us | Bazar Sh - Your Trusted Online Marketplace</title>
-        <meta
-          name="description"
-          content="BazarSh is your trusted online marketplace offering quality products, seamless shopping, and reliable services. Discover more about our mission, vision, and values."
-        />
-        <meta
-          name="keywords"
-          content="BazarSh, online shopping, marketplace, buy products online, ecommerce India, best deals, trusted marketplace, affordable shopping"
-        />
-        <meta name="author" content="BazarSh" />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:title" content="About Us | BazarSh" />
-        <meta
-          property="og:description"
-          content="Learn more about BazarSh - your trusted online marketplace for quality shopping and best deals."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.bazar.sh/about-us" />
-        <meta property="og:site_name" content="Bazar Sh" />
-        <meta property="og:locale" content="en_IN" />
-        <meta
-          property="og:description"
-          content="Learn more about Bazar.sh - marketing tools for small businesses."
-        />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://www.bazarsh.com/about-us" />
-        <meta property="og:site_name" content="Bazar Sh" />
-      </Head>
-
       <Navbar />
       <SupportNavForLaptop />
 
