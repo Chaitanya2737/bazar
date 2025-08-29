@@ -158,15 +158,15 @@ const UserPreview = () => {
     return null;
   }
 
-  console.log(userPreview?.data?.carauselImages);
 
   const renderUserDataSkeleton = loading || !data;
   const renderMainSectionSkeleton = loading || !data;
 
+
   return (
     <>
       <Head>
-        <title>{data?.businessName || "Bazar SH"}</title>
+        <title>{data?.businessName || "Bazar Sh"}</title>
         <meta
           name="description"
           content={data?.bio || "User profile on Bazar SH"}
@@ -178,6 +178,7 @@ const UserPreview = () => {
             "Bazar SH",
             `${data?.businessName} near me`,
             ...(data?.bio ? data.bio.split(" ").slice(0, 10) : []),
+            
             "online marketplace",
             "buy and sell",
             "local business",

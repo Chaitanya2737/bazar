@@ -24,7 +24,6 @@ const DisplayOffer = () => {
 
   
 
-
   const openWhatsApp = (contact) => {
     if (!contact) return;
     const phone = contact.replace(/\D/g, "");

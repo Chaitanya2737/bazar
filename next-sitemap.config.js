@@ -6,9 +6,8 @@ module.exports = {
 
   // Exclude internal/admin routes from sitemap
   exclude: [
-   
     "/user/*",
-    "/offers/*",
+    "/offers/*", // Exclude sub-routes of /offers, keep /offers root
     "/admin/*",
     "/api/*",
     "/dashboard/*",
@@ -16,11 +15,12 @@ module.exports = {
   ],
 
   transform: async (config, path) => {
+    const isMainOrFixedPage = ['/', '/offers', '/about-us'].includes(path);
     return {
       loc: path,
-      changefreq: "daily",
-      priority: 0.7,
-      lastmod: new Date().toISOString(),
+      changefreq: isMainOrFixedPage ? "daily" : "weekly", // More frequent updates for key pages
+      priority: isMainOrFixedPage ? 1.0 : 0.7, // Higher priority for main and fixed pages
+      lastmod: new Date().toISOString(), // Replace with dynamic lastmod if available
     };
   },
 
@@ -29,8 +29,8 @@ module.exports = {
     const res = await fetch("https://www.bazar.sh/api/user/sco");
     const data = await res.json();
 
-    // Only keep users with slug
-    const usersWithSlug = (data.users || []).filter((u) => u.slug);
+    // Only keep users with slug and active status
+    const usersWithSlug = (data.users || []).filter((u) => u.slug && u.isActive !== false);
 
     // Map slugs to proper encoded URLs
     const userPaths = await Promise.all(
@@ -39,10 +39,17 @@ module.exports = {
       )
     );
 
-    // Add custom static routes manually
-    return [
+    // Add custom static routes manually, ensuring they are under main site branding
+    const fixedPaths = [
       await config.transform(config, "/offers"),
       await config.transform(config, "/about-us"),
+      await config.transform(config, "/contact-us"), // Add other fixed pages as needed
+      await config.transform(config, "/categories"), // Example for category overview
+    ];
+
+    return [
+      await config.transform(config, "/"), // Ensure homepage is included
+      ...fixedPaths,
       ...userPaths,
     ];
   },
