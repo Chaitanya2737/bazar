@@ -4,17 +4,20 @@ import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageCircle } from "lucide-react";
+import Loader from "@/component/loader/loader";
 
 const DisplayOffer = () => {
   const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true); // 👈 new loading state
 
   const fetchOffer = async () => {
     try {
       const response = await axios.get("/api/user/siteoffer/displayoffer");
-      console.log(response.data);
       setOffers(response.data?.offers || []);
     } catch (error) {
       console.error("Error fetching offers:", error);
+    } finally {
+      setLoading(false); // 👈 stop loading after API call
     }
   };
 
@@ -22,13 +25,22 @@ const DisplayOffer = () => {
     fetchOffer();
   }, []);
 
-  
-
   const openWhatsApp = (contact) => {
     if (!contact) return;
     const phone = contact.replace(/\D/g, "");
     window.open(`https://wa.me/${phone}`, "_blank");
   };
+if (loading) {
+  return (
+    <div className="flex flex-col justify-center items-center h-[60vh] gap-4">
+      <Loader />
+      <p className="text-gray-600 text-lg animate-pulse">
+        Finding the best offers for you...
+      </p>
+    </div>
+  );
+}
+
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
@@ -43,7 +55,7 @@ const DisplayOffer = () => {
                 <p className="text-sm text-gray-500">{offer.businessNameName}</p>
               )}
             </CardHeader>
-           
+
             {offer.contact && (
               <CardFooter>
                 <Button

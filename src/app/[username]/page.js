@@ -158,37 +158,60 @@ const UserPreview = () => {
     return null;
   }
 
+  console.log(data?.bio?.trim());
 
   const renderUserDataSkeleton = loading || !data;
   const renderMainSectionSkeleton = loading || !data;
-
+  const metadata = {
+    title: data?.businessName?.trim() || "Bazar SH",
+    description: data?.bio?.trim() || "User profile on Bazar SH",
+    url:
+      typeof window !== "undefined"
+        ? window.location.href
+        : `https://bazarsh.com${pathname}`,
+    keywords: [
+      data?.businessName?.trim(),
+      "Bazar SH",
+      ...(data?.bio ? data.bio.split(/\s+/).slice(0, 10) : []),
+      "online marketplace",
+      "buy and sell",
+      "local business",
+      "products",
+      "services",
+      "shop online",
+    ]
+      .filter(Boolean)
+      .map((k) => k.trim())
+      .join(", "),
+    images: Array.isArray(data?.carauselImages) ? data.carauselImages : [],
+  };
 
   return (
     <>
       <Head>
-        <title>{data?.businessName || "Bazar Sh"}</title>
-        <meta
-          name="description"
-          content={data?.bio || "User profile on Bazar SH"}
-        />
-        <meta
-          name="keywords"
-          content={[
-            data?.businessName,
-            "Bazar SH",
-            `${data?.businessName} near me`,
-            ...(data?.bio ? data.bio.split(" ").slice(0, 10) : []),
-            
-            "online marketplace",
-            "buy and sell",
-            "local business",
-            "products",
-            "services",
-            "shop online",
-          ]
-            .filter(Boolean)
-            .join(", ")}
-        />
+        <title>{metadata.title}</title>
+        <meta name="description" content={metadata.description} />
+        <meta name="keywords" content={metadata.keywords} />
+
+        {/* Open Graph / Facebook */}
+        <meta property="og:title" content={metadata.title} />
+        <meta property="og:description" content={metadata.description} />
+        <meta property="og:url" content={metadata.url} />
+        {Array.isArray(metadata.images) && metadata.images.length > 0 && (
+          <meta property="og:image" content={metadata.images[0]} />
+        )}
+        <meta property="og:type" content="website" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metadata.title} />
+        <meta name="twitter:description" content={metadata.description} />
+        {Array.isArray(metadata.images) && metadata.images.length > 0 && (
+          <meta name="twitter:image" content={metadata.images[0]} />
+        )}
+
+        {/* Canonical URL */}
+        <link rel="canonical" href={metadata.url} />
       </Head>
 
       <div className="bg-white text-black dark:bg-gray-800 dark:text-white min-h-screen p-4 relative">
