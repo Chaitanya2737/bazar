@@ -1,6 +1,11 @@
 # *
 User-agent: *
 Allow: /
+Disallow: /user/*
+Disallow: /admin/*
+Disallow: /api/*
+Disallow: /dashboard/*
+Disallow: /login
 
 # Host
 Host: https://www.bazar.sh

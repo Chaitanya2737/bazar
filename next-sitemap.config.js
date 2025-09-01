@@ -3,6 +3,15 @@ module.exports = {
   siteUrl: "https://www.bazar.sh",
   generateRobotsTxt: true,
   sitemapSize: 7000,
+  robotsTxtOptions: {
+    policies: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: ["/user/*", "/admin/*", "/api/*", "/dashboard/*", "/login"],
+      },
+    ],
+  },
 
   // Exclude internal/admin routes from sitemap
   exclude: [
@@ -15,42 +24,62 @@ module.exports = {
   ],
 
   transform: async (config, path) => {
-    const isMainOrFixedPage = ['/', '/offers', '/about-us'].includes(path);
+    const isMainOrFixedPage = ['/', '/offers', '/about-us', '/contact-us', '/categories'].includes(path);
+    let lastmod = new Date().toISOString();
+
+    // Fetch dynamic lastmod if available (e.g., from CMS or API)
+    try {
+      if (path.startsWith('/')) {
+        const res = await fetch(`https://www.bazar.sh/api/lastmod?path=${encodeURIComponent(path)}`, {
+          headers: { 'Cache-Control': 'no-cache' }, // Prevent caching issues
+        });
+        const data = await res.json();
+        lastmod = data.lastmod || lastmod;
+      }
+    } catch (error) {
+      console.warn(`Failed to fetch lastmod for ${path}: ${error.message}`);
+      // Fallback to current timestamp
+    }
+
     return {
+      mobile: true, // Ensure mobile compatibility
       loc: path,
-      changefreq: "daily", // More frequent updates for key pages
-      priority: isMainOrFixedPage ? 1.0 : 0.7, // Higher priority for main and fixed pages
-      lastmod: new Date().toISOString(), // Replace with dynamic lastmod if available
+      changefreq: isMainOrFixedPage ? "daily" : "weekly", // Adjust frequency based on page type
+      priority: isMainOrFixedPage ? 1.0 : 0.8, // Slightly higher default priority
+      lastmod: lastmod,
     };
   },
 
   additionalPaths: async (config) => {
-    // Fetch dynamic slugs from your API
-    const res = await fetch("https://www.bazar.sh/api/user/sco");
-    const data = await res.json();
-    // Only keep users with slug and active status
+    try {
+      // Fetch dynamic slugs from your API with caching headers
+      const res = await fetch("https://www.bazar.sh/api/user/sco", {
+      });
+      const data = await res.json();
 
-    console.log(data);
-    const usersWithSlug = (data.users || []).filter((u) => u.slug && u.isActive !== false);
-    // Map slugs to proper encoded URLs
-    const userPaths = await Promise.all(
-      usersWithSlug.map((user) =>
-        config.transform(config, `/${encodeURIComponent(user.slug)}`)
-      )
-    );
+      console.log(data);
 
-    // Add custom static routes manually, ensuring they are under main site branding
-    const fixedPaths = [
-      await config.transform(config, "/offers"),
-      await config.transform(config, "/about-us"),
-      await config.transform(config, "/contact-us"), // Add other fixed pages as needed
-      await config.transform(config, "/categories"), // Example for category overview
-    ];
+      // Filter active users with slugs
+      const usersWithSlug = (data.users || []).filter((u) => u.slug && u.isActive !== false);
+      const userPaths = await Promise.all(
+        usersWithSlug.map((user) =>
+          config.transform(config, `/${encodeURIComponent(user.slug)}`)
+        )
+      );
 
-    return [
-      await config.transform(config, "/"), // Ensure homepage is included
-      ...fixedPaths,
-      ...userPaths,
-    ];
+      // Define static routes
+      const fixedPaths = [
+        await config.transform(config, "/"),
+        await config.transform(config, "/offers"),
+        await config.transform(config, "/about-us"),
+        await config.transform(config, "/contact-us"),
+        await config.transform(config, "/categories"),
+      ];
+
+      return [...fixedPaths, ...userPaths];
+    } catch (error) {
+      console.error(`Error fetching additional paths: ${error.message}`);
+      return [await config.transform(config, "/")]; // Fallback to homepage
+    }
   },
 };
