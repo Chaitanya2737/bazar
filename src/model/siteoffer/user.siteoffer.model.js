@@ -7,11 +7,14 @@ const OfferSchema = new mongoose.Schema({
     required: true,
   },
   title: String,
-  businessNameName: {
+  businessName: {
     type :String,
   },
   contact: {
    type: String,
+  },
+  category:{
+    type: String,
   },
   intervalDays: { type: Number, required: true }, // e.g., 7 days
   startDate: { type: Date, default: Date.now },

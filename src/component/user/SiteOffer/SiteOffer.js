@@ -26,17 +26,11 @@ export default function OfferDateDrawer() {
   const userId = user?._id || selector?._id;
   const businessName = user?.businessName;
   const contact = user?.mobileNumber?.[0];
+  const category = user?.categories
 
-  console.log(contact, "contact");
 
-  const getOfferDate = () => {
-    if (intervalDays) {
-      const date = new Date();
-      date.setDate(date.getDate() + intervalDays);
-      return date.toISOString().split("T")[0]; // yyyy-mm-dd
-    }
-    return "";
-  };
+    console.log(businessName);
+
 
 const handleSubmit = async () => {
   setIsSubmitting(true);
@@ -52,6 +46,8 @@ const handleSubmit = async () => {
       setIsSubmitting(false);
       return;
     }
+    console.log(businessName);
+
 
     const payload = {
       userId,
@@ -59,6 +55,7 @@ const handleSubmit = async () => {
       interval: intervalDays,
       businessName,
       contact,
+      category
     };
 
     const res = await axios.post("/api/user/siteoffer", payload);

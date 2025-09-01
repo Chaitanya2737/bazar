@@ -5,34 +5,36 @@ import { NextResponse } from "next/server";
 export async function POST(request) {
   try {
     await connectDB();
-    const { userId } = await request.json();
+
+    const body = await request.json();
+    const { userId } = body;
 
     if (!userId) {
       return NextResponse.json(
-        { success: false, message: "userId is not found" },
-        { status: 400 } // Bad Request
+        { success: false, message: "userId is required" },
+        { status: 400 }
       );
     }
 
-    const offer = await OfferModel.findOne({userId});
+    // Fetch offer
+    const offer = await OfferModel.findOne({ userId }).lean();
 
     if (!offer) {
       return NextResponse.json(
-        { success: false, message: "offer not exist" },
-        { status: 404 } // Not Found
+        { success: false, message: "Offer does not exist" },
+        { status: 404 }
       );
     }
 
-
     return NextResponse.json(
       { success: true, offer },
-      { status: 200 } // OK
+      { status: 200 }
     );
 
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching offer:", error);
     return NextResponse.json(
-      { success: false, message: "internal server error" },
+      { success: false, message: "Internal Server Error" },
       { status: 500 }
     );
   }

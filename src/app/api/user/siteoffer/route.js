@@ -4,13 +4,16 @@ import UserModel from "@/model/user.model";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../../auth/[...nextauth]/route";
+import CategoryModel from "@/model/categories.model";
 
 export async function POST(request) {
   try {
     await connectDB();
 
-    const { userId, title, interval, businessNameName, contact } =
-      await request.json();
+    const { userId, title, interval, businessName, contact, category } = await request.json();
+
+    // Logging to check values
+    console.log({ userId, title, businessName, contact, category });
 
     // ✅ Check authentication
     const session = await getServerSession(authOptions);
@@ -35,7 +38,7 @@ export async function POST(request) {
     // ✅ Check if user already has an active offer
     const existingOffer = await OfferModel.findOne({
       userId,
-      expiryDate: { $gte: new Date() }, // still valid (not expired)
+      expiryDate: { $gte: new Date() },
     });
 
     if (existingOffer) {
@@ -43,6 +46,13 @@ export async function POST(request) {
         { success: false, message: "You already have an active offer." },
         { status: 400 }
       );
+    }
+
+    // ✅ Handle category safely
+    let categoryName = "General";
+    if (category) {
+      const findCategory = await CategoryModel.findById(category);
+      if (findCategory) categoryName = findCategory.name;
     }
 
     // ✅ Calculate dates
@@ -57,8 +67,9 @@ export async function POST(request) {
       intervalDays: interval,
       startDate,
       expiryDate,
-      businessNameName,
+      businessName,
       contact,
+      category: categoryName,
     });
 
     // ✅ Update user with the offer reference

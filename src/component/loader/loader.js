@@ -4,7 +4,7 @@ import planeAnimation from "@/assets/Loading 40 _ Paperplane.json";
 
 const Loader = () => {
   return (
-    <div className="w-full h-screen flex items-center justify-center bg-gray-100">
+    <div className="w-full h-screen flex items-center justify-center bg-gray-100 bg-white dark:bg-gray-900">
       <Lottie animationData={planeAnimation} loop={true} autoplay={true} />
     </div>
   );
