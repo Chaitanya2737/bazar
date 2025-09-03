@@ -158,7 +158,7 @@ const UserPreview = () => {
     return null;
   }
 
-  console.log(data?.bio?.trim());
+ const review = data?.review || null;
 
   const renderUserDataSkeleton = loading || !data;
   const renderMainSectionSkeleton = loading || !data;
@@ -283,7 +283,7 @@ const UserPreview = () => {
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
-          <ScrollCards />
+          <ScrollCards reviewId ={review}  />
         )}
 
         {renderMainSectionSkeleton ? (

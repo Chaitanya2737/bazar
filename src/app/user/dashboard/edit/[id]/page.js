@@ -29,6 +29,7 @@ import ThemeToggle from "@/component/themeToggle/themeToggle";
 import CarouselForm from "@/component/user/UserPanel/CarouselForm";
 import VideoDialog from "@/component/user/UserPanel/VideoDialog";
 import UserProduct from "@/component/user/UserPanel/UserProduct";
+import ReviewSection from "@/component/user/ReviewSection";
 
 const ConfirmModal = React.memo(({ open, message, onConfirm, onCancel }) => (
   <Dialog open={open} onOpenChange={onCancel}>
@@ -75,8 +76,6 @@ export default function EditUserPage() {
 
   const { businessName, carauselImages = [] } = storedUser || {};
 
-  console.log();
-
   const openDeleteConfirm = (imgUrl) => {
     setImageToDelete(imgUrl);
     setConfirmOpen(true);
@@ -103,6 +102,9 @@ export default function EditUserPage() {
       setImageToDelete(null);
     }
   };
+
+
+const reviewID  = storedUser?.review;
 
   return (
     <main className="min-h-screen font-sans dark:bg-gray-900 text-black dark:text-white transition-all bg-dot-light dark:bg-dot-dark">
@@ -205,6 +207,11 @@ export default function EditUserPage() {
           </div>
         </div>
       </div>
+
+      {/* user specialty option */}
+      <section>
+        <ReviewSection userId={id}  reviewID ={reviewID}/>
+      </section>
 
       {/* Confirm Modal */}
       <ConfirmModal

@@ -415,7 +415,7 @@ const DisplayOffer = () => {
                     <CardFooter className="pt-3 border-t border-gray-200 dark:border-gray-700">
                       <Button
                         onClick={() => openWhatsApp(offer.contact)}
-                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white w-full py-2 transition-colors"
+                        className="flex items-center gap-2 bg-green-600 hover:bg-green-700 dark:bg-orange-500 text-white w-full py-2 transition-colors"
                       >
                         <MessageCircle size={18} />
                         Contact via WhatsApp

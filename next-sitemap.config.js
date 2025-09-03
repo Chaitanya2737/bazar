@@ -24,7 +24,7 @@ module.exports = {
   ],
 
   transform: async (config, path) => {
-    const isMainOrFixedPage = ['/', '/offers', '/about-us', '/contact-us', '/categories'].includes(path);
+    const isMainOrFixedPage = ['/', '/offers', '/about-us', '/contact-us', '/categories' ].includes(path);
     let lastmod = new Date().toISOString();
 
     // Fetch dynamic lastmod if available (e.g., from CMS or API)
