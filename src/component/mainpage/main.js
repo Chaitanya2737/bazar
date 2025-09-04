@@ -1,7 +1,6 @@
 // app/page.jsx
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@radix-ui/react-switch";
 import {
   ArrowRight,
   Globe,
@@ -10,8 +9,6 @@ import {
   Instagram,
 } from "lucide-react";
 import Head from "next/head";
-import { useState } from "react";
-import PricingToggle from "./PricingToggle";
 import ChatApp from "./ChatApp";
 import AdminSponsorCard from "./AdminSponsorCard";
 import Pricing from "./pricing";
