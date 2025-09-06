@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { toast } from "sonner";
+import { Phone } from "lucide-react";
 
 const Product = () => {
   const { userAuth, previewData } = useSelector((state) => ({
@@ -65,12 +66,14 @@ const Product = () => {
   }
 
   const handleWhatsAppClick = (product) => {
+    let phones = `91${phone[0]}`;
     const message = `
 नमस्कार 🙏, मला आपल्या उत्पादनाबद्दल माहिती हवी आहे:
 कृपया अधिक माहिती देऊ शकाल का?
   `.trim();
+
     const encodedMessage = encodeURIComponent(message);
-    const whatsappURL = `https://wa.me/${phone[0]}?text=${encodedMessage}`;
+    const whatsappURL = `https://wa.me/${phones}?text=${encodedMessage}`; // use full phone number
     window.open(whatsappURL, "_blank");
   };
 
