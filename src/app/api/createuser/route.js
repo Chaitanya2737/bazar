@@ -153,7 +153,7 @@ export async function POST(req) {
       slug: slugVariable,
       handlerName: user.handlerName,
       mobileNumber: mobileNumbers,
-      email: user.email,
+      email: user.email.trim(),
       password: hashedPassword,
       bio: user.bio,
       address: user.address,
