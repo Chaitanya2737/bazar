@@ -167,12 +167,21 @@ const DisplayOffer = () => {
 
   const openWhatsApp = (contact) => {
     if (!contact) return;
-    const phone = contact.replace(/\D/g, "");
+
+    // Remove non-digit characters
+    let phone = contact.replace(/\D/g, "");
+
+    // Ensure it has country code (assuming India)
+    if (!phone.startsWith("91")) {
+      phone = "91" + phone;
+    }
+
     const message = "Hello, I'm interested in your offer!";
-    window.open(
-      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
-      "_blank"
-    );
+    const whatsappURL = `https://wa.me/${phone}?text=${encodeURIComponent(
+      message
+    )}`;
+
+    window.open(whatsappURL, "_blank");
   };
 
   const formatDate = (dateString) => {

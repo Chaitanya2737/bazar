@@ -9,13 +9,12 @@ import { toast } from "sonner";
 import { Phone } from "lucide-react";
 
 const Product = () => {
-  const { userAuth, previewData } = useSelector((state) => ({
-    userAuth: state.userAuth,
-    previewData: state.previewData?.userPreview?.data,
-  }));
+  const userAuth = useSelector((state) => state.userAuth);
+  const previewData = useSelector(
+    (state) => state.previewData?.userPreview?.data
+  );
 
   const phone = useMemo(() => previewData?.mobileNumber, [previewData]);
-  console.log(phone);
 
   const id = useMemo(
     () => previewData?._id || userAuth?._id,
@@ -65,15 +64,19 @@ const Product = () => {
     );
   }
 
-  const handleWhatsAppClick = (product) => {
-    let phones = `91${phone[0]}`;
+  const handleWhatsAppClick = () => {
+    if (!phone || phone.length === 0)
+      return toast.error("Phone number not available.");
+
+    const sanitizedPhone = `91${phone[0].replace(/\D/g, "")}`; // first number
     const message = `
 नमस्कार 🙏, मला आपल्या उत्पादनाबद्दल माहिती हवी आहे:
 कृपया अधिक माहिती देऊ शकाल का?
   `.trim();
 
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappURL = `https://wa.me/${phones}?text=${encodedMessage}`; // use full phone number
+    const whatsappURL = `https://wa.me/${sanitizedPhone}?text=${encodeURIComponent(
+      message
+    )}`;
     window.open(whatsappURL, "_blank");
   };
 
