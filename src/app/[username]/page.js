@@ -104,14 +104,14 @@ const UserPreview = () => {
 
       localStorage.setItem("subdomain", subdomain);
       localStorage.removeItem("userPreview");
-      dispatch(resetUserPreview());
+      dispatch(resetUserPreview()); 
 
       const action = await dispatch(getUserPreview(subdomain));
 
       if (getUserPreview.rejected.match(action)) {
         const message = action.payload || "Authorization failed.";
 
-        // Redirect first to avoid visual delay
+        // Redirect first to avoid visual delay. 
         router.replace("/error/not-authorized");
 
         // Then optionally toast (if still needed)
