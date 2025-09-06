@@ -5,6 +5,7 @@ module.exports = {
   siteUrl: "https://www.bazar.sh",
   generateRobotsTxt: true,
   sitemapSize: 500,
+
   robotsTxtOptions: {
     policies: [
       {
@@ -13,68 +14,32 @@ module.exports = {
       },
     ],
   },
-  exclude: ["/login"], // Keep only pages you truly want excluded from sitemap
+
+  exclude: ["/login"], // pages to exclude
 
   transform: async (config, path) => {
-    const mainPages = [
-      "/",
-      "/offers",
-      "/about-us",
-      "/contact-us",
-      "/categories",
-    ];
-    let lastmod = new Date().toISOString();
-
-    try {
-      const res = await fetch(
-        `https://www.bazar.sh/api/lastmod?path=${encodeURIComponent(path)}`,
-        {
-          headers: { "Cache-Control": "no-cache" },
-        }
-      );
-      const data = await res.json();
-      lastmod = data.lastmod || lastmod;
-    } catch (error) {
-      console.warn(`Failed to fetch lastmod for ${path}: ${error.message}`);
-    }
+    const mainPages = ["/", "/offers", "/about-us", "/contact-us", "/categories"];
 
     return {
       loc: path,
       changefreq: mainPages.includes(path) ? "daily" : "weekly",
       priority: mainPages.includes(path) ? 1.0 : 0.7,
-      lastmod,
     };
   },
 
   additionalPaths: async (config) => {
     try {
-      const res = await fetch("https://www.bazar.sh/api/user/sco");
-      const data = await res.json();
+      const res = await axios.get("https://www.bazar.sh/api/user/sco");
+      const data = res.data;
 
       const userPaths = (data.users || [])
         .filter((u) => u.slug && u.isActive !== false)
         .map((u) => `/${encodeURIComponent(u.slug)}`);
 
-      const transformedUserPaths = await Promise.all(
-        userPaths.map((path) => config.transform(config, path))
-      );
-
-      const fixedPaths = [
-        "/",
-        "/offers",
-        "/about-us",
-        "/contact-us",
-        "/categories",
-      ];
-      const transformedFixedPaths = await Promise.all(
-        fixedPaths.map((path) => config.transform(config, path))
-      );
-
-      return [...transformedFixedPaths, ...transformedUserPaths];
+      return await Promise.all(userPaths.map((path) => config.transform(config, path)));
     } catch (error) {
       console.warn(`Skipping additional paths: ${error.message}`);
-      
-      return [];
+      return []; // fallback: return empty array if API fails
     }
   },
 };
