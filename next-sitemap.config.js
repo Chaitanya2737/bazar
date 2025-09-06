@@ -39,6 +39,7 @@ module.exports = {
       return await Promise.all(userPaths.map((path) => config.transform(config, path)));
     } catch (error) {
       console.warn(`Skipping additional paths: ${error.message}`);
+      
       return [];
     }
   },
