@@ -111,7 +111,7 @@ const Product = () => {
               className={"w-full"}
               onClick={() => handleWhatsAppClick(product)}
             >
-              View Details
+              Enquiry Now
             </Button>
           </div>
         ))}
