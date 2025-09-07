@@ -23,6 +23,7 @@ import Video from "@/component/user/Video";
 import Product from "@/component/user/Product";
 import PreviewOffer from "@/component/user/SiteOffer/PreviewOffer";
 import Head from "next/head";
+import NotificationManager from "@/component/notification/NotificationManager";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -104,14 +105,14 @@ const UserPreview = () => {
 
       localStorage.setItem("subdomain", subdomain);
       localStorage.removeItem("userPreview");
-      dispatch(resetUserPreview()); 
+      dispatch(resetUserPreview());
 
       const action = await dispatch(getUserPreview(subdomain));
 
       if (getUserPreview.rejected.match(action)) {
         const message = action.payload || "Authorization failed.";
 
-        // Redirect first to avoid visual delay. 
+        // Redirect first to avoid visual delay.
         router.replace("/error/not-authorized");
 
         // Then optionally toast (if still needed)
@@ -121,7 +122,7 @@ const UserPreview = () => {
 
       if (action.payload) {
         localStorage.setItem("userPreview", JSON.stringify(action.payload));
-        toast.success("User data fetched successfully!");
+        // toast.success("User data fetched successfully!");
       } else {
         toast.error("No data returned for the user preview.");
       }
@@ -158,7 +159,7 @@ const UserPreview = () => {
     return null;
   }
 
- const review = data?.review || null;
+  const review = data?.review || null;
 
   const renderUserDataSkeleton = loading || !data;
   const renderMainSectionSkeleton = loading || !data;
@@ -218,7 +219,9 @@ const UserPreview = () => {
         <Toaster />
         <Navbar />
         {/* Skeleton for Main Section */}
- 
+
+        <NotificationManager />
+
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
@@ -283,7 +286,7 @@ const UserPreview = () => {
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
-          <ScrollCards reviewId ={review}  />
+          <ScrollCards reviewId={review} />
         )}
 
         {renderMainSectionSkeleton ? (

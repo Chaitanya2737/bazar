@@ -34,16 +34,16 @@ const Product = () => {
           setProducts(response.data.products || []);
         } else {
           // Backend responded with success: false
-          toast.error(response.data.message || "Something went wrong.");
+          // toast.error(response.data.message || "Something went wrong.");
         }
       } catch (error) {
         console.error("Error fetching products:", error);
 
         if (error.response) {
-          toast.error(error.response.data?.message || "Server error occurred.");
+          // toast.error(error.response.data?.message || "Server error occurred.");
         } else if (error.request) {
           // Request made but no response received
-          toast.error("No response from server. Please check your connection.");
+          // toast.error("No response from server. Please check your connection.");
         } else {
           // Something else happened
           toast.error("Unexpected error occurred.");

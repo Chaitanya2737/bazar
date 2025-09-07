@@ -7,36 +7,13 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import Maincomp from "@/component/mainpage/main";
 import Head from "next/head";
+import NotificationManager from "@/component/notification/NotificationManager";
 
 const NOTIF_STORAGE_KEY = "notif_prompted";
 
 export default function Home() {
-  const dispatch = useDispatch();
   const darkMode = useSelector((state) => state.theme.darkMode);
 
-  const [mounted, setMounted] = useState(false);
-  const [permissionStatus, setPermissionStatus] = useState("default");
-  const [showPrompt, setShowPrompt] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const toastId = useRef(null);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const storedChoice = localStorage.getItem(NOTIF_STORAGE_KEY);
-    const browserPermission = Notification.permission;
-
-    setPermissionStatus(browserPermission);
-
-    if (browserPermission === "default" && storedChoice !== "asked") {
-      setShowPrompt(true);
-    }
-
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
 
   const metadata = {
     title: "Bazar.sh - Business Hub for Small & Medium Enterprises",
@@ -81,6 +58,7 @@ export default function Home() {
         <div className="pb-16 md:pb-16">
           <Maincomp />
         </div>
+        <NotificationManager />
         <SupportNavForLaptop />
       </div>
     </>
