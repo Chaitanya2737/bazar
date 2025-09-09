@@ -1,25 +1,37 @@
-const axios = require("axios");
+const { default: axios } = require("axios");
 
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
   siteUrl: "https://www.bazar.sh",
   generateRobotsTxt: true,
   sitemapSize: 500,
+  outDir: "./public", // sitemap इथे save होईल
 
   robotsTxtOptions: {
-    policies: [
-      {
-        userAgent: "*",
-        allow: "/",
-      },
+    policies: [{ userAgent: "*", allow: "/" }],
+    additionalSitemaps: [
+      "https://www.bazar.sh/sitemap.xml", // always include sitemap index
     ],
   },
 
-  exclude: ["/login"], // pages to exclude
+  exclude: [
+    "/admin/*",
+    "/user/dashboard/*",
+    "/error/*",
+    "/signin",
+    "/sign-in",
+    "/signup",
+    "/system",
+  ],
 
   transform: async (config, path) => {
-    const mainPages = ["/", "/offers", "/about-us", "/contact-us", "/categories"];
-
+    const mainPages = [
+      "/",
+      "/offers",
+      "/about-us",
+      "/contact-us",
+      "/categories",
+    ];
     return {
       loc: path,
       changefreq: mainPages.includes(path) ? "daily" : "weekly",
@@ -36,10 +48,12 @@ module.exports = {
         .filter((u) => u.slug && u.isActive !== false)
         .map((u) => `/${encodeURIComponent(u.slug)}`);
 
-      return await Promise.all(userPaths.map((path) => config.transform(config, path)));
+      return await Promise.all(
+        userPaths.map((path) => config.transform(config, path))
+      );
     } catch (error) {
       console.warn(`Skipping additional paths: ${error.message}`);
-      return []; // fallback: return empty array if API fails
+      return [];
     }
   },
 };

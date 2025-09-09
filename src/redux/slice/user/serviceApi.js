@@ -1,6 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
-import { date } from "zod";
 
 export const createUserApi = createAsyncThunk(
   "user/createuser",

@@ -90,11 +90,6 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
 
-  lastUpdated: {
-    type: Date,
-    default: Date.now,
-  },
-
   carauselImages: {
     type: [String],
     default: [],
