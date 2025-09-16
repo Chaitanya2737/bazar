@@ -5,7 +5,6 @@ import serviceAccount from "./sms-sender-b3081-firebase-adminsdk-fbsvc-1a91b7497
 let adminApp;
 
 try {
-
   if (!getApps().length) {
     adminApp = initializeApp({
       credential: cert(serviceAccount),

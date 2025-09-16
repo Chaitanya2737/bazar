@@ -26,58 +26,55 @@ export default function OfferDateDrawer() {
   const userId = user?._id || selector?._id;
   const businessName = user?.businessName;
   const contact = user?.mobileNumber?.[0];
-  const category = user?.categories
+  const category = user?.categories;
 
+  console.log(businessName);
 
-    console.log(businessName);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
 
+    try {
+      if (!title.trim()) {
+        toast.error("Offer title is required");
+        setIsSubmitting(false);
+        return;
+      }
+      if (!intervalDays) {
+        toast.error("Please select an interval (7, 12, 21 days)");
+        setIsSubmitting(false);
+        return;
+      }
+      console.log(businessName);
 
-const handleSubmit = async () => {
-  setIsSubmitting(true);
+      const payload = {
+        userId,
+        title,
+        interval: intervalDays,
+        businessName,
+        contact,
+        category,
+      };
 
-  try {
-    if (!title.trim()) {
-      toast.error("Offer title is required");
+      const res = await axios.post("/api/user/siteoffer", payload);
+      console.log(contact, "contact");
+
+      if (res.data.success) {
+        toast.success("Offer added successfully 🎉");
+        setTitle("");
+        setIntervalDays(null);
+      } else {
+        toast.error(res.data.message || "Failed to add offer");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong while saving offer"
+      );
+    } finally {
       setIsSubmitting(false);
-      return;
     }
-    if (!intervalDays) {
-      toast.error("Please select an interval (7, 12, 21 days)");
-      setIsSubmitting(false);
-      return;
-    }
-    console.log(businessName);
-
-
-    const payload = {
-      userId,
-      title,
-      interval: intervalDays,
-      businessName,
-      contact,
-      category
-    };
-
-    const res = await axios.post("/api/user/siteoffer", payload);
-    console.log(contact, "contact");
-
-    if (res.data.success) {
-      toast.success("Offer added successfully 🎉");
-      setTitle("");
-      setIntervalDays(null);
-    } else {
-      toast.error(res.data.message || "Failed to add offer");
-    }
-  } catch (error) {
-    console.error(error);
-    toast.error(
-      error.response?.data?.message || "Something went wrong while saving offer"
-    );
-  } finally {
-    setIsSubmitting(false);
-  }
-};
-
+  };
 
   return (
     <div className="flex justify-center items-center">
@@ -109,7 +106,7 @@ const handleSubmit = async () => {
             <fieldset>
               <legend className="mb-2 font-medium">📅 Valid For</legend>
               <div className="space-y-2">
-                {[7, 12, 21].map((days) => (
+                {[7, 12, 21, 64, 182, 365].map((days) => (
                   <label
                     key={days}
                     className="flex items-center gap-2 cursor-pointer"
@@ -121,11 +118,13 @@ const handleSubmit = async () => {
                       checked={intervalDays === days}
                       onChange={() => setIntervalDays(days)}
                     />
-                    {days} Days (till {(() => {
+                    {days} Days (till{" "}
+                    {(() => {
                       const date = new Date();
                       date.setDate(date.getDate() + days);
                       return date.toLocaleDateString();
-                    })()})
+                    })()}
+                    )
                   </label>
                 ))}
               </div>
@@ -133,7 +132,11 @@ const handleSubmit = async () => {
           </div>
 
           <DrawerFooter>
-            <Button onClick={handleSubmit} disabled={isSubmitting} className="w-full">
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="w-full"
+            >
               {isSubmitting ? "Saving..." : "Save Offer"}
             </Button>
           </DrawerFooter>

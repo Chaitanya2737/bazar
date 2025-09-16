@@ -11,13 +11,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 
 const Carusel = ({ image }) => {
-  const nextButtonRef = useRef(null);
+  const nextButtonWrapperRef = useRef(null);
 
   // Autoplay effect
   useEffect(() => {
     const interval = setInterval(() => {
-      if (nextButtonRef.current) {
-        nextButtonRef.current.click();
+      const nextBtn = nextButtonWrapperRef.current?.querySelector("button");
+      if (nextBtn) {
+        nextBtn.click();
       }
     }, 3000);
 
@@ -25,18 +26,15 @@ const Carusel = ({ image }) => {
   }, []);
 
   return (
-    <Carousel className="relative w-[90%] mx-auto py-12 dark:bg-gray-800 dark:text-white">
-      <h1 className="text-3xl sm:text-4xl font-bold mb-6 text-center">
-        Runway Reels
-      </h1>
-
-      {/* Carousel Slides */}
+    <Carousel
+      opts={{ loop: true }}  // 🔑 enables infinite looping
+      className="relative w-[90%] mx-auto py-12 dark:bg-gray-800 dark:text-white"
+    >
       <CarouselContent>
         {image.map((imgUrl, index) => (
           <CarouselItem key={index}>
             <div className="p-4">
               <Card className="dark:bg-gray-800 dark:text-white">
-                {/* Fixed height only on md+ screens */}
                 <CardContent className="flex items-center justify-center p-6 h-auto md:h-[400px] w-full">
                   <div className="relative w-full h-auto md:h-full">
                     <Image
@@ -56,11 +54,17 @@ const Carusel = ({ image }) => {
       </CarouselContent>
 
       {/* Navigation Buttons */}
-      <CarouselPrevious className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur-md hover:bg-white text-black rounded-full p-5 shadow" />
-      <CarouselNext
-        ref={nextButtonRef}
-        className="absolute right-5 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur-md hover:bg-white text-black rounded-full p-5 shadow"
-      />
+      {image.length > 0 && (
+        <>
+          <CarouselPrevious className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur-md hover:bg-white text-black rounded-full p-5 shadow" />
+          <div
+            ref={nextButtonWrapperRef}
+            className="absolute right-5 top-1/2 -translate-y-1/2 z-10"
+          >
+            <CarouselNext className="bg-white/80 backdrop-blur-md hover:bg-white text-black rounded-full p-5 shadow" />
+          </div>
+        </>
+      )}
     </Carousel>
   );
 };

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 
 const NOTIF_STORAGE_KEY = "notif-permission-choice";
 
+// ✅ Reverse geocode fallback
 async function reverseGeocode(lat, lon) {
   try {
     const res = await fetch(
@@ -29,21 +30,21 @@ async function reverseGeocode(lat, lon) {
   }
 }
 
+// ✅ Always resolve something, even on error
 const getLocation = () =>
-  new Promise((resolve, reject) => {
+  new Promise((resolve) => {
     if (!navigator.geolocation) {
-      reject(new Error("Geolocation not supported"));
+      resolve({ latitude: 0, longitude: 0, fallback: true });
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) => resolve(pos.coords),
-      (err) => reject(err)
+      () => resolve({ latitude: 0, longitude: 0, fallback: true })
     );
   });
 
 /**
  * 🔔 NotificationManager Component
- * Handles notification permission, FCM token retrieval & prompts
  */
 export default function NotificationManager() {
   const dispatch = useDispatch();
@@ -70,8 +71,6 @@ export default function NotificationManager() {
 
     setMounted(true);
   }, []);
-
-
 
   // Foreground message handler
   useEffect(() => {
@@ -107,64 +106,69 @@ export default function NotificationManager() {
     }
   }, []);
 
-  // Request notification + FCM token
-  const requestPermissions = useCallback(async () => {
-    setLoading(true);
-    try {
-      const permission = await Notification.requestPermission();
-      setPermissionStatus(permission);
-      localStorage.setItem(NOTIF_STORAGE_KEY, "asked");
-      setShowPrompt(false);
+// Request notification + FCM token
+const requestPermissions = useCallback(async () => {
+  setLoading(true);
+  try {
+    const permission = await Notification.requestPermission();
+    setPermissionStatus(permission);
+    localStorage.setItem(NOTIF_STORAGE_KEY, "asked");
+    setShowPrompt(false);
 
-      if (permission !== "granted") {
-        setLoading(false);
-        return;
-      }
-
-      const messaging = getMessagingInstance();
-      const token = await getToken(messaging, {
-        vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
-      });
-
-      if (!token) {
-        toast.error("❌ Failed to get FCM token.");
-        setLoading(false);
-        return;
-      }
-
-      let location = null;
-      let cityName = null;
-
-      try {
-        location = await getLocation();
-        cityName = await reverseGeocode(location.latitude, location.longitude);
-      } catch {
-        cityName = "Unknown Location";
-      }
-
-      const deviceInfo = navigator.userAgent || "Unknown Device";
-      const platform = navigator.platform || "Unknown Platform";
-      const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0";
-
-      await fetch("/api/fcmtoken", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          token,
-          deviceInfo,
-          platform,
-          appVersion,
-          location,
-          city: cityName,
-        }),
-      });
-    } catch (error) {
-      console.error("❌ Error getting token:", error);
-      toast.error("❌ Something went wrong. Please try again.");
-    } finally {
+    if (permission !== "granted") {
       setLoading(false);
+      return;
     }
-  }, []);
+
+    const messaging = getMessagingInstance();
+    const token = await getToken(messaging, {
+      vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
+    });
+
+    if (!token) {
+      toast.error("❌ Failed to get FCM token.");
+      setLoading(false);
+      return;
+    }
+
+    // ✅ Location handling with fallback
+    const location = await getLocation();
+    let cityName = "Unknown Location";
+
+    if (location?.latitude && location?.longitude) {
+      cityName = await reverseGeocode(location.latitude, location.longitude);
+    }
+
+    const deviceInfo = navigator.userAgent || "Unknown Device";
+    const platform = navigator.platform || "Unknown Platform";
+    const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0";
+
+    const res = await fetch("/api/fcmtoken", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        token,
+        deviceInfo,
+        platform,
+        appVersion,
+        location,
+        city: cityName,
+      }),
+    });
+
+    if (!res.ok) throw new Error("Failed to save token");
+
+    // ✅ Success handling
+    toast.dismiss(); // close any open prompt
+    toast.success("🎉 Notifications enabled successfully!");
+  } catch (error) {
+    console.error("❌ Error getting token:", error);
+    toast.error("❌ Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+}, []);
+
 
   // Register service worker
   useEffect(() => {
@@ -177,7 +181,7 @@ export default function NotificationManager() {
           if (Notification.permission === "granted") {
             getToken(getMessagingInstance(), {
               vapidKey: process.env.NEXT_PUBLIC_VAPID_KEY,
-              serviceWorkerRegistration: registration, // 👈 HERE
+              serviceWorkerRegistration: registration,
             })
               .then((currentToken) => {
                 if (currentToken) {
@@ -199,7 +203,6 @@ export default function NotificationManager() {
 
   // Toast prompts
   useEffect(() => {
-    // Prompt when permission is "default"
     if (permissionStatus === "default" && showPrompt) {
       const audio = new Audio("/mixkit-message-pop-alert-2354.mp3");
       audio.play().catch(() => {});
@@ -233,8 +236,8 @@ export default function NotificationManager() {
       ));
     }
 
-    // Show blocked warning only once
-    if (permissionStatus === "denied") {
+    if (permissionStatus === "denied" && !deniedToastShown) {
+      setDeniedToastShown(true);
       toast.custom((t) => (
         <div className="bg-white dark:bg-gray-900 border border-yellow-400 p-5 rounded-lg shadow-lg w-[360px] flex flex-col gap-4">
           <h2 className="font-bold text-lg flex items-center gap-2">
@@ -242,12 +245,6 @@ export default function NotificationManager() {
           </h2>
 
           <div className="flex gap-3">
-            <Button
-              variant="outline"
-              onClick={() => setShowHelpModal(true)}
-            >
-              How to Enable?
-            </Button>
             <Button variant="default" onClick={() => toast.dismiss(t)}>
               Okay
             </Button>
@@ -255,13 +252,7 @@ export default function NotificationManager() {
         </div>
       ));
     }
-  }, [
-    showPrompt,
-    permissionStatus,
-    requestPermissions,
-    loading,
-    deniedToastShown,
-  ]);
+  }, [showPrompt, permissionStatus, requestPermissions, loading, deniedToastShown]);
 
   if (!mounted) return null;
   return null;

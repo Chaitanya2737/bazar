@@ -14,6 +14,16 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+
+self.addEventListener("install", () => {
+  self.skipWaiting();
+});
+self.addEventListener("activate", () => {
+  clients.claim();
+});
+
+
+
 // Cache to track processed messages
 self.processedMessages = new Set();
 
