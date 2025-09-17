@@ -245,7 +245,7 @@ const UserPreview = () => {
           )
         )}
 
-        <Userpreviewcount count={backendVisitCount} />
+        {/* <Userpreviewcount count={backendVisitCount} /> */}
 
         {renderMainSectionSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />

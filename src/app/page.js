@@ -1,15 +1,10 @@
 "use client";
-
-import { useEffect, useState, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Navbar, { SupportNavForLaptop } from "@/component/navBar/page";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import Maincomp from "@/component/mainpage/main";
 import Head from "next/head";
 import NotificationManager from "@/component/notification/NotificationManager";
 
-const NOTIF_STORAGE_KEY = "notif_prompted";
 
 export default function Home() {
   const darkMode = useSelector((state) => state.theme.darkMode);

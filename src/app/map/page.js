@@ -12,13 +12,12 @@ const MapWithMarkers = dynamic(
 
 export default function Home() {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
-  const [clients, setClient] = useState([]);
+  const [client, setClient] = useState([]);
 
   const fetchData = async () => {
     try {
       const response = await axios.get("/api/user/preview/mappreview");
       const data = await response.data;
-      console.log(data);
       setClient(data.users);
     } catch (error) {
       console.log(error);
@@ -29,13 +28,15 @@ export default function Home() {
     fetchData();
   }, []);
 
+  console.log(client);
+
   return (
     <div className="min-h-screen">
       <Head>
         <title>Maharashtra Businesses Map</title>
       </Head>
 
-      <div className="grid grid-cols-1 md:grid-cols-[30%_70%]">
+      <div className="grid grid-cols-1 md:grid-cols-[10%_90%]">
         <div className=" bg-gray-200 p-4 overflow-y-auto">
           {selectedBusiness ? (
             <div>
@@ -49,7 +50,7 @@ export default function Home() {
         <div className="h-screen bg-blue-200">
           <MapWithMarkers
             onSelectBusiness={setSelectedBusiness}
-            clients={clients}
+            clients={client}
           />
         </div>
       </div>
