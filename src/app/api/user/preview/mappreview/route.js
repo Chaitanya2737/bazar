@@ -1,13 +1,17 @@
 import connectDB from "@/lib/db";
 import UserModel from "@/model/user.model";
+import CategoryModel from "@/model/categories.model";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   await connectDB();
   try {
-    const users = await UserModel.find().select(
-      "-review -products -referralCode -visitCount -carauselImages -termsAccepted -admin -language -joiningDate -socialMediaLinks -subscriptionPlan -password -email -videoUrl"
-    );
+    const users = await UserModel.find()
+      .select(
+        "-review -products -referralCode -visitCount -carauselImages -termsAccepted -admin -language -joiningDate -socialMediaLinks -subscriptionPlan -password -email -videoUrl"
+      )
+      .populate("categories", "name"); 
+      // 👆 this will replace ObjectId with category document
 
     return NextResponse.json({ success: true, users });
   } catch (error) {

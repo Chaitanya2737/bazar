@@ -14,8 +14,12 @@ import AdminSponsorCard from "./AdminSponsorCard";
 import Pricing from "./pricing";
 import Testimonials from "./Testimonials";
 import Footer from "../user/Footer";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 export default function Maincomp() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 rounded-2xl shadow-lg ">
       <Head>
@@ -101,6 +105,37 @@ export default function Maincomp() {
               </p>
             </CardContent>
           </Card>
+        </div>
+      </section>
+
+      <section className="py-16 px-4 bg-gray-300/20 shadow-2xl rounded-md mt-10 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center text-center">
+          <div className="container p-5 text-center md:text-left dark:text-white">
+            <h1 className="text-3xl md:text-4xl font-bold mb-3 text-gray-900 dark:text-white">
+              Check out our recent client
+            </h1>
+            <p className="text-gray-700 mb-5 dark:text-gray-300">
+              We take pride in delivering top-notch solutions to our clients.
+              See how we helped our recent client achieve their goals with our
+              expertise and support.
+            </p>
+            <Button
+              size="lg"
+              onClick={() => router.push("/map")}
+              className="text-center bg-blue-600 dark:bg-orange-500 hover:bg-blue-700 dark:hover:bg-orange-600 text-white px-8 py-3 rounded-lg transform transition duration-300 ease-in-out hover:scale-105 shadow-lg"
+            >
+              let&lsquo;s find
+            </Button>
+          </div>
+
+          <div className="relative w-full sm:w-[24rem] md:w-[32rem] h-60 sm:h-72 md:h-96 rounded-lg overflow-hidden mx-auto">
+            <Image
+              src="/pexels-arthousestudio-4338093.jpg"
+              alt="Recent client image"
+              fill
+              className="object-cover"
+            />
+          </div>
         </div>
       </section>
 

@@ -187,7 +187,10 @@ export const SupportNavForLaptop = () => {
         <Link href="/offers">
           <li className="hover:text-blue-500 cursor-pointer">Offers</li>
         </Link>
-        <li className="hover:text-blue-500 cursor-pointer">Contact</li>
+
+        <Link href="/map">
+          <li className="hover:text-blue-500 cursor-pointer">Client</li>
+        </Link>
         <li className="hover:text-blue-500 cursor-pointer">Support</li>
       </ul>
     </nav>

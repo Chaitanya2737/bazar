@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import axios from "axios";
+import Image from "next/image";
 
 // --- Fix for default markers (Leaflet icons) ---
 delete L.Icon.Default.prototype._getIconUrl;
@@ -21,11 +22,6 @@ async function extractCoordinates(url) {
   try {
     // If URL is a short link, fetch final redirect URL (server-side recommended to avoid CORS)
     let finalUrl = url;
-    if (url.includes("goo.gl")) {
-      const response = await fetch(url, { redirect: "follow" });
-      finalUrl = response.url;
-    }
-
     // Try to extract coordinates from '@lat,lng' pattern
     const match = finalUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (match) {
@@ -46,11 +42,11 @@ async function extractCoordinates(url) {
 
 // Example usage
 (async () => {
-  const url = "https://www.google.com/maps/place/Dr+Abhay+Radio+FM+sangli+Devgiri+Ayurved,+Bapat+bal+school,+Foujdar+Galli,+Dr+udgaavkar+hospital's+back+side,+Near+S+T+stand,+Main+Road,+Sangli,+Maharashtra+416416/data=!4m2!3m1!1s0x3bc119606bc13dd9:0xd1b1fdc4518f9dc7?utm_source=mstt_1";
+  const url =
+    "https://www.google.com/maps/place/Dr+Abhay+Radio+FM+sangli+Devgiri+Ayurved,+Bapat+bal+school,+Foujdar+Galli,+Dr+udgaavkar+hospital's+back+side,+Near+S+T+stand,+Main+Road,+Sangli,+Maharashtra+416416/data=!4m2!3m1!1s0x3bc119606bc13dd9:0xd1b1fdc4518f9dc7?utm_source=mstt_1";
   const coords = await extractCoordinates(url);
   console.log(coords);
 })();
-
 
 // --- Marker icon (custom styled popup card look) ---
 const createDivIcon = (business) => {
@@ -59,10 +55,17 @@ const createDivIcon = (business) => {
     html: `
       <div class="custom-marker-container">
         <div class="flex justify-between items-center mb-1">
-          <h3 class="text-xs font-semibold truncate w-3/5">${business.businessName}</h3>
+        
+          <h3 class="text-xs font-semibold truncate w-3/5">${
+            business.businessName
+          }</h3>
         </div>
-        <p class="text-[10px] text-gray-600 truncate">${business.handlerName || ""}</p>
-        <p class="text-[10px] text-gray-500">${business.mobileNumber?.join(" / ") || ""}</p>
+        <p class="text-[10px] text-gray-600 truncate">${
+          business.handlerName || ""
+        }</p>
+        <p class="text-[10px] text-gray-500">${
+          business.mobileNumber?.join(" / ") || ""
+        }</p>
       </div>
     `,
     iconSize: [140, 60],
@@ -77,8 +80,7 @@ const FitBounds = ({ positions }) => {
   useEffect(() => {
     if (positions.length > 0) {
       const bounds = L.latLngBounds(positions);
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 })
-      ;
+      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
     }
   }, [positions, map]);
   return null;
@@ -89,7 +91,6 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [resolvedClients, setResolvedClients] = useState([]);
 
-  // Resolve Google Maps short URLs into lat/lng
   useEffect(() => {
     async function resolveAll() {
       const resolved = await Promise.all(
@@ -109,9 +110,7 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
   // Prepare positions for fit bounds
   const positions = useMemo(
     () =>
-      resolvedClients
-        .filter((c) => c.lat && c.lng)
-        .map((c) => [c.lat, c.lng]),
+      resolvedClients.filter((c) => c.lat && c.lng).map((c) => [c.lat, c.lng]),
     [resolvedClients]
   );
 
@@ -143,7 +142,7 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
                 },
               }}
             >
-              <Popup>
+              {/* <Popup>
                 <div className="p-2">
                   <h3 className="font-semibold">{business.businessName}</h3>
                   <p className="text-sm text-gray-600">
@@ -153,7 +152,7 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
                     {business.mobileNumber?.join(" / ")}
                   </p>
                 </div>
-              </Popup>
+              </Popup> */}
             </Marker>
           ))}
 
@@ -162,6 +161,7 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
 
       {selectedBusiness && (
         <div className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg max-w-xs z-[1000]">
+      
           <h3 className="font-bold text-lg">{selectedBusiness.businessName}</h3>
           <p className="text-gray-600">{selectedBusiness.handlerName}</p>
           <p className="text-gray-500">
