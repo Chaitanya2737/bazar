@@ -328,13 +328,11 @@ const renderSocialLink = (platform, url) => (
   </div>
 );
 
-
-
 const SocialMediaItem = ({ platform, url, id }) =>
   url ? (
     <div className="flex justify-between items-center gap-4 mb-3">
       {renderSocialLink(platform, url)}
-      <SocialMediaDelete  id={id} platform={platform}/>
+      <SocialMediaDelete id={id} platform={platform} />
     </div>
   ) : (
     <div className="flex  justify-between items-center gap-4 mb-3">
@@ -368,7 +366,6 @@ const SocialMediaDelete = ({ id, platform }) => {
     </Button>
   );
 };
-
 
 const SocialMediaAdd = ({ id, platform }) => {
   const dispatch = useDispatch();
