@@ -1,4 +1,3 @@
-// app/layout.js (or app/layout.jsx)
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
@@ -8,7 +7,6 @@ import { ThemeProvider } from "next-themes";
 import ProviderAuth from "@/lib/ProviderAuth";
 import { Toaster } from "@/components/ui/sonner";
 
-// ✅ Google Fonts
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -19,7 +17,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-// ✅ Metadata for SEO
+
+
+
+
+
+
+
 export const metadata = {
   title: "Bazar.sh - Business Hub for Small & Medium Enterprises",
   description:
@@ -28,6 +32,7 @@ export const metadata = {
     "bazar, business hub, small business website, medium business website, business website builder, online marketing, push notifications",
   openGraph: {
     title: "Bazar.sh - Business Hub for Small & Medium Enterprises",
+
     description:
       "Build your business website effortlessly with Bazar.sh — the all-in-one platform for small and medium enterprises. Promote your brand using SMS, WhatsApp, Meta ads, and engage your customers with powerful push notifications.",
     url: "https://bazar.sh",
@@ -41,6 +46,7 @@ export const metadata = {
       },
     ],
   },
+
   robots: {
     index: true,
     follow: true,
@@ -66,10 +72,10 @@ export const metadata = {
   },
 };
 
-// ✅ Root Layout
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -92,27 +98,6 @@ export default function RootLayout({ children }) {
           </Providers>
         </ThemeProvider>
 
-        {/* ✅ Google Analytics */}
-
-        {/* ✅ Load GA library */}
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-YW07BJQL9N"
-          strategy="afterInteractive"
-        />
-
-        {/* ✅ Init GA */}
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-YW07BJQL9N');
-  `}
-
-  
-        </Script>
-
-        {/* ✅ JSON-LD Structured Data */}
         <Script
           id="ld-json"
           type="application/ld+json"
@@ -144,8 +129,7 @@ export default function RootLayout({ children }) {
               },
               openingHours: "Mo-Sa 09:00-19:00",
               sameAs: [],
-              keywords:
-                "bazar, business hub, small business website, medium business website, business website builder, online marketing, push notifications",
+              keywords: metadata.keywords, // ✅ pull directly from metadata
             }),
           }}
         />

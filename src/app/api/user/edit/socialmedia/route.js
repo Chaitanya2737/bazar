@@ -1,12 +1,13 @@
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import connectDB from "@/lib/db";
 import UserModel from "@/model/user.model";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
     await connectDB();
     const body = await request.json();
-
 
     console.log(body);
     const { addValue, id, platform } = body;
@@ -15,6 +16,14 @@ export async function POST(request) {
       return NextResponse.json(
         { error: "User ID, platform, and value are required" },
         { status: 400 }
+      );
+    }
+
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "User is not authenticated" },
+        { status: 401 }
       );
     }
 
@@ -30,15 +39,23 @@ export async function POST(request) {
     }
 
     return NextResponse.json(
-      { success: true, message: "Social media link updated", platform, addValue, id },
+      {
+        success: true,
+        message: "Social media link updated",
+        platform,
+        addValue,
+        id,
+      },
       { status: 200 }
     );
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
-
 
 export async function DELETE(request) {
   try {
@@ -52,6 +69,14 @@ export async function DELETE(request) {
       return NextResponse.json(
         { error: "User ID and platform are required" },
         { status: 400 }
+      );
+    }
+
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: "User is not authenticated" },
+        { status: 401 }
       );
     }
 
@@ -78,6 +103,9 @@ export async function DELETE(request) {
     );
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
