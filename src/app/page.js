@@ -8,7 +8,7 @@ import NotificationManager from "@/component/notification/NotificationManager";
 
 export default function Home() {
   const darkMode = useSelector((state) => state.theme.darkMode);
-
+  // abcd
 
   const metadata = {
     title: "Bazar.sh - Business Hub for Small & Medium Enterprises",
@@ -51,7 +51,8 @@ export default function Home() {
       >
         <Navbar />
         <div className="pb-16 md:pb-16">
-          <Maincomp />
+          <Maincomp /> 
+            
         </div>
         <NotificationManager />
         <SupportNavForLaptop />

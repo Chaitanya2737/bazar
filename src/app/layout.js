@@ -108,6 +108,8 @@ export default function RootLayout({ children }) {
     gtag('js', new Date());
     gtag('config', 'G-YW07BJQL9N');
   `}
+
+  
         </Script>
 
         {/* ✅ JSON-LD Structured Data */}
