@@ -93,17 +93,21 @@ export default function RootLayout({ children }) {
         </ThemeProvider>
 
         {/* ✅ Google Analytics */}
+
+        {/* ✅ Load GA library */}
         <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-LPNBPFGETY"
+          src="https://www.googletagmanager.com/gtag/js?id=G-YW07BJQL9N"
           strategy="afterInteractive"
         />
+
+        {/* ✅ Init GA */}
         <Script id="google-analytics" strategy="afterInteractive">
           {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-LPNBPFGETY');
-          `}
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-YW07BJQL9N');
+  `}
         </Script>
 
         {/* ✅ JSON-LD Structured Data */}
