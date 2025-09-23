@@ -3,12 +3,28 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import Image from "next/image";
+import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
+
 import { userLogin } from "@/redux/slice/user/userSlice";
 import { getUserDataApi } from "@/redux/slice/user/serviceApi";
-import ChangePassword from "./ChangePassword";
-import Link from "next/link";
 import Updatedata from "./customehook/Updatedata";
-import { motion, AnimatePresence } from "framer-motion";
+import ChangePassword from "./ChangePassword";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "recharts";
+import { Input } from "@/components/ui/input";
+import axios from "axios";
+import { toast } from "sonner";
 
 const UserDataUpdate = () => {
   const { data: session } = useSession();
@@ -62,9 +78,17 @@ const UserDataUpdate = () => {
     slug,
   } = userData;
 
-  const words = bio?.split(" ") || [];
-  const isLongBio = words.length > 50;
-  const shortBio = isLongBio ? words.slice(0, 30).join(" ") + "..." : bio;
+  const bioWords = bio?.split(" ") || [];
+  const isLongBio = bioWords.length > 50;
+  const shortBio = isLongBio ? bioWords.slice(0, 50).join(" ") + "..." : bio;
+
+  const socialPlatforms = [
+    ["insta", socialMediaLinks?.insta],
+    ["facebook", socialMediaLinks?.facebook],
+    ["linkedin", socialMediaLinks?.linkedin],
+    ["x", socialMediaLinks?.x],
+    ["youtube", socialMediaLinks?.youtube],
+  ];
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -94,16 +118,15 @@ const UserDataUpdate = () => {
             }))
           }
         >
-   
-            <InfoRow label="Handler Name" value={handlerName}>
-              <Updatedata
-                userID={userId}
-                fieldKey="handlerName"
-                fieldValue={handlerName}
-                Title="Update handler name"
-              />
-            </InfoRow>
-       
+          <InfoRow label="Handler Name" value={handlerName}>
+            <Updatedata
+              userID={userId}
+              fieldKey="handlerName"
+              fieldValue={handlerName}
+              Title="Update handler name"
+            />
+          </InfoRow>
+
           <InfoRow label="Mobile Numbers">
             <div className="flex flex-col gap-2 w-full">
               {mobileNumber.map((num, idx) => (
@@ -114,9 +137,9 @@ const UserDataUpdate = () => {
                   <p className="text-gray-800 dark:text-gray-200">{num}</p>
                   <Updatedata
                     userID={userId}
-                    fieldKey="mobileNumber" // tell component what field
-                    fieldValue={num} // pass the single number
-                    mobileIndex={idx} // which index in array
+                    fieldKey="mobileNumber"
+                    fieldValue={num}
+                    mobileIndex={idx}
                     Title={`Update Mobile #${idx + 1}`}
                   />
                 </div>
@@ -161,10 +184,10 @@ const UserDataUpdate = () => {
             }))
           }
         >
-          <InfoRow
+          {/* <InfoRow
             label="Business Name"
             value={businessName || "Not Provided"}
-          />
+          /> */}
 
           {bio && (
             <InfoRow label="Bio">
@@ -223,22 +246,26 @@ const UserDataUpdate = () => {
             }))
           }
         >
-          {renderSocialLink("Instagram", socialMediaLinks?.insta)}
-          {renderSocialLink("Facebook", socialMediaLinks?.facebook)}
-          {renderSocialLink("LinkedIn", socialMediaLinks?.linkedin)}
-          {renderSocialLink("X (Twitter)", socialMediaLinks?.x)}
-          {renderSocialLink("YouTube", socialMediaLinks?.youtube)}
+          {socialPlatforms.map(([platform, url]) => (
+            <SocialMediaItem
+              key={platform}
+              platform={platform}
+              url={url}
+              id={userId}
+            />
+          ))}
         </Card>
 
+        {/* Change Password */}
         <ChangePassword />
       </div>
     </div>
   );
 };
 
-/* ✅ Reusable Components */
+/* Reusable Components */
 
-const Card = ({ title, children, open, onToggle }) => (
+const Card = ({ title, children, open, onToggle, id }) => (
   <div className="rounded-2xl bg-white dark:bg-gray-800 shadow-sm p-6">
     <div className="flex justify-between items-center border-b pb-3 mb-4">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -266,35 +293,140 @@ const Card = ({ title, children, open, onToggle }) => (
     </AnimatePresence>
   </div>
 );
+
 const InfoRow = ({ label, value, children }) => (
-  <div>
-    {" "}
-    <p className="text-sm text-gray-500">{label}</p>{" "}
+  <div className="mb-3">
+    <p className="text-sm text-gray-500">{label}</p>
     <div className="flex justify-between items-center gap-2">
-      {" "}
-      {value ? (
-        <p className="text-gray-800 dark:text-gray-200">{value}</p>
-      ) : (
-        <p className="text-gray-400"></p>
-      )}{" "}
-      {children}{" "}
-    </div>{" "}
+      <p
+        className={
+          value ? "text-gray-800 dark:text-gray-200" : "text-gray-400 italic"
+        }
+      >
+        {value}
+      </p>
+      {children}
+    </div>
   </div>
 );
 
-const renderSocialLink = (platform, url) => {
-  if (!url) return null;
-  return (
-    <div>
-      <p className="text-sm text-gray-500">{platform}</p>
+const renderSocialLink = (platform, url) => (
+  <div className="max-w-full">
+    <p className="text-sm text-gray-500">{platform}</p>
+    {url ? (
       <a
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-blue-600 hover:underline break-words"
+        className="text-blue-600 hover:underline break-all max-w-full"
       >
         {url}
       </a>
+    ) : (
+      <span className="text-gray-400">Not added</span>
+    )}
+  </div>
+);
+
+
+
+const SocialMediaItem = ({ platform, url, id }) =>
+  url ? (
+    <div className="flex justify-between items-center gap-4 mb-3">
+      {renderSocialLink(platform, url)}
+      <SocialMediaDelete  id={id} platform={platform}/>
+    </div>
+  ) : (
+    <div className="flex  justify-between items-center gap-4 mb-3">
+      {renderSocialLink(platform)} {/* only label, no URL */}
+      <SocialMediaAdd id={id} platform={platform} />
+    </div>
+  );
+
+const SocialMediaDelete = ({ id, platform }) => {
+  const dispatch = useDispatch();
+
+  const handleDelete = async () => {
+    try {
+      const fetchData = await axios.delete("/api/user/edit/socialmedia", {
+        data: { id, platform },
+      });
+
+      toast.success(`${platform} link deleted successfully!`);
+
+      // Refresh user data
+      dispatch(getUserDataApi(id)).unwrap().catch(console.error);
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to delete social media link");
+    }
+  };
+
+  return (
+    <Button variant="destructive" size="sm" onClick={handleDelete}>
+      Delete
+    </Button>
+  );
+};
+
+
+const SocialMediaAdd = ({ id, platform }) => {
+  const dispatch = useDispatch();
+
+  const [open, setOpen] = useState(false);
+  const [addValue, setAddValue] = useState("");
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    const fetchData = await axios.post("/api/user/edit/socialmedia", {
+      addValue,
+      id,
+      platform,
+    });
+
+    toast.success("Social media link added successfully!");
+
+    setOpen(false);
+    dispatch(getUserDataApi(id)).unwrap().catch(console.error);
+  };
+
+  return (
+    <div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline">Add</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Add Social Media</DialogTitle>
+            <DialogDescription>
+              Add a new social media link for your profile here. Click save when
+              done.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className="grid gap-4" onSubmit={(e) => handleAdd(e)}>
+            <div className="grid gap-3">
+              <Label htmlFor="platform">Platform</Label>
+              <Input
+                id="platform"
+                name="platform"
+                onChange={(e) => setAddValue(e.target.value)}
+                value={addValue}
+                required
+                placeholder="Instagram, Facebook..."
+              />
+            </div>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="outline">Cancel</Button>
+              </DialogClose>
+              <Button type="submit">Save</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
