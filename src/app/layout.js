@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Script from "next/script";
+import { Analytics } from "@vercel/analytics/next";
 
 import { Providers } from "./providers";
 import { ThemeProvider } from "next-themes";
@@ -16,13 +17,6 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
-
-
-
-
-
-
 
 export const metadata = {
   title: "Bazar.sh - Business Hub for Small & Medium Enterprises",
@@ -75,7 +69,6 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -87,6 +80,7 @@ export default function RootLayout({ children }) {
         >
           <Providers>
             <ProviderAuth>{children}</ProviderAuth>
+
             <Toaster
               toastOptions={{
                 success: { backgroundColor: "#4CAF50" },
@@ -97,6 +91,20 @@ export default function RootLayout({ children }) {
             />
           </Providers>
         </ThemeProvider>
+        <Analytics />
+
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-HX7PDV877D"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-HX7PDV877D');
+        `}
+        </Script>
 
         <Script
           id="ld-json"
