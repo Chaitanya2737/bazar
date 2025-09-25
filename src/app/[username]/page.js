@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import axios from "axios";
 import { toast, Toaster } from "sonner";
 
@@ -11,9 +11,7 @@ import { getUserPreview } from "@/redux/slice/user/serviceApi";
 
 import Navbar from "@/component/preview/Navbar";
 import MainSection from "@/component/preview/MainSection";
-import Userpreviewcount from "@/component/preview/Userpreviewcount";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter } from "next/navigation";
 import Carusel from "@/component/user/Carusel";
 import ScrollCards from "@/component/user/OverlappingCards";
 import HeroSection from "@/component/user/HeroSection";
@@ -32,13 +30,12 @@ const UserPreview = () => {
   const router = useRouter();
   const dispatch = useDispatch();
   const pathname = usePathname();
-  const { userPreview, loading, errorMessage } = useSelector(
+  const { userPreview, loading } = useSelector(
     (state) => state.previewData || {}
   );
 
   const [visitCount, setVisitCount] = useState(null);
   const [backendVisitCount, setBackendVisitCount] = useState(null);
-  const [isUnauthorized, setIsUnauthorized] = useState(false);
 
   const storedPreview = useMemo(() => {
     try {
@@ -85,6 +82,12 @@ const UserPreview = () => {
       } else {
         toast.error("User ID not found. Skipping visit count update.");
       }
+      if (typeof window !== "undefined" && window.gtag) {
+        window.gtag("event", "page_view", {
+          page_path: pathname,
+          page_title: document.title,
+        });
+      }
     } else {
       const count = parseInt(localStorage.getItem(pageKey) || "0", 10);
       setVisitCount(count);
@@ -111,25 +114,18 @@ const UserPreview = () => {
 
       if (getUserPreview.rejected.match(action)) {
         const message = action.payload || "Authorization failed.";
-
-        // Redirect first to avoid visual delay.
         router.replace("/error/not-authorized");
-
-        // Then optionally toast (if still needed)
         toast.error(message);
         return;
       }
 
       if (action.payload) {
         localStorage.setItem("userPreview", JSON.stringify(action.payload));
-        // toast.success("User data fetched successfully!");
       } else {
         toast.error("No data returned for the user preview.");
       }
     } catch (error) {
       console.error("Error fetching user data:", error);
-
-      // Redirect immediately on unexpected error
       router.replace("/error/not-authorized");
       toast.error("Unexpected error occurred while fetching user data.");
     }
@@ -152,17 +148,10 @@ const UserPreview = () => {
   }, [trackPageVisit, fetchUserData, dispatch, pathname]);
 
   const data = userPreview?.data;
-
   const image = data?.carauselImages || [];
-  if (!image) {
-    toast.error("No images found for the carousel.");
-    return null;
-  }
-
   const review = data?.review || null;
 
-  const renderUserDataSkeleton = loading || !data;
-  const renderMainSectionSkeleton = loading || !data;
+  const renderSkeleton = loading || !data;
   const metadata = {
     title: data?.businessName?.trim() || "Bazar SH",
     description: data?.bio?.trim() || "User profile on Bazar SH",
@@ -174,15 +163,8 @@ const UserPreview = () => {
       data?.businessName?.trim(),
       "Bazar SH",
       ...(data?.bio ? data.bio.split(/\s+/).slice(0, 10) : []),
-      "online marketplace",
-      "buy and sell",
-      "local business",
-      "products",
-      "services",
-      "shop online",
     ]
       .filter(Boolean)
-      .map((k) => k.trim())
       .join(", "),
     images: Array.isArray(data?.carauselImages) ? data.carauselImages : [],
   };
@@ -193,8 +175,6 @@ const UserPreview = () => {
         <title>{metadata.title}</title>
         <meta name="description" content={metadata.description} />
         <meta name="keywords" content={metadata.keywords} />
-
-        {/* Open Graph / Facebook */}
         <meta property="og:title" content={metadata.title} />
         <meta property="og:description" content={metadata.description} />
         <meta property="og:url" content={metadata.url} />
@@ -202,33 +182,27 @@ const UserPreview = () => {
           <meta property="og:image" content={metadata.images[0]} />
         )}
         <meta property="og:type" content="website" />
-
-        {/* Twitter */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={metadata.title} />
         <meta name="twitter:description" content={metadata.description} />
         {Array.isArray(metadata.images) && metadata.images.length > 0 && (
           <meta name="twitter:image" content={metadata.images[0]} />
         )}
-
-        {/* Canonical URL */}
         <link rel="canonical" href={metadata.url} />
       </Head>
 
       <div className="bg-white text-black dark:bg-gray-800 dark:text-white min-h-screen p-4 relative">
         <Toaster />
         <Navbar />
-        {/* Skeleton for Main Section */}
-
         <NotificationManager />
 
-        {renderMainSectionSkeleton ? (
+        {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <PreviewOffer userId={data?._id} />
         )}
 
-        {renderMainSectionSkeleton ? (
+        {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           data && (
@@ -245,9 +219,7 @@ const UserPreview = () => {
           )
         )}
 
-        {/* <Userpreviewcount count={backendVisitCount} /> */}
-
-        {renderMainSectionSkeleton ? (
+        {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <Contact
@@ -258,38 +230,37 @@ const UserPreview = () => {
           />
         )}
 
-        {/* <Userpreviewcount count={backendVisitCount} /> */}
-        {renderMainSectionSkeleton ? (
+        {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <Carusel image={image} />
         )}
 
-        {renderMainSectionSkeleton ? (
+        {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <Video Video={data.videoUrl} />
         )}
 
-        {renderMainSectionSkeleton ? (
+        {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <Product />
         )}
 
-        {renderMainSectionSkeleton ? (
+        {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <HeroSection />
         )}
 
-        {renderMainSectionSkeleton ? (
+        {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <ScrollCards reviewId={review} />
         )}
 
-        {renderMainSectionSkeleton ? (
+        {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
         ) : (
           <Footer businessName={data.businessName} />
