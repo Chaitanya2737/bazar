@@ -325,6 +325,7 @@ const UserProduct = () => {
             </div>
 
             {/* Description Input */}
+            {/* Description Input */}
             <div>
               <label
                 htmlFor="description"
@@ -339,7 +340,7 @@ const UserProduct = () => {
                 value={product.description}
                 onChange={handleInputChange}
                 rows={4}
-                className="w-full"
+                className="w-full max-h-40 overflow-y-auto resize-none"
               />
             </div>
           </div>
