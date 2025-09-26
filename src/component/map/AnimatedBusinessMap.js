@@ -1,12 +1,10 @@
 "use client";
 import React, { useState, useMemo, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import axios from "axios";
-import Image from "next/image";
 
-// --- Fix for default markers (Leaflet icons) ---
+// --- Fix default Leaflet markers ---
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl:
@@ -17,80 +15,107 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-// --- Extract coordinates from Google Maps short URL ---
+// --- Extract coordinates from Google Maps URLs ---
 async function extractCoordinates(url) {
   try {
-    // If URL is a short link, fetch final redirect URL (server-side recommended to avoid CORS)
-    let finalUrl = url;
-    // Try to extract coordinates from '@lat,lng' pattern
-    const match = finalUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-    if (match) {
-      return { lat: match[1], lng: match[2] };
-    }
+    const match = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (match) return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
 
-    // If not found, try extracting from '!3dLAT!4dLNG' pattern (Google Maps place URLs)
-    const altMatch = finalUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-    if (altMatch) {
-      return { lat: altMatch[1], lng: altMatch[2] };
-    }
+    const altMatch = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (altMatch)
+      return { lat: parseFloat(altMatch[1]), lng: parseFloat(altMatch[2]) };
 
-    return { error: "Coordinates not found in the URL" };
+    return null;
   } catch (error) {
-    return { error: error.message };
+    return null;
   }
 }
 
-// Example usage
-(async () => {
-  const url =
-    "https://www.google.com/maps/place/Dr+Abhay+Radio+FM+sangli+Devgiri+Ayurved,+Bapat+bal+school,+Foujdar+Galli,+Dr+udgaavkar+hospital's+back+side,+Near+S+T+stand,+Main+Road,+Sangli,+Maharashtra+416416/data=!4m2!3m1!1s0x3bc119606bc13dd9:0xd1b1fdc4518f9dc7?utm_source=mstt_1";
-  const coords = await extractCoordinates(url);
-  console.log(coords);
-})();
+// --- Custom DivIcon with circular image and left-aligned name ---
+const createDivIcon = (business, index = 0, total = 1, scale = 1.0) => {
+  const width = 100 * scale;
+  const height = 125 * scale;
 
-// --- Marker icon (custom styled popup card look) ---
-const createDivIcon = (business) => {
-  return L.divIcon({
+  // Offset for overlapping markers
+  let offsetX = 0,
+    offsetY = 0;
+  if (total > 1) {
+    const angle = (index / total) * 2 * Math.PI;
+    const distance = 25; // ↑ increased distance to separate overlapping markers
+    offsetX = Math.cos(angle) * distance;
+    offsetY = Math.sin(angle) * distance;
+  }
+
+  return new L.DivIcon({
     className: "custom-marker",
     html: `
-      <div class="custom-marker-container">
-        <div class="flex justify-between items-center mb-1">
-        
-          <h3 class="text-xs font-semibold truncate w-3/5">${
-            business.businessName
-          }</h3>
-        </div>
-        <p class="text-[10px] text-gray-600 truncate">${
-          business.handlerName || ""
-        }</p>
-        <p class="text-[10px] text-gray-500">${
-          business.mobileNumber?.join(" / ") || ""
-        }</p>
+      <div style="width: ${width}px; height: ${height}px; transform: translate(${offsetX}px, ${offsetY}px);">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 125 100"
+             style="width: 100%; height: 100%; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
+
+          <defs>
+            <path id="pinPath${business._id}" 
+                  d="M50,85 C50,85 15,65 15,40 C15,18 30,5 50,5 C70,5 85,18 85,40 C85,65 50,85 50,85 Z" />
+            <clipPath id="pinClip${business._id}">
+              <use href="#pinPath${business._id}" />
+            </clipPath>
+          </defs>
+
+          <g>
+            <use href="#pinPath${
+              business._id
+            }" fill="transparent" stroke="#333" stroke-width="1.5" />
+            <image href="${business.businessIcon || "/default.png"}"
+                   x="0" y="0" width="100" height="95"
+                   preserveAspectRatio="xMidYMid slice"
+                   clip-path="url(#pinClip${business._id})" />
+          </g>
+          
+          <g>
+            <rect x="5" y="88" width="90" height="30" rx="15" ry="15" 
+                  fill="rgba(255, 255, 255, 0.9)" stroke="#333" stroke-width="1.5" />
+            <text x="10" y="108" text-anchor="start" alignment-baseline="middle"
+                  font-size="${10 * scale}px" font-weight="bold" fill="#222"
+                  textLength="80" lengthAdjust="spacingAndGlyphs">
+              ${business.businessName || "Unnamed"}
+            </text>
+          </g>
+        </svg>
       </div>
     `,
-    iconSize: [140, 60],
-    iconAnchor: [70, 60],
-    popupAnchor: [0, -60],
+    iconSize: [width, height],
+    iconAnchor: [width / 2, (height * 85) / 125],
+    popupAnchor: [0, (-height * 85) / 125],
   });
 };
 
-// --- Auto fit map to markers ---
+// --- Fit map to marker bounds with preferred max zoom ---
 const FitBounds = ({ positions }) => {
   const map = useMap();
+
   useEffect(() => {
     if (positions.length > 0) {
       const bounds = L.latLngBounds(positions);
-      map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+      map.fitBounds(bounds, { padding: [50, 50] });
+
+      // Max zoom to separate markers/cards
+      const currentZoom = map.getZoom();
+      const preferredMaxZoom = 10; // adjust for best separation
+      if (currentZoom < preferredMaxZoom) {
+        map.setZoom(preferredMaxZoom);
+      }
     }
   }, [positions, map]);
+
   return null;
 };
 
-// --- Main MapWithMarkers component ---
+// --- Main component ---
 export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
   const [resolvedClients, setResolvedClients] = useState([]);
 
+  // Resolve coordinates from URLs
   useEffect(() => {
     async function resolveAll() {
       const resolved = await Promise.all(
@@ -107,20 +132,40 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
     resolveAll();
   }, [clients]);
 
-  // Prepare positions for fit bounds
+  // Group businesses by coordinates for overlap handling
+  const groupedMarkers = useMemo(() => {
+    const grouped = {};
+    resolvedClients.forEach((b) => {
+      if (b.lat && b.lng) {
+        const key = `${b.lat},${b.lng}`;
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(b);
+      }
+    });
+    return grouped;
+  }, [resolvedClients]);
+
+  // Prepare positions for FitBounds
   const positions = useMemo(
-    () =>
-      resolvedClients.filter((c) => c.lat && c.lng).map((c) => [c.lat, c.lng]),
+    () => resolvedClients.filter((c) => c.lat && c.lng).map((c) => [c.lat, c.lng]),
     [resolvedClients]
   );
 
   return (
     <div style={{ position: "relative", height: "100vh", width: "100%" }}>
       <MapContainer
-        center={[19.076, 75]}
-        zoom={6}
+        center={[16.8489, 74.5746]} // Sangli city coordinates
+
+        zoom={6} // default Leaflet zoom (temporary until FitBounds applies)
         style={{ height: "100%", width: "100%" }}
         scrollWheelZoom={true}
+        zoomControl={true}
+        doubleClickZoom={true}
+        dragging={true} 
+        touchZoom={true}
+        keyboard={true}
+        boxZoom={true}
+        attributionControl={false}
       >
         <TileLayer
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
@@ -128,40 +173,27 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
           subdomains={["a", "b", "c", "d"]}
         />
 
-        {resolvedClients
-          .filter((c) => c.lat && c.lng)
-          .map((business) => (
+        {Object.values(groupedMarkers).map((group) =>
+          group.map((business, i) => (
             <Marker
               key={business._id}
               position={[business.lat, business.lng]}
-              icon={createDivIcon(business)}
+              icon={createDivIcon(business, i, group.length)}
               eventHandlers={{
                 click: () => {
                   setSelectedBusiness(business);
                   onSelectBusiness?.(business);
                 },
               }}
-            >
-              {/* <Popup>
-                <div className="p-2">
-                  <h3 className="font-semibold">{business.businessName}</h3>
-                  <p className="text-sm text-gray-600">
-                    {business.handlerName}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {business.mobileNumber?.join(" / ")}
-                  </p>
-                </div>
-              </Popup> */}
-            </Marker>
-          ))}
+            />
+          ))
+        )}
 
         <FitBounds positions={positions} />
       </MapContainer>
 
       {selectedBusiness && (
         <div className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg max-w-xs z-[1000]">
-      
           <h3 className="font-bold text-lg">{selectedBusiness.businessName}</h3>
           <p className="text-gray-600">{selectedBusiness.handlerName}</p>
           <p className="text-gray-500">
@@ -176,19 +208,6 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
           </button>
         </div>
       )}
-
-      {/* Marker card CSS */}
-      <style>{`
-        .custom-marker-container {
-          background: white;
-          padding: 6px;
-          border-radius: 8px;
-          border-top: 4px solid #3b82f6;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-          min-width: 140px;
-          transform: translateY(-24px);
-        }
-      `}</style>
     </div>
   );
 }
