@@ -3,6 +3,7 @@ import connectDB from "@/lib/db";
 import UserProductModel from "@/model/product/user.product.model";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
+import { cache, updateCacheForUser } from "../preview/route";
 
 export const DELETE = async (request) => {
   try {
@@ -24,7 +25,7 @@ export const DELETE = async (request) => {
       );
     }
 
-    // ✅ Ensure product belongs to the logged-in user
+    // Delete the product only if it belongs to this user
     const deletedProduct = await UserProductModel.findOneAndDelete({
       _id: pid,
       userId: session.user.id,
@@ -35,6 +36,14 @@ export const DELETE = async (request) => {
         { success: false, message: "Product not found or not authorized" },
         { status: 404 }
       );
+    }
+
+    // Refresh cache for this user after deletion
+    try {
+      await updateCacheForUser(session.user.id);
+    } catch (err) {
+      console.error("Error updating cache after deletion:", err);
+      // Optional: still return success even if cache update fails
     }
 
     return NextResponse.json(

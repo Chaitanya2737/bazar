@@ -2,9 +2,16 @@ import connectDB from "@/lib/db";
 import UserProductModel from "@/model/product/user.product.model";
 import { NextResponse } from "next/server";
 
-// Simple in-memory cache object
-const cache = new Map();
+// Shared in-memory cache
+export const cache = new Map();
 const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 hours in ms
+
+// Helper to fetch fresh data and update cache
+export const updateCacheForUser = async (userId) => {
+  const products = await UserProductModel.find({ userId });
+  cache.set(userId, { data: products, timestamp: Date.now() });
+  return products;
+};
 
 export const POST = async (request) => {
   try {
@@ -18,19 +25,26 @@ export const POST = async (request) => {
       );
     }
 
-    // Check cache
     const cached = cache.get(userId);
     const now = Date.now();
 
+    // If cache exists and is valid, serve it immediately
     if (cached && now - cached.timestamp < CACHE_DURATION) {
-      return NextResponse.json(
+      const response = NextResponse.json(
         { success: true, products: cached.data, cached: true },
         { status: 200 }
       );
+
+      // Refresh cache asynchronously in the background
+      updateCacheForUser(userId).catch((err) =>
+        console.error("Error refreshing cache:", err)
+      );
+
+      return response;
     }
 
-    // Fetch fresh data
-    const products = await UserProductModel.find({ userId });
+    // No cache or expired → fetch fresh from DB
+    const products = await updateCacheForUser(userId);
 
     if (!products.length) {
       return NextResponse.json(
@@ -38,12 +52,6 @@ export const POST = async (request) => {
         { status: 404 }
       );
     }
-
-    // Store in cache
-    cache.set(userId, {
-      data: products,
-      timestamp: now,
-    });
 
     return NextResponse.json(
       { success: true, products, cached: false },

@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
   Carousel,
@@ -25,6 +25,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
+import { getUserDataApi } from "@/redux/slice/user/serviceApi";
 
 // Simple debounce
 const debounce = (fn, wait) => {
@@ -47,6 +48,8 @@ const UserProduct = () => {
   const [products, setProducts] = useState([]);
   const [expandedDescriptions, setExpandedDescriptions] = useState({});
 
+  const dispatch = useDispatch();
+
   // Redux
   const user = useSelector((s) => s.userdata?.userData || s.userAuth);
   const id = user?._id;
@@ -58,10 +61,14 @@ const UserProduct = () => {
       toast.error("User ID not found. Please log in.");
       return;
     }
+
+    console.log("Fetching products for user ID:", id);
     setLoading(true);
     try {
       const { data } = await axios.post("/api/user/product/preview", { id });
-      if (data?.success) {
+
+      console.log(data);
+      if (data.success) {
         setProducts(data.products || []);
         setExpandedDescriptions({});
       } else {
@@ -141,7 +148,8 @@ const UserProduct = () => {
         toast.success("Product uploaded successfully!");
         setProduct({ title: "", description: "", thumbnail: null });
         setOpen(false);
-        await fetchProducts();
+        setProducts((prev) => [data.product, ...prev]); // prepend new product
+        console.log(products);
       } else {
         toast.error(data?.message || "Failed to upload product.");
       }
@@ -153,23 +161,22 @@ const UserProduct = () => {
   };
 
   // DELETE product
-const handleDelete = async (pid) => {
-  try {
-    const { data } = await axios.delete(`/api/user/product/delete`, {
-      data: { pid }, // 👈 body must go inside "data"
-    });
+  const handleDelete = async (pid) => {
+    try {
+      const { data } = await axios.delete(`/api/user/product/delete`, {
+        data: { pid }, // 👈 body must go inside "data"
+      });
 
-    if (data?.success) {
-      toast.success("Product deleted successfully!");
-      setProducts((prev) => prev.filter((p) => p._id !== pid));
-    } else {
-      toast.error(data?.message || "Failed to delete product.");
+      if (data?.success) {
+        toast.success("Product deleted successfully!");
+        setProducts((prev) => prev.filter((p) => p._id !== pid));
+      } else {
+        toast.error(data?.message || "Failed to delete product.");
+      }
+    } catch (err) {
+      handleApiError(err, "Error deleting product.");
     }
-  } catch (err) {
-    handleApiError(err, "Error deleting product.");
-  }
-};
-
+  };
 
   // Toggle description
   const toggleDescription = (pid) => {
@@ -216,7 +223,7 @@ const handleDelete = async (pid) => {
                     variant="destructive"
                     size="icon"
                     className="absolute top-2 right-2 rounded-full p-2"
-                    onClick={() => handleDelete(pid )}
+                    onClick={() => handleDelete(pid)}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
