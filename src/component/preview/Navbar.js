@@ -92,7 +92,23 @@ export default function Navbar() {
           </TooltipContent>
         </Tooltip>
 
-        {/* Contact */}
+       <Tooltip>
+        <TooltipTrigger asChild>
+          <Link href="/map" className="relative inline-block w-10 h-10">
+            <Image
+              src="/world_image.png"
+              alt="Offer"
+              width={40}
+              height={40}
+              className="absolute inset-0 m-auto animate-spin-slow"
+            />
+          </Link>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p>Client</p>
+        </TooltipContent>
+      </Tooltip>
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
