@@ -1,17 +1,16 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import React, { useEffect, useRef, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const AnimatedCount = ({ target }) => {
+// Animated counter
+const AnimatedCount = ({ target, duration = 800 }) => {
   const [count, setCount] = useState(0);
   const frame = useRef();
+  const startTime = useRef();
 
   useEffect(() => {
-    let start = 0;
-    const duration = 800;
-    const startTime = performance.now();
-
     const animate = (time) => {
-      const progress = Math.min((time - startTime) / duration, 1);
+      if (!startTime.current) startTime.current = time;
+      const progress = Math.min((time - startTime.current) / duration, 1);
       const current = Math.floor(progress * target);
       setCount(current);
 
@@ -23,40 +22,40 @@ const AnimatedCount = ({ target }) => {
     frame.current = requestAnimationFrame(animate);
 
     return () => cancelAnimationFrame(frame.current);
-  }, [target]);
+  }, [target, duration]);
 
   return (
-    <div className="w-20 h-20 rounded-full bg-[#161212] dark:bg-gray-700 flex flex-col items-center justify-center shadow-xl text-center p-2">
-      <span className="text-white text-xl font-bold leading-none">{count}</span>
-      <p className="text-[10px] text-gray-400 leading-tight">Visited users</p>
+    <div className="w-20 h-20 rounded-full bg-gray-900 dark:bg-white dark:text-black flex flex-col items-center justify-center shadow-xl p-2 text-center">
+      <span className="text-white text-xl font-bold dark:bg-white dark:text-black ">{count}</span>
+      <p className="text-[10px] text-gray-400">Visited users</p>
     </div>
   );
 };
 
+// User preview count badge
 const UserPreviewCount = ({ count }) => {
-  const [show, setShow] = useState(true);
+  const [visible, setVisible] = useState(false);
   const isValid = typeof count === "number";
 
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const screenHeight = window.innerHeight;
-      setShow(scrollY >= screenHeight);
+    const onScroll = () => {
+      setVisible(window.scrollY >= window.innerHeight);
     };
-    
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", onScroll);
+    onScroll(); // trigger on mount
+
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  if (!show) return null;
+  if (!visible) return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {isValid ? (
         <AnimatedCount target={count} />
       ) : (
-        <Skeleton className="w-16 h-16 rounded-full bg-gray-300 dark:bg-gray-700 animate-pulse" />
+        <Skeleton className="w-16 h-16 rounded-full animate-pulse" />
       )}
     </div>
   );

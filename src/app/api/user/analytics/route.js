@@ -1,19 +1,21 @@
 import { NextResponse } from "next/server";
-import { getPageViews, getEventCount } from "@/lib/ga";
+import { getPageViews } from "@/lib/ga";
 
-export async function GET(request) {
+export async function POST(request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const slug = searchParams.get("slug") || "/";
-    const eventName = searchParams.get("event");
+    const { pathname } = await request.json();
 
-    if (eventName) {
-      const count = await getEventCount(eventName);
-      return NextResponse.json({ event: eventName, count });
+    if (!pathname) {
+      return NextResponse.json(
+        { error: "Pathname is required" },
+        { status: 400 }
+      );
     }
 
-    const views = await getPageViews(slug);
-    return NextResponse.json({ slug, views });
+    // get total views from 2000-01-01 till today
+    const views = await getPageViews(pathname);
+
+    return NextResponse.json({ pathname, views });
   } catch (err) {
     console.error("Analytics error:", err);
     return NextResponse.json(

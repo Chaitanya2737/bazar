@@ -22,6 +22,7 @@ import Product from "@/component/user/Product";
 import PreviewOffer from "@/component/user/SiteOffer/PreviewOffer";
 import Head from "next/head";
 import NotificationManager from "@/component/notification/NotificationManager";
+import UserPreviewCount from "@/component/preview/Userpreviewcount";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -34,65 +35,29 @@ const UserPreview = () => {
     (state) => state.previewData || {}
   );
 
-  const [visitCount, setVisitCount] = useState(null);
-  const [backendVisitCount, setBackendVisitCount] = useState(null);
-
-  const storedPreview = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem("userPreview") || "{}");
-    } catch {
-      return {};
-    }
-  }, []);
-
-  const sendVisitCountToBackend = async (id, count) => {
-    try {
-      const response = await axios.post("/api/user/usercount", {
-        userId: id,
-        visitCount: count,
-      });
-      return response.data;
-    } catch (error) {
-      console.error("Error sending visit count:", error);
-      toast.error("Failed to send visit count to backend.");
-    }
-  };
+  const [visitCount, setVisitCount] = useState(0);
 
   const trackPageVisit = useCallback(async () => {
-    const pageKey = getPageKey(pathname);
-    const sessionKey = getSessionKey(pathname);
+    try {
+      const response = await axios.post("/api/user/analytics", {
+        pathname: decodeURI(pathname),
+      });
+      const data = response.data;
 
-    if (!sessionStorage.getItem(sessionKey)) {
-      const prevCount = parseInt(localStorage.getItem(pageKey) || "0", 10);
-      const newCount = prevCount + 1;
+      setVisitCount(data.views);
 
-      localStorage.setItem(pageKey, newCount.toString());
-      setVisitCount(newCount);
-      sessionStorage.setItem(sessionKey, "true");
-
-      const userId = storedPreview?.data?._id;
-
-      if (userId) {
-        const response = await sendVisitCountToBackend(userId, newCount);
-        if (response?.visitCount !== undefined) {
-          setBackendVisitCount(response.visitCount);
-          localStorage.setItem("visitCount", response.visitCount.toString());
-          toast.success("Event has been created");
-        }
-      } else {
-        toast.error("User ID not found. Skipping visit count update.");
-      }
+      // Log the latest count from the API, not stale state
+      console.log("Visit count:", data.views);
       if (typeof window !== "undefined" && window.gtag) {
-        window.gtag("event", "page_view", {
+       const abcd = window.gtag("event", "page_view", {
           page_path: pathname,
           page_title: document.title,
         });
       }
-    } else {
-      const count = parseInt(localStorage.getItem(pageKey) || "0", 10);
-      setVisitCount(count);
+    } catch (error) {
+      console.error("Error tracking page visit:", error);
     }
-  }, [pathname, storedPreview]);
+  }, [pathname]);
 
   const fetchUserData = useCallback(async () => {
     try {
@@ -195,6 +160,8 @@ const UserPreview = () => {
         <Toaster />
         <Navbar />
         <NotificationManager />
+
+        <UserPreviewCount count={visitCount} />
 
         {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />

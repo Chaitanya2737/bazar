@@ -28,16 +28,28 @@ const propertyId = 506284738;
 export async function getPageViews(pathName) {
   const [response] = await client.runReport({
     property: `properties/${propertyId}`,
-    dateRanges: [{ startDate: "30daysAgo", endDate: "today" }],
+    dateRanges: [{ startDate: "2025-09-01", endDate: "today" }], // full history
     dimensions: [{ name: "pagePath" }],
     metrics: [{ name: "screenPageViews" }],
     dimensionFilter: {
-      filter: { fieldName: "pagePath", stringFilter: { value: pathName } },
+      filter: {
+        fieldName: "pagePath",
+        stringFilter: {
+          value: pathName,
+          matchType: "EXACT", // strict match
+        },
+      },
     },
   });
 
-  return response.rows?.[0]?.metricValues?.[0]?.value || 0;
+  return response.rows
+    ? response.rows.reduce(
+        (total, row) => total + Number(row.metricValues[0].value || 0),
+        0
+      )
+    : 0;
 }
+
 
 /**
  * Get custom event count (e.g., button clicks)
