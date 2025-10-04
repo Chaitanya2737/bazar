@@ -67,3 +67,58 @@ export async function getEventCount(eventName) {
 
   return response.rows?.[0]?.metricValues?.[0]?.value || 0;
 }
+export async function getAnalyticsData(pathName) {
+  try {
+    const todayStr = new Date().toISOString().slice(0, 10).replace(/-/g, ""); // YYYYMMDD
+    const [response] = await client.runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [
+        { startDate: "2025-01-01", endDate: new Date().toISOString().slice(0, 10) },
+      ],
+      dimensions: [
+        { name: "date" },
+        { name: "pagePath" },
+      ],
+      metrics: [
+        { name: "screenPageViews" },
+        { name: "activeUsers" },
+      ],
+      dimensionFilter: {
+        filter: {
+          fieldName: "pagePath",
+          stringFilter: { value: pathName, matchType: "EXACT" },
+        },
+      },
+      orderBys: [{ dimension: { dimensionName: "date" } }],
+    });
+
+    if (!response.rows?.length) {
+      return { totalViews: 0, totalUsers: 0, daily: [{ date: todayStr, views: 0, users: 0 }] };
+    }
+
+    let totalViews = 0;
+    let totalUsers = 0;
+    const daily = [];
+
+    response.rows.forEach((row) => {
+      const date = row.dimensionValues?.[0]?.value || "";
+      const views = Number(row.metricValues?.[0]?.value || 0);
+      const users = Number(row.metricValues?.[1]?.value || 0);
+      totalViews += views;
+      totalUsers += users;
+      daily.push({ date, views, users });
+    });
+
+    // Ensure today is included
+    const lastDate = daily[daily.length - 1]?.date;
+    if (lastDate !== todayStr) {
+      daily.push({ date: todayStr, views: 0, users: 0 });
+    }
+
+    return { totalViews, totalUsers, daily };
+  } catch (error) {
+    console.error("Google Analytics fetch failed:", error);
+    const todayStr = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    return { totalViews: 0, totalUsers: 0, daily: [{ date: todayStr, views: 0, users: 0 }] };
+  }
+}
