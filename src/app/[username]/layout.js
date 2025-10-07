@@ -1,44 +1,58 @@
-import Script from "next/script";
+import { getUserBySlug } from "@/lib/generateMetadata";
 import React from "react";
 
-export const metadata = {
-  title: "Bazar SH - Empowering Small & Medium Businesses",
-  description:
-    "BazarSh provides small and medium businesses with powerful digital solutions to grow online, manage their brand effectively, and reach more customers effortlessly",
-  keywords:
-    "BazarSh, online marketplace, business growth, digital tools, small business, medium business, SME, marketing solutions",
-  robots: "index, follow",
-  openGraph: {
-    title: "Bazar SH - Empowering Small & Medium Businesses",
-    description:
-      "Learn about BazarSh’s vision, mission, and values that empower SMEs to grow digitally and manage their business effectively.",
-    type: "website",
-    url: "https://www.bazar.sh",
-    siteName: "Bazar Sh",
-    images: [
-      {
-        url: "https://res.cloudinary.com/dp8evydam/image/upload/v1752949353/bazar.sh_social_png_ou5arw.png",
-        width: 1200,
-        height: 630,
-      },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Bazar SH - Empowering Small & Medium Businesses",
-    description:
-      "Learn about BazarSh’s vision, mission, and values that empower SMEs to grow digitally.",
-    images: [
-      "https://res.cloudinary.com/dp8evydam/image/upload/v1752949353/bazar.sh_social_png_ou5arw.png",
-    ],
-  },
-  canonical: "https://www.bazar.sh",
-};
+export async function generateMetadata(props) {
+  // ✅ Await params first (as per Next.js docs)
+  const { username } = await props.params;
+
+  const decodedSlug = decodeURIComponent(username || "").trim();
+  console.log("📍 current routing:", decodedSlug);
+
+  const { user } = (await getUserBySlug(decodedSlug)) || {};
+
+  if (!user) {
+    return {
+      title: "Bazar SH - Empowering Small & Medium Businesses",
+      description: "Grow your business online with Bazar SH.",
+    };
+  }
+
+  const categoryNames = Array.isArray(user.categories)
+    ? user.categories.map((cat) => cat.name)
+    : user.categories?.name
+    ? [user.categories.name]
+    : [];
+
+  const description =
+    user.bio?.length > 160 ? user.bio.slice(0, 157) + "..." : user.bio;
+
+  return {
+    title: `${user.businessName} | Bazar SH`,
+    description,
+    keywords: `${categoryNames.join(", ")}, ${user.businessName}, Bazar SH`,
+    openGraph: {
+      title: `${user.businessName} | Bazar SH`,
+      description,
+      url: `https://user.bazar.sh/${encodeURIComponent(user.slug)}`,
+      images: [
+        {
+          url: user.businessIcon || "/default-og.png",
+          width: 1200,
+          height: 630,
+          alt: user.businessName,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${user.businessName} | Bazar SH`,
+      description,
+      images: [user.businessIcon || "/default-og.png"],
+    },
+    canonical: `https://user.bazar.sh/${encodeURIComponent(user.slug)}`,
+  };
+}
+
 export default function UserLayout({ children }) {
-  return (
-    <>
-      {/* Render the child components */}
-      <div>{children}</div>
-    </>
-  );
+  return <div>{children}</div>;
 }

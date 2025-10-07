@@ -8,7 +8,6 @@ export async function GET() {
     // Connect to database
     await connectDB();
 
-    // Fetch only businessName & slug fields for indexing
     const users = await UserModel.find({}, "businessName slug").lean();
 
     return NextResponse.json(
