@@ -107,7 +107,7 @@ const UserDataUpdate = () => {
         toast.error(res?.data?.message || "Upload failed");
       }
     } catch (error) {
-        console.error("Upload error:", err);
+        console.error("Upload error:", error);
       toast.error("Upload failed. Try again.");
     }finally {
       setUploading(false);
