@@ -68,19 +68,14 @@ export async function POST(request) {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
+      const base64 = buffer.toString("base64");
+      const dataUri = `data:${file.type};base64,${base64}`;
 
-      const uploadResponse = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "business-icons" },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve(result);
-          }
-        );
-        stream.end(buffer);
+      const uploaded = await cloudinary.uploader.upload(dataUri, {
+        folder: "business-icons",
       });
 
-      logoUrl = uploadResponse.secure_url;
+      logoUrl = uploaded.secure_url;
       console.log("✅ Cloudinary upload success:", logoUrl);
     } catch (error) {
       console.error("❌ Cloudinary upload error:", error.message);
