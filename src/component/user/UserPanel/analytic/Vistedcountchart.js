@@ -1,24 +1,12 @@
 "use client";
-
-import { TrendingUp } from "lucide-react";
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, CartesianGrid, ResponsiveContainer } from "recharts";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+export function ChartBarDefault({ data = [] }) {
+  console.log("Chart Data Input:", data);
 
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-
-export function ChartBarDefault({ data }) {
   const parseDate = (str) => {
     const year = Number(str.slice(0, 4));
     const month = Number(str.slice(4, 6)) - 1;
@@ -28,14 +16,14 @@ export function ChartBarDefault({ data }) {
 
   const chartData = useMemo(
     () =>
-      data?.views?.daily?.map((item) => ({
+      data.map((item) => ({
         day: parseDate(item.date).toLocaleDateString("en-GB", {
           day: "numeric",
           month: "short",
         }),
-        desktop: item.views,
-      })) || [],
-    [data?.views?.daily]
+        views: item.views,
+      })),
+    [data]
   );
 
   if (!chartData.length) {
@@ -49,13 +37,6 @@ export function ChartBarDefault({ data }) {
     );
   }
 
-  const chartConfig = {
-    desktop: {
-      label: "Daily Visitors",
-      color: "var(--chart-1)",
-    },
-  };
-
   return (
     <Card className="w-full">
       <CardHeader className="px-6 pt-6 pb-0 space-y-1">
@@ -63,19 +44,18 @@ export function ChartBarDefault({ data }) {
         <CardDescription>Showing views per day</CardDescription>
       </CardHeader>
       <CardContent className="px-6 space-y-4">
-        {/* Scrollable container for wide charts */}
         <div className="overflow-x-auto">
-          <div
-            className="w-max h-[300px] lg:h-[50vh]"
-            style={{ minWidth: chartData.length * 50 }} // 60px per bar, adjust if needed
-          >
-            <ChartContainer config={chartConfig}>
+          <div className="min-w-full h-[300px] lg:h-[400px]">
+            <ChartContainer config={{}}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 10, right: 10, left: 0, bottom: 10 }}
+                >
                   <CartesianGrid vertical={false} />
                   <XAxis dataKey="day" tickLine={false} tickMargin={10} axisLine={false} />
                   <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                  <Bar dataKey="desktop" fill="var(--color-desktop)" radius={8} />
+                  <Bar dataKey="views" fill="#3b82f6" radius={8} />
                 </BarChart>
               </ResponsiveContainer>
             </ChartContainer>

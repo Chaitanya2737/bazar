@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useDispatch, useSelector, shallowEqual } from "react-redux";
 import Image from "next/image";
@@ -25,6 +25,17 @@ import { Label } from "recharts";
 import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { toast } from "sonner";
+import { Pencil } from "lucide-react";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 
 const UserDataUpdate = () => {
   const { data: session } = useSession();
@@ -41,6 +52,12 @@ const UserDataUpdate = () => {
   const userAuth = useSelector((state) => state.userAuth, shallowEqual);
   const userdata = useSelector((state) => state.userdata, shallowEqual);
   const userData = userdata?.userData;
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
 
   const userId = useMemo(
     () => userAuth?.id || userData?._id || session?.user?.id,
@@ -59,6 +76,50 @@ const UserDataUpdate = () => {
       dispatch(getUserDataApi(userId)).unwrap().catch(console.error);
     }
   }, [session, dispatch, userId, userData]);
+
+  const handleUpload = async () => {
+    if (!userId) {
+      toast.error("User not loaded yet");
+      return;
+    }
+
+    setUploading(true);
+    setProgress(0);
+
+    try {
+      const formData = new FormData();
+      formData.append("userId", userId);
+      // pass oldFile so backend can delete previous image
+      formData.append("oldFile", userData?.businessIcon || "");
+      formData.append("file", selectedFile);
+
+      const res = await axios.post("/api/user/edit/logo", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (res?.data?.success) {
+        toast.success(res.data.message || "Logo updated");
+        // refresh user data
+        dispatch(getUserDataApi(userId)).unwrap().catch(console.error);
+        // clear selection & close drawer
+        setSelectedFile(null);
+        setDrawerOpen(false);
+      } else {
+        toast.error(res?.data?.message || "Upload failed");
+      }
+    } catch (error) {
+        console.error("Upload error:", err);
+      toast.error("Upload failed. Try again.");
+    }finally {
+      setUploading(false);
+      setProgress(0);
+    }
+  };
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+    }
+  };
 
   if (!userData)
     return <div className="text-center mt-10">Data is loading...</div>;
@@ -94,13 +155,61 @@ const UserDataUpdate = () => {
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       {/* Profile Header */}
       <div className="flex flex-col items-center space-y-4 my-6">
-        <Image
-          src={businessIcon}
-          alt="Business Icon"
-          width={120}
-          height={120}
-          className="rounded-2xl shadow-md"
-        />
+         <div className="relative">
+          <Image
+            src={businessIcon || "/default-icon.png"}
+            alt="Business Icon"
+            width={120}
+            height={120}
+            className="rounded-2xl shadow-md object-cover"
+          />
+
+          {/* ✏️ Edit Icon opens Drawer */}
+          <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
+            <DrawerTrigger asChild>
+              <button
+                className="absolute bottom-1 right-1 bg-white dark:bg-gray-800 p-2 rounded-full shadow hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                aria-label="Edit business icon"
+              >
+                <Pencil className="w-4 h-4 text-gray-700 dark:text-gray-200" />
+              </button>
+            </DrawerTrigger>
+
+            <DrawerContent className="p-4">
+              <DrawerHeader>
+                <DrawerTitle>Update Business Icon</DrawerTitle>
+                <DrawerDescription>Select and upload a new image.</DrawerDescription>
+              </DrawerHeader>
+
+              <div className="flex flex-col items-center gap-4 mt-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="border p-2 rounded-md w-full"
+                  disabled={uploading}
+                />
+
+                {selectedFile && (
+                  <div className="w-full text-sm text-gray-700 dark:text-gray-200">
+                    <p className="truncate">{selectedFile.name}</p>
+                    <p className="text-xs text-gray-500">Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                  </div>
+                )}
+              </div>
+
+              <DrawerFooter>
+                <Button onClick={handleUpload} disabled={uploading}>
+                  {uploading ? "Uploading..." : "Upload"}
+                </Button>
+                <DrawerClose asChild>
+                  <Button variant="outline" disabled={uploading}>Cancel</Button>
+                </DrawerClose>
+              </DrawerFooter>
+            </DrawerContent>
+          </Drawer>
+        </div>
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
           {businessName || "Business Name Not Provided"}
         </h1>

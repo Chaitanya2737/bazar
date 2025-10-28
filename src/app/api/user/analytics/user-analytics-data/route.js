@@ -1,16 +1,12 @@
 import { NextResponse } from "next/server";
-import { getAnalyticsData } from "@/lib/ga";
+import { getAnalyticsData } from "@/lib/ga"; // your existing GA function
 
 export async function POST(request) {
   try {
-    if (request.method !== "POST") {
-      return NextResponse.json(
-        { error: "Method not allowed" },
-        { status: 405 }
-      );
-    }
+    const body = await request.json();
+    const { pathname, interval = "7d" } = body;
 
-    const { pathname } = await request.json();
+    console.log(pathname);
 
     if (!pathname) {
       return NextResponse.json(
@@ -19,17 +15,33 @@ export async function POST(request) {
       );
     }
 
-    // Fetch GA analytics safely
-    let views = 0;
-    try {
-      views = await getAnalyticsData(`/${pathname}`);
-    } catch (gaError) {
-      console.error("Google Analytics fetch failed:", gaError);
-      // fallback to 0 if GA fails
-      views = 0;
+    // Validate interval
+    if (!["7d", "30d"].includes(interval)) {
+      return NextResponse.json(
+        { error: "Invalid interval; use '7d' or '30d'" },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ pathname, views });
+    // Normalize pathname (ensure leading /, no double //)
+    const normalizedPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
+
+    let analyticsData;
+    try {
+      // Pass interval to GA function (it handles dates internally)
+      analyticsData = await getAnalyticsData(normalizedPath, interval);
+    } catch (gaError) {
+      console.error(`Google Analytics fetch failed for ${normalizedPath}:`, gaError);
+      analyticsData = { totalViews: 0, totalUsers: 0, daily: [] };
+    }
+
+    return NextResponse.json({
+      pathname: normalizedPath.replace(/^\//, ""), // Return clean pathname
+      interval,
+      ...analyticsData, // { totalViews, totalUsers, daily }
+    }, {
+      headers: { "Cache-Control": "public, s-maxage=300" }, // 5min cache for perf
+    });
   } catch (err) {
     console.error("Analytics API error:", err);
     return NextResponse.json(
