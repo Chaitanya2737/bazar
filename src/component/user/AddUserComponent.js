@@ -18,12 +18,23 @@ import {
   ArrowRightFromLine,
   Trash2,
   Plus,
+  FileText,
 } from "lucide-react";
 import { resetUser, updateUser } from "@/redux/slice/user/addUserSlice";
 import { createUserApi } from "@/redux/slice/user/serviceApi";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+
 // Parent Component
 const AddUserComponent = () => {
   const dispatch = useDispatch();
@@ -43,12 +54,14 @@ const AddUserComponent = () => {
             BasicCategories: true,
             BusinessCategories: false,
             SocialMediaLink: false,
+            TermsConditions: false, // 🆕 Add this
           };
     }
     return {
       BasicCategories: true,
       BusinessCategories: false,
       SocialMediaLink: false,
+      TermsConditions: false, // 🆕
     };
   });
 
@@ -84,8 +97,8 @@ const AddUserComponent = () => {
       const status = "success";
 
       // 4. Dispatch thunk
+      let data  =  createUserApi(newFormData)
       const result = await dispatch(createUserApi(newFormData));
-
       // 5. Handle rejection manually
       if (createUserApi.rejected.match(result)) {
         // Safely extract error message from payload
@@ -170,6 +183,22 @@ const AddUserComponent = () => {
           isSubmitted={isSubmitted}
         />
       )}
+
+      <div className="md:col-span-2 mt-5">
+        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight">
+          Terms & Conditions
+        </h2>
+      </div>
+      {isOpen.TermsConditions && (
+        <TermsConditions
+          formData={formData}
+          setIsOpen={setIsOpen}
+          handleSubmit={handleSubmit}
+          isSubmitted={isSubmitted}
+          setFormData =   {setFormData}
+        />
+      )}
+
       {submitError && (
         <p className="text-sm text-red-500 mt-3 text-center">{submitError}</p>
       )}
@@ -640,6 +669,13 @@ export const SocialMediaLink = ({
       SocialMediaLink: false,
     }));
 
+  const next = () =>
+    setIsOpen((prev) => ({
+      ...prev,
+      SocialMediaLink: false,
+      TermsConditions: true,
+    }));
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
@@ -697,15 +733,121 @@ export const SocialMediaLink = ({
         </Button>
 
         <Button
-          onClick={handleSubmit}
+          onClick={next}
           variant="secondary"
           disabled={isSubmitted} // Add disabled prop here
           className="w-full flex items-center justify-center gap-2 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800"
         >
-          <span>{isSubmitted ? "Submitting..." : "Submit"}</span>
+          <span>View Terms & Conditions</span>
           <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-2" />
         </Button>
       </div>
     </>
+  );
+};
+
+export const TermsConditions = ({ setIsOpen, handleSubmit, isSubmitted , setFormData  , formData}) => {
+  const [agree, setAgree] = useState(false);
+  
+
+  const back = () =>
+    setIsOpen((prev) => ({
+      ...prev,
+      SocialMediaLink: true,
+      TermsConditions: false,
+    }));
+
+    const setAgreed = (value) => {
+      setFormData((prev) => ({ ...prev, termsAccepted: value }));
+      setAgree(value);
+    };
+    console.log(formData.termsAccepted);
+
+  return (
+    <Card className="mt-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden">
+      {/* Header */}
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-gray-900/50 dark:to-gray-800/50">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-xl">
+            <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          </div>
+          <div>
+            <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+              Bazar.sh Terms & Conditions
+            </CardTitle>
+            <CardDescription className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+              Updated: Oct 2025
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+
+      {/* Content */}
+      <CardContent className="p-6 space-y-4 text-base text-gray-700 dark:text-gray-300 leading-relaxed max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+        <div className="space-y-3">
+          {[
+            "आपल्या व्यवसायाचे नाव, लोगो आणि दिलेली माहिती सार्वजनिकरित्या Bazar.sh वर प्रदर्शित केली जाईल.",
+            "आपली वैयक्तिक माहिती कोणत्याही इतर कंपनी किंवा व्यक्तीकडे दिली जाणार नाही.",
+            "Bazar.sh तपासणी, सुधारणा किंवा माहिती अपडेट साठी आपणास संपर्क करू शकतो।",
+            "आपण दिलेल्या माहितीचा वापर Bazar.sh फक्त आपल्या व्यवसायाच्या प्रमोशनसाठीच करेल.",
+            "जर कोणत्याही वापरकर्त्याने जाती, धर्म, लिंग, व्यक्ती किंवा समाजाविरुद्ध आक्षेपार्ह, अश्लील, भेदभाव करणारी किंवा कायद्याच्या विरोधात असलेली कोणतीही प्रतिमा, माहिती किंवा सामग्री अपलोड केली, तर त्याचे खाते तत्काळ हटविले जाईल, आवश्यक ती कायदेशीर कारवाई करण्यात येईल आणि अशा कृतीसाठी Bazar.sh कोणतीही जबाबदारी स्वीकारणार नाही.",
+            "जर प्रोजेक्टमध्ये कोणतीही तांत्रिक अडचण किंवा त्रुटी निर्माण झाली, तर त्याच्या निराकरणासाठी वापरकर्त्याने ७ ते १२ दिवस संयम ठेवावा.",
+          ].map((term, index) => (
+            <div key={index} className="flex items-start gap-3 py-2">
+              <span className="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5">
+                {index + 1}
+              </span>
+              <p className="flex-1 text-gray-700 dark:text-gray-300">{term}</p>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+
+      {/* Footer */}
+      <CardFooter className="p-6 pt-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/30">
+        {/* Agreement Checkbox */}
+        <div className="flex items-start sm:items-center space-x-3 w-full sm:w-auto p-3 bg-white/80 dark:bg-gray-800/50 rounded-xl border border-gray-200/50 dark:border-gray-600/50">
+          <Checkbox
+            id="agree"
+            checked={agree}
+            onCheckedChange={setAgreed}
+            className="mt-0.5 data-[state=checked]:bg-blue-600 border-gray-300 dark:border-gray-500"
+          />
+          <label
+            htmlFor="agree"
+            className="text-sm font-medium text-gray-800 dark:text-gray-200 cursor-pointer leading-relaxed"
+          >
+            मी वरील अटी व शर्ती मान्य करतो/करते.
+          </label>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Button
+            onClick={back}
+            variant="outline"
+            className="flex items-center justify-center gap-2 h-12 px-4 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500 transition-all duration-200 flex-1 sm:flex-none"
+          >
+            <ArrowLeftFromLine className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span>Edit Social Media</span>
+          </Button>
+
+          <Button
+            onClick={() => {
+              if (!agree) {
+                toast.error("कृपया अटी व शर्ती मान्य करा (Please accept the terms).")
+                return;
+              }
+              handleSubmit();
+            }}
+            disabled={isSubmitted}
+            className="flex items-center justify-center gap-2 h-12 px-6  group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800  font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none"
+          >
+            <span>{isSubmitted ? "Submitting..." : "Accept & Submit"}</span>
+            <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </div>
+      </CardFooter>
+    </Card>
   );
 };

@@ -20,6 +20,7 @@ function generateSlug(name) {
 }
 
 export async function POST(req) {
+
   try {
     await connectDB();
     const formData = await req.formData();
