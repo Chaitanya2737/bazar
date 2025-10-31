@@ -9,13 +9,38 @@ export async function generateMetadata(props) {
 
   const { user } = (await getUserBySlug(decodedSlug)) || {};
 
+  // 🧩 Fallback metadata
   if (!user) {
     return {
       title: "Bazar SH - Empowering Small & Medium Businesses",
       description: "Grow your business online with Bazar SH.",
+      openGraph: {
+        type: "website",
+        siteName: "Bazar SH",
+        title: "Bazar SH - Empowering Small & Medium Businesses",
+        description: "Grow your business online with Bazar SH.",
+        url: "https://www.bazar.sh",
+        images: [
+          {
+            url: "/favicon.png",
+            width: 1200,
+            height: 630,
+            alt: "Bazar SH",
+          },
+        ],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: "Bazar SH - Empowering Small & Medium Businesses",
+        description: "Grow your business online with Bazar SH.",
+        images: [
+          "/favicon.png",
+        ],
+      },
     };
   }
 
+  // 🧠 Prepare user info
   const categoryNames = Array.isArray(user.categories)
     ? user.categories.map((cat) => cat.name)
     : user.categories?.name
@@ -25,19 +50,21 @@ export async function generateMetadata(props) {
   const description =
     user.bio?.length > 160 ? user.bio.slice(0, 157) + "..." : user.bio || "";
 
+  // 🧩 Cloudinary image optimization
   let businessIcon = user.businessIcon;
-
-  // ✅ Fix Cloudinary image for WhatsApp + Facebook preview
   if (businessIcon?.startsWith("https://res.cloudinary.com/")) {
     businessIcon = businessIcon.replace(
       /\/upload\/(v\d+\/)?/,
-      "/upload/w_1200,h_630,c_fill,q_auto,f_jpg,fl_attachment:false/$1"
+      "/upload/w_1200,h_630,c_fill,q_auto,f_jpg/$1"
     );
   }
 
-
+  // 🧩 Create proper one-line encoded URL
   const title = `${user.businessName} | Bazar SH`;
   const url = `https://www.bazar.sh/${encodeURIComponent(user.slug)}`;
+
+  // 🧠 Log for debugging (server-side)
+  console.log("🧠 Generated Metadata:", { title, description, url, businessIcon });
 
   return {
     title,
