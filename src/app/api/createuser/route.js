@@ -148,7 +148,6 @@ export async function POST(req) {
       }
     }
 
-    // Create new user
     const newUser = new UserModel({
       businessName: user.businessName,
       slug: slugVariable,
@@ -166,6 +165,7 @@ export async function POST(req) {
       admin: adminDoc._id,
       role: user.role || "user",
       expiringDate: user.expiringDate,
+      termsAccepted : user.termsAccepted ,
       socialMediaLinks: {
         insta: user.insta || "",
         youtube: user.youtube || "",

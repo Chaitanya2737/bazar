@@ -248,3 +248,16 @@ button:hover {
 .animate-spin-slow {
   animation: spin 25s linear infinite; /* Adjust duration as needed */
 }
+
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.animate-gradient-slow {
+  background-size: 200% 200%;
+  animation: gradientMove 10s ease infinite;
+}
+

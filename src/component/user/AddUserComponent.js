@@ -757,15 +757,23 @@ export const TermsConditions = ({ setIsOpen, handleSubmit, isSubmitted , setForm
       TermsConditions: false,
     }));
 
-    const setAgreed = (value) => {
-      setFormData((prev) => ({ ...prev, termsAccepted: value }));
-      setAgree(value);
-    };
-    console.log(formData.termsAccepted);
+   const setAgreed = (value) => {
+  console.log(value);
+  
+  setFormData((prev) => {
+    console.log(prev);
+    return { ...prev, termsAccepted: value };
+  });
 
+  console.log(formData.termsAccepted);
+  setAgree(value);
+};
+
+    console.log(formData.termsAccepted);
   return (
     <Card className="mt-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden">
       {/* Header */}
+
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-gray-900/50 dark:to-gray-800/50">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-xl">
