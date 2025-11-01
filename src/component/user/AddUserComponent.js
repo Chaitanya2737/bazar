@@ -19,6 +19,7 @@ import {
   Trash2,
   Plus,
   FileText,
+  CreditCard,
 } from "lucide-react";
 import { resetUser, updateUser } from "@/redux/slice/user/addUserSlice";
 import { createUserApi } from "@/redux/slice/user/serviceApi";
@@ -34,6 +35,8 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import Script from "next/script";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Parent Component
 const AddUserComponent = () => {
@@ -97,7 +100,7 @@ const AddUserComponent = () => {
       const status = "success";
 
       // 4. Dispatch thunk
-      let data  =  createUserApi(newFormData)
+      let data = createUserApi(newFormData);
       const result = await dispatch(createUserApi(newFormData));
       // 5. Handle rejection manually
       if (createUserApi.rejected.match(result)) {
@@ -195,7 +198,22 @@ const AddUserComponent = () => {
           setIsOpen={setIsOpen}
           handleSubmit={handleSubmit}
           isSubmitted={isSubmitted}
-          setFormData =   {setFormData}
+          setFormData={setFormData}
+        />
+      )}
+
+      <div className="md:col-span-2 mt-5">
+        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight">
+          Payment
+        </h2>
+      </div>
+      {isOpen.Payments && (
+        <Payment
+          formData={formData}
+          setIsOpen={setIsOpen}
+          handleSubmit={handleSubmit}
+          isSubmitted={isSubmitted}
+          setFormData={setFormData}
         />
       )}
 
@@ -746,9 +764,14 @@ export const SocialMediaLink = ({
   );
 };
 
-export const TermsConditions = ({ setIsOpen, handleSubmit, isSubmitted , setFormData  , formData}) => {
+export const TermsConditions = ({
+  setIsOpen,
+  handleSubmit,
+  isSubmitted,
+  setFormData,
+  formData,
+}) => {
   const [agree, setAgree] = useState(false);
-  
 
   const back = () =>
     setIsOpen((prev) => ({
@@ -757,23 +780,32 @@ export const TermsConditions = ({ setIsOpen, handleSubmit, isSubmitted , setForm
       TermsConditions: false,
     }));
 
-   const setAgreed = (value) => {
-  console.log(value);
-  
-  setFormData((prev) => {
-    console.log(prev);
-    return { ...prev, termsAccepted: value };
-  });
+  const setAgreed = (value) => {
+    const agreed = value === true;
+    setFormData((prev) => {
+      const updated = { ...prev, termsAccepted: agreed };
+      console.log("🟢 Updated formData:", updated);
+      return updated;
+    });
+    setAgree(agreed);
+  };
 
-  console.log(formData.termsAccepted);
-  setAgree(value);
-};
+  const next = () => {
+    if (!agree) {
+      toast.error("Please accept the terms and conditions to proceed.");
+      return; // prevent moving forward
+    }
 
-    console.log(formData.termsAccepted);
+    setIsOpen((prev) => ({
+      ...prev,
+      TermsConditions: false,
+      Payments: true,
+    }));
+  };
+
   return (
-    <Card className="mt-6 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden">
+    <Card className="mt-6 border border-gray-200 dark:border-gray-700 text-black dark:bg-gray-800 dark:text-white shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden">
       {/* Header */}
-
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-gray-900/50 dark:to-gray-800/50">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-xl">
@@ -817,6 +849,7 @@ export const TermsConditions = ({ setIsOpen, handleSubmit, isSubmitted , setForm
         <div className="flex items-start sm:items-center space-x-3 w-full sm:w-auto p-3 bg-white/80 dark:bg-gray-800/50 rounded-xl border border-gray-200/50 dark:border-gray-600/50">
           <Checkbox
             id="agree"
+            aria-label="Agree to terms and conditions"
             checked={agree}
             onCheckedChange={setAgreed}
             className="mt-0.5 data-[state=checked]:bg-blue-600 border-gray-300 dark:border-gray-500"
@@ -841,21 +874,368 @@ export const TermsConditions = ({ setIsOpen, handleSubmit, isSubmitted , setForm
           </Button>
 
           <Button
-            onClick={() => {
-              if (!agree) {
-                toast.error("कृपया अटी व शर्ती मान्य करा (Please accept the terms).")
-                return;
-              }
-              handleSubmit();
-            }}
-            disabled={isSubmitted}
-            className="flex items-center justify-center gap-2 h-12 px-6  group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800  font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none"
+            onClick={next}
+            disabled={!agree || isSubmitted}
+            className="flex items-center justify-center gap-2 h-12 px-6 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800 font-semibold shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none"
           >
-            <span>{isSubmitted ? "Submitting..." : "Accept & Submit"}</span>
+            <span>Move to payment</span>
             <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Button>
         </div>
       </CardFooter>
     </Card>
+  );
+};
+
+
+export const Payment = ({
+  setIsOpen,
+  handleSubmit,
+  isSubmitted,
+  setFormData,
+  formData,
+}) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [remark, setRemark] = useState("");
+  const amount = 100;
+
+  const back = () =>
+    setIsOpen((prev) => ({
+      ...prev,
+      TermsConditions: true,
+      Payments: false,
+    }));
+
+  const handlePayment = async () => {
+    try {
+      setIsProcessing(true);
+      console.log("🟡 Creating Razorpay order...");
+
+      const response = await fetch("/api/razorpay", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ amount }),
+      });
+
+      if (!response.ok) throw new Error("Failed to create order");
+      const data = await response.json();
+      console.log("✅ Razorpay order created:", data);
+
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: data.amount,
+        currency: data.currency,
+        name: "Bazar SH",
+        description: "Website Plan Payment",
+        order_id: data.id,
+        handler: async function (response) {
+          console.log("💰 Payment successful:", response);
+
+          setFormData((prev) => ({
+            ...prev,
+            remark,
+            paymentId: response.razorpay_payment_id,
+            orderId: response.razorpay_order_id,
+            paymentStatus: "success",
+          }));
+
+          // Show loader animation while submitting
+          setIsSubmitting(true);
+          await handleSubmit();
+          setTimeout(() => {
+            setIsSubmitting(false);
+          }, 1000);
+        },
+        prefill: {
+          name: formData?.name || "Chaitanya",
+          email: formData?.email || "chaitanyasatarkar123@gmail.com",
+          contact: formData?.phone || "1234567890",
+        },
+        notes: { address: "Bazar SH Office" },
+        theme: {
+          color: "#000000",
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.on("payment.failed", function (response) {
+        console.error("❌ Payment failed:", response.error);
+        alert("Payment failed. Please try again.");
+      });
+      razorpay.open();
+    } catch (error) {
+      console.error("❌ Payment Error:", error);
+      alert("Something went wrong. Try again.");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <>
+<AnimatePresence>
+  {isSubmitting && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-lg bg-gradient-to-br from-black/90 via-purple-900/20 to-blue-900/20 text-white"
+    >
+      {/* Animated gradient orbs */}
+      <motion.div
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.3, 0.6, 0.3],
+          rotate: [0, 180, 360],
+        }}
+        transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
+        className="absolute w-80 h-80 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
+      />
+      <motion.div
+        animate={{
+          scale: [1.2, 1, 1.2],
+          opacity: [0.4, 0.2, 0.4],
+          rotate: [180, 360, 180],
+        }}
+        transition={{ repeat: Infinity, duration: 5, ease: "linear", delay: 1 }}
+        className="absolute w-96 h-96 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl"
+      />
+
+      {/* Main content container */}
+      <motion.div
+        initial={{ scale: 0.8, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        transition={{ type: "spring", damping: 15, stiffness: 200 }}
+        className="relative z-10 flex flex-col items-center justify-center text-center max-w-md mx-4"
+      >
+        {/* Floating emoji with bounce */}
+        <motion.div
+          animate={{ 
+            y: [0, -15, 0],
+            rotate: [0, 5, -5, 0]
+          }}
+          transition={{ 
+            y: { repeat: Infinity, duration: 2, ease: "easeInOut" },
+            rotate: { repeat: Infinity, duration: 3, ease: "easeInOut" }
+          }}
+          className="text-7xl mb-6 filter drop-shadow-2xl"
+        >
+          🚀
+        </motion.div>
+
+        {/* Progress indicator */}
+        <div className="relative flex flex-col items-center gap-4 mb-8">
+          {/* Outer glow ring */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+            className="absolute w-24 h-24 border-2 border-transparent border-t-white/30 border-r-white/10 rounded-full"
+          />
+          
+          {/* Main spinner */}
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+            className="w-20 h-20 border-4 border-white/20 border-t-white rounded-full relative"
+          >
+            {/* Inner pulse */}
+            <motion.div
+              animate={{ scale: [1, 1.1, 1] }}
+              transition={{ repeat: Infinity, duration: 1 }}
+              className="absolute inset-2 border-2 border-white/10 rounded-full"
+            />
+          </motion.div>
+
+          {/* Progress dots */}
+          <div className="flex gap-1">
+            {[0, 1, 2].map((index) => (
+              <motion.div
+                key={index}
+                animate={{ scale: [1, 1.3, 1] }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 1,
+                  delay: index * 0.2,
+                }}
+                className="w-2 h-2 bg-white/60 rounded-full"
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Text content */}
+        <div className="space-y-3">
+          {/* Main message */}
+          <motion.h3
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent"
+          >
+            Processing Your Request
+          </motion.h3>
+
+          {/* Sub message */}
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-lg text-gray-200 font-medium"
+          >
+            Securing your payment... ⏳
+          </motion.p>
+
+          {/* Animated status text */}
+          <motion.div
+            animate={{ opacity: [0.7, 1, 0.7] }}
+            transition={{ repeat: Infinity, duration: 2 }}
+            className="text-sm text-gray-300 space-y-1"
+          >
+            <p>✓ Payment verified</p>
+            <p>✓ Data encrypted</p>
+            <motion.p
+              animate={{ opacity: [1, 0.5, 1] }}
+              transition={{ repeat: Infinity, duration: 1.5 }}
+            >
+              🔄 Finalizing submission...
+            </motion.p>
+          </motion.div>
+
+          {/* Funny reassurance */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            className="text-xs text-gray-400 italic pt-2 border-t border-white/10"
+          >
+            Dont worry, weve got this! Your data is safe with us 🔒
+          </motion.p>
+        </div>
+
+        {/* Progress bar */}
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: "100%" }}
+          transition={{ duration: 8, ease: "linear" }}
+          className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mt-6 overflow-hidden"
+        >
+          <motion.div
+            animate={{ x: [-100, 100] }}
+            transition={{ repeat: Infinity, duration: 1 }}
+            className="h-full w-20 bg-white/30 skew-x-12"
+          />
+        </motion.div>
+      </motion.div>
+
+      {/* Background particles */}
+      <div className="absolute inset-0 overflow-hidden">
+        {[...Array(15)].map((_, i) => (
+          <motion.div
+            key={i}
+            animate={{
+              y: [0, -100],
+              opacity: [0, 1, 0],
+            }}
+            transition={{
+              duration: 3 + Math.random() * 2,
+              repeat: Infinity,
+              delay: Math.random() * 2,
+            }}
+            className="absolute w-1 h-1 bg-white/30 rounded-full"
+            style={{
+              left: `${Math.random() * 100}%`,
+              bottom: "0%",
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Close warning - only show after a few seconds */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 5 }}
+        className="absolute bottom-8 text-xs text-gray-400 text-center"
+      >
+        <p>Please keep this tab open until complete</p>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+
+      <Card className="mt-6 border border-gray-300 dark:border-gray-700 text-black dark:text-white bg-white dark:bg-gray-900 shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden">
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" />
+
+        {/* Header */}
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50/60 to-gray-100/60 dark:from-gray-800/60 dark:to-gray-700/60">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-gray-200 dark:bg-gray-800 rounded-xl">
+              <CreditCard className="w-5 h-5 text-black dark:text-white" />
+            </div>
+            <div>
+              <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
+                Bazar.sh Payment
+              </CardTitle>
+              <CardDescription className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Secure Payment Gateway
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+
+        {/* Content */}
+        <CardContent className="p-6 space-y-6 text-base text-gray-700 dark:text-gray-300">
+          <div className="flex justify-between items-center">
+            <p className="text-lg font-medium text-gray-900 dark:text-gray-100">
+              Amount
+            </p>
+            <p className="text-2xl font-bold text-gray-900 dark:text-white">
+              ₹{amount}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="remark"
+              className="text-gray-900 dark:text-gray-200 font-medium"
+            >
+              Remark (Optional)
+            </Label>
+            <Input
+              id="remark"
+              type="text"
+              placeholder="Enter any note or remark before payment..."
+              value={remark}
+              onChange={(e) => setRemark(e.target.value)}
+              className="w-full p-7 rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-black dark:focus:ring-white transition-all"
+            />
+          </div>
+        </CardContent>
+
+        {/* Footer */}
+        <CardFooter className="p-6 pt-0 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 border-t border-gray-200 dark:border-gray-700 bg-gray-100/60 dark:bg-gray-900/40">
+          <Button
+            onClick={back}
+            variant="outline"
+            className="flex items-center justify-center gap-2 h-12 px-4 border-gray-400 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 hover:border-gray-500 dark:hover:border-gray-500 transition-all duration-200 flex-1 sm:flex-none"
+          >
+            <ArrowLeftFromLine className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            <span>Back to Terms</span>
+          </Button>
+
+          <Button
+            onClick={handlePayment}
+            disabled={isProcessing || isSubmitted}
+            className="flex items-center justify-center gap-2 h-12 px-6 group bg-black dark:bg-white text-white dark:text-black font-semibold shadow-md hover:shadow-lg hover:bg-gray-900 dark:hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex-1 sm:flex-none"
+          >
+            {isProcessing ? "Processing..." : `Pay ₹${amount}`}
+            <CreditCard className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Button>
+        </CardFooter>
+      </Card>
+    </>
   );
 };
