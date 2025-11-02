@@ -15,7 +15,7 @@ const client = new BetaAnalyticsDataClient({
   },
 });
 
-const propertyId = process.env.GA_PROPERTY_ID || "506284738"; // fallback
+const propertyId =  "506284738"; // fallback
 
 // Helper function for running reports with error handling
 async function runReport(request) {
@@ -29,8 +29,8 @@ async function runReport(request) {
 }
 
 // ✅ Fetch total page views for a given path
-export async function getPageViews(pathName, startDate = "2025-09-01") { // Made startDate optional/dynamic
-  const [response] = await runReport({
+export async function getPageViews(pathName, startDate = "2025-09-01") {
+  const response = await runReport({
     property: `properties/${propertyId}`,
     dateRanges: [{ startDate, endDate: "today" }],
     dimensions: [{ name: "pagePath" }],
@@ -45,7 +45,7 @@ export async function getPageViews(pathName, startDate = "2025-09-01") { // Made
 
   return (
     response.rows?.reduce(
-      (total, row) => total + Number(row.metricValues[0].value || 0),
+      (total, row) => total + Number(row.metricValues?.[0]?.value || 0),
       0
     ) || 0
   );
@@ -68,129 +68,97 @@ export async function getEventCount(eventName) {
 
   return Number(response.rows?.[0]?.metricValues?.[0]?.value || 0);
 }
-export async function getAnalyticsData(
-  pathName,
-  interval = "7d",
-  filterType = "CONTAINS",
-  debug = false,
-  noFilter = false
-) {
-  const propertyId = "506284738";
 
-  // Determine date range
-  const today = new Date();
-  const todayStr = today.toISOString().slice(0, 10); // YYYY-MM-DD
 
-  const start = new Date();
+
+
+function getTodayAndStartDate(interval = "7d", tzOffsetMinutes = 330) {
+  const now = new Date();
+  const gaNow = new Date(now.getTime() + tzOffsetMinutes * 60 * 1000);
+
+  const todayStr = gaNow.toISOString().slice(0, 10); // YYYY-MM-DD (GA timezone)
+  const start = new Date(gaNow);
   const daysBack = interval === "30d" ? 30 : 7;
-  start.setDate(today.getDate() - daysBack);
+  start.setDate(start.getDate() - daysBack);
   const startStr = start.toISOString().slice(0, 10);
 
-  // Normalize path
-  let normalizedPath = pathName.startsWith("/")
-    ? pathName.replace(/\/$/, "")
-    : `/${pathName.replace(/\/$/, "")}`;
+  return { todayStr, startStr };
+}
+/** ✅ Main Analytics Function (timezone-safe + filled daily) */
+export async function getAnalyticsData(pathname = "/", interval = "7d") {
+  const { todayStr, startStr } = getTodayAndStartDate(interval, 330); // Adjust if your GA property is in another zone
 
-  if (filterType === "BEGINS_WITH") {
-    normalizedPath = normalizedPath.replace(/\/$/, "") + "/";
-  }
-
-  // Prepare GA4 request
-  const request = {
+  let response = await runReport({
     property: `properties/${propertyId}`,
     dateRanges: [{ startDate: startStr, endDate: todayStr }],
     dimensions: [{ name: "date" }, { name: "pagePath" }],
-    metrics: [{ name: "screenPageViews" }, { name: "activeUsers" }],
-    orderBys: [{ dimension: { dimensionName: "date" } }],
-  };
-
-  if (!noFilter) {
-    request.dimensionFilter = {
+    metrics: [{ name: "screenPageViews" }, { name: "totalUsers" }],
+    dimensionFilter: {
       filter: {
         fieldName: "pagePath",
-        stringFilter: { value: normalizedPath, matchType: filterType },
+        stringFilter: { value: pathname, matchType: "EXACT" },
       },
-    };
+    },
+    orderBys: [{ dimension: { dimensionName: "date" } }],
+  });
+
+  // Fallback to CONTAINS filter if exact match yields nothing
+  if (!response?.rows?.length) {
+    console.warn(`⚠️ No GA data for exact path "${pathname}", retrying with CONTAINS`);
+    response = await runReport({
+      property: `properties/${propertyId}`,
+      dateRanges: [{ startDate: startStr, endDate: todayStr }],
+      dimensions: [{ name: "date" }, { name: "pagePath" }],
+      metrics: [{ name: "screenPageViews" }, { name: "totalUsers" }],
+      dimensionFilter: {
+        filter: {
+          fieldName: "pagePath",
+          stringFilter: { value: pathname, matchType: "CONTAINS" },
+        },
+      },
+      orderBys: [{ dimension: { dimensionName: "date" } }],
+    });
   }
 
-  try {
-    const response = await client.runReport(request);
-
-    // Debug logs
-    if (debug) {
-      console.log(`GA4 Debug for ${normalizedPath} (${interval}):`);
-      console.log(`- Date range: ${startStr} to ${todayStr}`);
-      console.log(`- Raw rows count: ${response.rows?.length || 0}`);
-      console.log(
-        "- Sample rows:",
-        response.rows?.slice(0, 3).map((row) => ({
-          date: row.dimensionValues[0].value,
-          path: row.dimensionValues[1].value,
-          views: row.metricValues[0].value,
-          users: row.metricValues[1].value,
-        })) || "None"
-      );
-      console.log(
-        "- Totals in response:",
-        {
-          totalViews: response.totals?.[0]?.values?.[0]?.value || 0,
-          totalUsers: response.totals?.[0]?.values?.[1]?.value || 0,
-        }
-      );
-    }
-
-    // Aggregate rows by date
-    const dailyAggregated = response.rows?.reduce((acc, row) => {
-      const date = row.dimensionValues[0].value;
-      const views = Number(row.metricValues[0].value);
-      const users = Number(row.metricValues[1].value);
-      if (!acc[date]) acc[date] = { views: 0, users: 0 };
-      acc[date].views += views;
-      acc[date].users += users;
-      return acc;
-    }, {}) || {};
-
-    const totalViews = Object.values(dailyAggregated).reduce(
-      (sum, d) => sum + d.views,
-      0
-    );
-    const totalUsers = Object.values(dailyAggregated).reduce(
-      (sum, d) => sum + d.users,
-      0
-    );
-
-    // Fill missing dates
-    const filledDaily = [];
-    const current = new Date(start);
-    while (current <= today) {
-      const dateStr = current.toISOString().slice(0, 10);
-      const day = dailyAggregated[dateStr] || { views: 0, users: 0 };
-      filledDaily.push({
-        date: dateStr.replace(/-/g, ""), // YYYYMMDD for charts
-        views: day.views,
-        users: day.users,
-      });
-      current.setDate(current.getDate() + 1);
-    }
-
-    if (debug) {
-      console.log("- Aggregated totals:", { totalViews, totalUsers });
-      console.log("- Filled daily sample:", filledDaily.slice(0, 3));
-    }
-
-    return { totalViews, totalUsers, daily: filledDaily };
-  } catch (error) {
-    console.error("Google Analytics fetch failed:", error);
-
-    // Fallback: fill with zeros
-    const filledDaily = [];
-    const fallbackStart = new Date(start);
-    while (fallbackStart <= today) {
-      const dateStr = fallbackStart.toISOString().slice(0, 10).replace(/-/g, "");
-      filledDaily.push({ date: dateStr, views: 0, users: 0 });
-      fallbackStart.setDate(fallbackStart.getDate() + 1);
-    }
-
-    return { totalViews: 0, totalUsers: 0, daily: filledDaily };
+  if (!response?.rows?.length) {
+    console.log(`📭 No GA data even after fallback for: ${pathname}`);
+    return { totalViews: 0, totalUsers: 0, daily: [] };
   }
+
+  /** Aggregate by date */
+  const dailyData = {};
+  for (const row of response.rows) {
+    const date = row.dimensionValues?.[0]?.value || "unknown";
+    const views = Number(row.metricValues?.[0]?.value || 0);
+    const users = Number(row.metricValues?.[1]?.value || 0);
+    if (!dailyData[date]) dailyData[date] = { views: 0, users: 0 };
+    dailyData[date].views += views;
+    dailyData[date].users += users;
+  }
+
+  /** Fill missing days */
+  const filledDaily = [];
+  const start = new Date(startStr);
+  const end = new Date(todayStr);
+
+  while (start <= end) {
+    const dateStr = start.toISOString().split("T")[0].replace(/-/g, "");
+    filledDaily.push({
+      date: dateStr,
+      views: dailyData[dateStr]?.views || 0,
+      users: dailyData[dateStr]?.users || 0,
+    });
+    start.setDate(start.getDate() + 1);
+  }
+
+  const totalViews = filledDaily.reduce((sum, d) => sum + d.views, 0);
+  const totalUsers = filledDaily.reduce((sum, d) => sum + d.users, 0);
+
+  console.log(`📊 GA data for "${pathname}" (${interval}):`, {
+    totalViews,
+    totalUsers,
+    filledDays: filledDaily.length,
+  });
+
+  return { totalViews, totalUsers, daily: filledDaily };
 }
