@@ -4,6 +4,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Loader2 } from "lucide-react";
 
 export default function SignInPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -52,14 +53,22 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 h-screen">
+    <div className="grid grid-cols-1 md:grid-cols-2 h-screen relative">
+      {/* 🔄 Loader Overlay */}
+      {isLoggingIn && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
+          <Loader2 className="animate-spin text-white w-10 h-10 mb-3" />
+          <p className="text-white text-lg font-medium">Signing you in...</p>
+        </div>
+      )}
+
       {/* Left - Form */}
       <div className="flex items-center justify-center px-6 text-black bg-white dark:bg-gray-800 dark:text-white">
         <div className="w-full max-w-md">
-          <h2 className="text-3xl font-bold text-black  dark:text-white mb-2">
+          <h2 className="text-3xl font-bold text-black dark:text-white mb-2">
             Welcome Back 👋
           </h2>
-          <p className="text-sm text-black  dark:text-white mb-6">
+          <p className="text-sm text-black dark:text-white mb-6">
             Please sign in to your account
           </p>
 
@@ -90,7 +99,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={isLoggingIn}
-              className="w-full bg-blue-600 dark:bg-orange-500 hover:bg-blue-700 dark:hover:bg-orange-600  text-white font-semibold py-3 rounded-lg transition-all duration-200 disabled:opacity-50"
+              className="w-full bg-blue-600 dark:bg-orange-500 hover:bg-blue-700 dark:hover:bg-orange-600 text-white font-semibold py-3 rounded-lg transition-all duration-200 disabled:opacity-50"
             >
               {isLoggingIn ? "Logging in..." : "Sign In"}
             </button>
@@ -99,15 +108,15 @@ export default function SignInPage() {
       </div>
 
       {/* Right - Image */}
-      <div className="hidden  md:block ">
-        <div className="w-full h-screen relative ">
+      <div className="hidden md:block">
+        <div className="w-full h-screen relative">
           <Image
             src="/pexels-anuragsinngh-2264075.jpg"
             alt="Login background"
             width={1200}
             height={500}
             loading="lazy"
-            className="w-full h-full object-cover rounded-4xl p-3 "
+            className="w-full h-full object-cover rounded-4xl p-3"
           />
         </div>
       </div>
