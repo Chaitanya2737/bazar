@@ -13,7 +13,7 @@ export async function POST(request) {
 
     // Optionally, read amount from client
     const body = await request.json().catch(() => ({}));
-    const amount = body.amount || 100; // default ₹100
+    const amount = body.amount || 2000; // default ₹100
 
     // ✅ Create Razorpay order (amount is in paise)
     const order = await razorpay.orders.create({
