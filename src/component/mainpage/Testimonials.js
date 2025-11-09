@@ -95,7 +95,7 @@ const testimonials = [
 export default function FloatingTestimonials() {
   return (
     <>
-      <section className="relative rounded-2xl bg-gradient-to-br from-[#96caed] via-white/50 to-[#3a4a56] dark:from-gray-900 dark:via-white/50 dark:to-gray-900 dark:text-white  py-24 overflow-hidden">
+      <section className="relative rounded-2xl bg-gradient-to-br from-[#96caed] via-white/50 to-pink-50 dark:from-gray-900 dark:via-white/50 dark:to-gray-900 dark:text-white  py-24 overflow-hidden">
         <div className="relative max-w-[100%] h-[500px] ">
           {testimonials.map((t, i) => (
             <div

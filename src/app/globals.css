@@ -261,3 +261,12 @@ button:hover {
   animation: gradientMove 10s ease infinite;
 }
 
+
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
