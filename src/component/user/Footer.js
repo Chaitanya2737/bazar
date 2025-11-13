@@ -4,6 +4,7 @@ import { Facebook, Instagram, Link2, Mail, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState } from "react";
+import FooterAd from "../addsence/FooterAd";
 
 const Footer = ({ businessName }) => {
   const [email, setEmail] = useState("");
@@ -21,6 +22,7 @@ const Footer = ({ businessName }) => {
 
   return (
     <footer className="bg-gray-900 text-white px-4 sm:px-6 py-12 mt-16 text-sm">
+      <FooterAd />
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Main Footer Sections */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

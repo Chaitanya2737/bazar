@@ -23,6 +23,7 @@ import PreviewOffer from "@/component/user/SiteOffer/PreviewOffer";
 import Head from "next/head";
 import NotificationManager from "@/component/notification/NotificationManager";
 import UserPreviewCount from "@/component/preview/Userpreviewcount";
+import AdSense from "@/component/addsence/googleAds";
 
 const getPageKey = (pathname) => `visitCount:${pathname}`;
 const getSessionKey = (pathname) => `hasVisited:${pathname}`;
@@ -196,6 +197,9 @@ const UserPreview = () => {
             mobileNumber={data.mobileNumber}
           />
         )}
+
+
+        <AdSense />
 
         {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />

@@ -105,6 +105,13 @@ export default function RootLayout({ children }) {
           gtag('config', 'G-HX7PDV877D');
         `}
         </Script>
+    <script
+          async
+          id="adsbygoogle-script"
+          strategy="afterInteractive"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5404817035821633"
+          crossOrigin="anonymous"
+        ></script>
 
         <Script
           id="ld-json"
