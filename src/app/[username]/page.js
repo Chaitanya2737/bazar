@@ -199,7 +199,7 @@ const UserPreview = () => {
         )}
 
 
-        <AdSense />
+    
 
         {renderSkeleton ? (
           <Skeleton className="w-full h-64 bg-gray-800 rounded mb-4" />
