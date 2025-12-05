@@ -70,7 +70,7 @@ const Contact = ({ socialMediaLinks, email, location, mobileNumber }) => {
         transition={{ duration: 0.5 }}
       >
         <h1 className="font-bold text-4xl md:text-5xl text-center mb-8 text-black dark:text-white">
-        Stay Connected
+          Stay Connected
         </h1>
       </motion.div>
 
@@ -120,23 +120,30 @@ const Contact = ({ socialMediaLinks, email, location, mobileNumber }) => {
                   </DrawerTitle>
                 </DrawerHeader>
                 <div className="px-6 pb-6 space-y-3 max-h-60 overflow-y-auto">
-                  {mobileNumber.map((number, index) => (
-                    <motion.a
-                      key={index}
-                      href={`https://wa.me/${number}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full px-4 py-3 text-center rounded-lg 
-                        bg-green-50 dark:bg-green-900/20 
-                        text-green-800 dark:text-green-200 
-                        hover:bg-green-100 dark:hover:bg-green-800/30 
-                        transition-all duration-200"
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {number}
-                    </motion.a>
-                  ))}
+                  {mobileNumber.map((number, index) => {
+                    const clean = cleanNumber(number);
+                    const finalNumber = clean.startsWith("91")
+                      ? clean
+                      : `91${clean}`;
+
+                    return (
+                      <motion.a
+                        key={index}
+                        href={`https://wa.me/${finalNumber}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full px-4 py-3 text-center rounded-lg 
+          bg-green-50 dark:bg-green-900/20 
+          text-green-800 dark:text-green-200 
+          hover:bg-green-100 dark:hover:bg-green-800/30 
+          transition-all duration-200"
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        {`+${finalNumber}`}
+                      </motion.a>
+                    );
+                  })}
                 </div>
               </DrawerContent>
             </Drawer>

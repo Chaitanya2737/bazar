@@ -31,6 +31,10 @@ export const metadata = {
       "Build your business website effortlessly with Bazar.sh — the all-in-one platform for small and medium enterprises. Promote your brand using SMS, WhatsApp, Meta ads, and engage your customers with powerful push notifications.",
     url: "https://bazar.sh",
     type: "website",
+    viewport: {
+      width: "device-width",
+      initialScale: 1,
+    },
     images: [
       {
         url: "https://res.cloudinary.com/dp8evydam/image/upload/v1752949353/bazar.sh_social_png_ou5arw.png",
@@ -69,6 +73,9 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -105,7 +112,7 @@ export default function RootLayout({ children }) {
           gtag('config', 'G-HX7PDV877D');
         `}
         </Script>
-    <script
+        <script
           async
           id="adsbygoogle-script"
           strategy="afterInteractive"
