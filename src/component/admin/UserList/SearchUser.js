@@ -73,6 +73,7 @@ const SearchUser = ({ id }) => {
   const handleNewUser = () => {
     setRouteLoading(true);
     router.push(`/adduser/${id}`);
+    
   };
 
   return (
