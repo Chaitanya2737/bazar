@@ -1,5 +1,6 @@
 import Image from "next/image";
 import React from "react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const UserList = ({ users }) => {
   if (!users || users.length === 0) {
@@ -7,7 +8,7 @@ const UserList = ({ users }) => {
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 w-full">
+    <div className="flex flex-col gap-4 w-full">
       {users.map((user) => {
         const categoryName = user.categoryDetails?.[0]?.name || "No Category";
 
@@ -20,20 +21,13 @@ const UserList = ({ users }) => {
           : "N/A";
 
         return (
-          <div
+          <Card
             key={user._id}
             onClick={() => (window.location.href = `/user/${user._id}`)}
-            className="flex items-center border border-gray-200 dark:border-gray-700 
-                       rounded-xl p-4 bg-white dark:bg-gray-800 shadow-sm 
-                       hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer"
+            className="flex flex-row items-center cursor-pointer hover:shadow-lg transition-all duration-200"
           >
-            {/* Left: Business Icon */}
-            <div
-              className="flex items-center justify-center w-24 h-24 
-                            bg-gray-100 dark:bg-gray-900 
-                            border-2 border-gray-200 dark:border-gray-700 
-                            rounded-xl overflow-hidden relative shrink-0"
-            >
+            {/* Left: Image */}
+            <div className="shrink-0 w-18 h-18 relative mx-1 rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700">
               {user.businessIcon ? (
                 <Image
                   src={user.businessIcon}
@@ -42,37 +36,31 @@ const UserList = ({ users }) => {
                   className="object-cover"
                 />
               ) : (
-                <span className="text-xl font-bold text-gray-600 dark:text-gray-300">
+                <span className="flex items-center justify-center w-full h-full text-xl font-bold text-gray-600 dark:text-gray-300">
                   {(user.businessName || "A").charAt(0)}
                 </span>
               )}
             </div>
 
-            <div className="border-l border-gray-300 dark:border-gray-700 mx-4"></div>
-
-            {/* Right: User Details */}
-            <div className="flex flex-col justify-center leading-relaxed space-y-1 overflow-hidden">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100 truncate w-48">
-                {user.businessName}
+            {/* Right: Details */}
+            <CardContent className="flex flex-col justify-start overflow-hidden">
+              <h2 className="text-md font-semibold text-gray-800 dark:text-gray-100 wrap-break-word">
+                {user.businessName || "No Name"}
               </h2>
-
-              <p className="text-gray-600 dark:text-gray-300 text-sm truncate w-48">
+              <p className="text-gray-600 dark:text-gray-300 text-sm truncate ">
                 {user.email || "No Email"}
               </p>
-
-              <p className="text-gray-700 dark:text-gray-300 text-sm truncate w-48">
-                {user.mobileNumber || "No mobile number"}
+              <p className="text-gray-700 dark:text-gray-300 text-sm truncate wrap-break-word">
+                {user.mobileNumber || "No Mobile"}
               </p>
-
-              <p className="text-gray-700 dark:text-gray-200 text-sm font-medium">
+              <p className="text-gray-700 dark:text-gray-200 text-sm font-medium  wrap-break-word">
                 {categoryName}
               </p>
-
               <p className="text-gray-400 dark:text-gray-500 text-xs">
                 Joined: {formattedDate}
               </p>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         );
       })}
     </div>

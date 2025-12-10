@@ -73,11 +73,11 @@ const SearchUser = ({ id }) => {
   const handleNewUser = () => {
     setRouteLoading(true);
     router.push(`/adduser/${id}`);
-    
+
   };
 
   return (
-    <div className="p-4 w-full">
+    <div className="p-4 ">
       {routeLoading && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="animate-spin h-12 w-12 border-4 border-white/50 border-t-white rounded-full"></div>
