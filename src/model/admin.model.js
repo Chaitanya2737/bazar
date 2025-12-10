@@ -6,6 +6,10 @@ const adminSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     email: {
       type: String,
       required: true,
@@ -42,6 +46,7 @@ const adminSchema = new mongoose.Schema(
   }
 );
 
-const AdminModel = mongoose.models.Admin || mongoose.model("Admin", adminSchema);
+const AdminModel =
+  mongoose.models.Admin || mongoose.model("Admin", adminSchema);
 
 export default AdminModel;

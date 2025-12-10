@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { userLogout, userLogin } from "@/redux/slice/user/userSlice";
 import { useParams, useRouter } from "next/navigation";
+import SearchUser from "@/component/admin/UserList/SearchUser";
 
 const UserDashboardPage = () => {
   const admin = useSelector((state) => state.userAuth);
@@ -86,29 +87,13 @@ const UserDashboardPage = () => {
 
   // Main dashboard
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
-      <div className="w-full max-w-4xl rounded-2xl bg-white p-8 shadow-xl transition-all duration-300 dark:bg-gray-800 sm:p-12">
-        <div className="flex items-center justify-between">
-          <h2 className="animate-fade-in text-4xl font-bold text-gray-800 dark:text-white sm:text-5xl">
-            Welcome 👋
-          </h2>
-        </div>
-        <p className="mb-8 max-w-2xl text-lg text-gray-600 dark:text-gray-300 leading-relaxed sm:text-xl">
-          Seamlessly manage users, add new ones, and keep your system updated
-          with our user-friendly platform.{" "}
-        </p>
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-          <button
-            onClick={() => router.push(`/adduser/${admin?.id}`)}
-            className="transform rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white shadow-md transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:scale-105"
-          >
-            Register User
-          </button>
-        </div>
-      </div>
 
-    
+    <>
+    <div className=" min-h-screen  bg-gray-100 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+      <SearchUser id = {session.user.id} />
     </div>
+    
+    </>
   );
 };
 
