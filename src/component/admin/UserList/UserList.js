@@ -8,7 +8,7 @@ const UserList = ({ users }) => {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
       {users.map((user) => {
         const categoryName = user.categoryDetails?.[0]?.name || "No Category";
 
@@ -49,11 +49,11 @@ const UserList = ({ users }) => {
 
               {/* Right: Details */}
               <CardContent className="flex flex-col justify-start p-0 break-words">
-                <h2 className="text-md font-semibold text-gray-800 dark:text-gray-100 wrap-break-word">
+                <h2 className="text-md font-semibold text-gray-800 dark:text-gray-100 wrap-break-word w-48">
                   {user.businessName || "No Name"}
                 </h2>
 
-                <p className="text-gray-600 dark:text-gray-300 text-sm truncate overflow-hidden w-48" >
+                <p className="text-gray-600 dark:text-gray-300 text-sm truncate overflow-hidden w-40" >
                   {user.email || "No Email"}
                 </p>
 
