@@ -8,7 +8,7 @@ const UserList = ({ users }) => {
   }
 
   return (
-    <div className="flex flex-col gap-4 w-full">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {users.map((user) => {
         const categoryName = user.categoryDetails?.[0]?.name || "No Category";
 
@@ -24,42 +24,53 @@ const UserList = ({ users }) => {
           <Card
             key={user._id}
             onClick={() => (window.location.href = `/user/${user._id}`)}
-            className="flex flex-row items-center cursor-pointer hover:shadow-lg transition-all duration-200"
+            className="cursor-pointer hover:shadow-lg transition-all duration-200"
           >
-            {/* Left: Image */}
-            <div className="shrink-0 w-18 h-18 relative mx-1 rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700">
-              {user.businessIcon ? (
-                <Image
-                  src={user.businessIcon}
-                  alt={user.businessName || "Business"}
-                  fill
-                  className="object-cover"
-                />
-              ) : (
-                <span className="flex items-center justify-center w-full h-full text-xl font-bold text-gray-600 dark:text-gray-300">
-                  {(user.businessName || "A").charAt(0)}
-                </span>
-              )}
-            </div>
+            {/* GRID layout inside card */}
+            <div className="grid grid-cols-[80px_1fr] gap-6 p-3">
 
-            {/* Right: Details */}
-            <CardContent className="flex flex-col justify-start overflow-hidden">
-              <h2 className="text-md font-semibold text-gray-800 dark:text-gray-100 wrap-break-word">
-                {user.businessName || "No Name"}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-300 text-sm truncate ">
-                {user.email || "No Email"}
-              </p>
-              <p className="text-gray-700 dark:text-gray-300 text-sm truncate wrap-break-word">
-                {user.mobileNumber || "No Mobile"}
-              </p>
-              <p className="text-gray-700 dark:text-gray-200 text-sm font-medium  wrap-break-word">
-                {categoryName}
-              </p>
-              <p className="text-gray-400 dark:text-gray-500 text-xs">
-                Joined: {formattedDate}
-              </p>
-            </CardContent>
+              {/* Left: Image */}
+              <div className="relative w-full h-20 rounded-xl overflow-hidden border-2 border-gray-200 dark:border-gray-700">
+                {user.businessIcon ? (
+                  <Image
+                    src={user.businessIcon}
+                    alt={user.businessName || "Business"}
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="flex items-center justify-center w-full h-full text-xl font-bold text-gray-600 dark:text-gray-300">
+                    {(user.businessName || "A").charAt(0)}
+                  </span>
+                )}
+              </div>
+
+              
+
+              {/* Right: Details */}
+              <CardContent className="flex flex-col justify-start p-0 break-words">
+                <h2 className="text-md font-semibold text-gray-800 dark:text-gray-100 wrap-break-word">
+                  {user.businessName || "No Name"}
+                </h2>
+
+                <p className="text-gray-600 dark:text-gray-300 text-sm truncate overflow-hidden w-48" >
+                  {user.email || "No Email"}
+                </p>
+
+                <p className="text-gray-700 dark:text-gray-300 text-sm break-words">
+                  {user.mobileNumber || "No Mobile"}
+                </p>
+
+                <p className="text-gray-700 dark:text-gray-200 text-sm font-medium break-words">
+                  {categoryName}
+                </p>
+
+                <p className="text-gray-400 dark:text-gray-500 text-xs">
+                  Joined: {formattedDate}
+                </p>
+              </CardContent>
+
+            </div>
           </Card>
         );
       })}
