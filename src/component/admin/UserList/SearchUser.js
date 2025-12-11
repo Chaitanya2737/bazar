@@ -141,7 +141,7 @@ const SearchUser = ({ id }) => {
       {/* Actual User List */}
       {!loading && !error && !routeLoading && (
         <>
-          <UserList users={filteredUsers} />
+          <UserList users={filteredUsers}  fetchUser = {fetchUser}/>
 
           {/* Pagination */}
           <div className="flex justify-center items-center mt-6 space-x-2">
