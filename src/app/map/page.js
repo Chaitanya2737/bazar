@@ -25,13 +25,29 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   const fetchData = async () => {
+    if (isLoading || !hasMore) return;
+
     setIsLoading(true);
     setError(null);
+
     try {
-      const response = await axios.get("/api/user/preview/mappreview");
-      setClient(response.data.users);
+      const response = await axios.post("/api/user/preview/mappreview", { page });
+
+      const newUsers = response.data.users || [];
+
+      if (newUsers.length === 0) {
+        setHasMore(false); // no more data
+      } else {
+        setClient((prev) => {
+          const ids = new Set(prev.map((u) => u._id));
+          return [...prev, ...newUsers.filter((u) => !ids.has(u._id))];
+        });
+        setPage((prev) => prev + 1);
+      }
     } catch (error) {
       setError("Failed to load businesses. Please try again.");
     } finally {
@@ -93,35 +109,14 @@ export default function Home() {
       </Head>
 
       <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] h-screen">
-        {/* Sidebar (collapsible on small screens) */}
+        {/* Sidebar */}
         <div className="bg-white p-4 lg:p-6 shadow-lg overflow-y-auto max-h-[60vh] lg:max-h-full lg:static fixed bottom-0 w-full rounded-t-2xl z-20">
           <h1 className="text-xl lg:text-2xl font-bold mb-4 text-gray-800 text-center lg:text-left">
             Business Finder
           </h1>
 
-          {/* Loading / Error */}
           {isLoading && (
             <div className="flex items-center justify-center mb-4 text-blue-600">
-              <svg
-                className="animate-spin h-5 w-5 mr-2"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v8H4z"
-                ></path>
-              </svg>
               Loading...
             </div>
           )}
@@ -131,7 +126,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* Search Input */}
+          {/* Search */}
           <div className="mb-3">
             <input
               type="text"
@@ -142,7 +137,6 @@ export default function Home() {
           </div>
 
           {/* Category Filter */}
-          {/* Category Filter using Shadcn Dropdown */}
           <div className="mb-3">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Filter by Category
@@ -173,7 +167,6 @@ export default function Home() {
             </DropdownMenu>
           </div>
 
-          {/* Reset Button */}
           {(searchText || selectedCategory) && (
             <button
               onClick={resetFilters}
@@ -182,9 +175,19 @@ export default function Home() {
               Clear Filters
             </button>
           )}
+
+          {/* Load Next Page */}
+          {hasMore && !isLoading && (
+            <button
+              onClick={fetchData}
+              className="w-full py-2 mt-3 bg-black text-white rounded-lg text-sm lg:text-base"
+            >
+              Load next 50 businesses
+            </button>
+          )}
         </div>
 
-        {/* Map Area */}
+        {/* Map */}
         <div className="h-full z-10">
           <MapWithMarkers
             onSelectBusiness={setSelectedBusiness}
