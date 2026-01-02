@@ -1,6 +1,6 @@
 "use client";
+
 import React, { useEffect, useState, useMemo } from "react";
-import Head from "next/head";
 import dynamic from "next/dynamic";
 import axios from "axios";
 import { debounce } from "lodash";
@@ -12,11 +12,26 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-
+import MapErrorBoundary from "./MapErrorBoundary";
+MapErrorBoundary
+// ✅ Dynamic import (NO SSR for Leaflet)
 const MapWithMarkers = dynamic(
   () => import("@/component/map/AnimatedBusinessMap"),
-  { ssr: false }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-full text-gray-600">
+        Loading map…
+      </div>
+    ),
+  }
 );
+
+// // ✅ App Router metadata (REPLACES next/head)
+// export const metadata = {
+//   title: "Maharashtra Businesses Map",
+//   description: "Explore businesses in Maharashtra on an interactive map",
+// };
 
 export default function Home() {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -28,19 +43,24 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  const fetchData = async () => {
+  // ✅ SAFE, abortable fetch
+  const fetchData = async (signal) => {
     if (isLoading || !hasMore) return;
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await axios.post("/api/user/preview/mappreview", { page });
+      const response = await axios.post(
+        "/api/user/preview/mappreview",
+        { page },
+        { signal }
+      );
 
-      const newUsers = response.data.users || [];
+      const newUsers = response.data?.users || [];
 
       if (newUsers.length === 0) {
-        setHasMore(false); // no more data
+        setHasMore(false);
       } else {
         setClient((prev) => {
           const ids = new Set(prev.map((u) => u._id));
@@ -48,26 +68,36 @@ export default function Home() {
         });
         setPage((prev) => prev + 1);
       }
-    } catch (error) {
-      setError("Failed to load businesses. Please try again.");
+    } catch (err) {
+      if (err.name !== "CanceledError") {
+        setError("Failed to load businesses. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+  // ✅ Initial load with AbortController
   useEffect(() => {
-    fetchData();
+    const controller = new AbortController();
+    fetchData(controller.signal);
+    return () => controller.abort();
   }, []);
 
-  const debouncedSetSearchText = useMemo(
-    () => debounce((value) => setSearchText(value), 300),
-    []
-  );
+  // ✅ SAFE debounce (no memory leak)
+  const debouncedSetSearchText = useMemo(() => {
+    return debounce((value) => {
+      setSearchText(value);
+    }, 300);
+  }, []);
 
   useEffect(() => {
-    return () => debouncedSetSearchText.cancel();
+    return () => {
+      debouncedSetSearchText.cancel();
+    };
   }, [debouncedSetSearchText]);
 
+  // ✅ Filtering
   const filteredClients = useMemo(() => {
     return client.filter((c) => {
       const matchesText =
@@ -85,13 +115,24 @@ export default function Home() {
     });
   }, [client, searchText, selectedCategory]);
 
-  const categoryOptions = [
-    ...new Map(
-      client
-        .filter((c) => c.categories)
-        .map((c) => [c.categories._id, c.categories])
-    ).values(),
-  ];
+  // ✅ Stabilize reference for Leaflet
+  const stableClients = useMemo(
+    () => filteredClients,
+    [filteredClients.length, searchText, selectedCategory]
+  );
+
+  // ✅ Unique category list
+  const categoryOptions = useMemo(
+    () =>
+      [
+        ...new Map(
+          client
+            .filter((c) => c.categories)
+            .map((c) => [c.categories._id, c.categories])
+        ).values(),
+      ],
+    [client]
+  );
 
   const resetFilters = () => {
     setSearchText("");
@@ -100,14 +141,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Head>
-        <title>Maharashtra Businesses Map</title>
-        <meta
-          name="description"
-          content="Explore businesses in Maharashtra on an interactive map"
-        />
-      </Head>
-
       <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] h-screen">
         {/* Sidebar */}
         <div className="bg-white p-4 lg:p-6 shadow-lg overflow-y-auto max-h-[60vh] lg:max-h-full lg:static fixed bottom-0 w-full rounded-t-2xl z-20">
@@ -120,6 +153,7 @@ export default function Home() {
               Loading...
             </div>
           )}
+
           {error && (
             <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
               {error}
@@ -132,26 +166,22 @@ export default function Home() {
               type="text"
               placeholder="🔍 Search by name, bio, or service..."
               onChange={(e) => debouncedSetSearchText(e.target.value)}
-              className="w-full p-2 lg:p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm lg:text-base"
+              className="w-full p-2 lg:p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
-          {/* Category Filter */}
+          {/* Category */}
           <div className="mb-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Filter by Category
-            </label>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button className="w-full justify-between rounded-lg border border-gray-300 p-2 text-sm lg:text-base">
+                <Button className="w-full justify-between">
                   {selectedCategory
                     ? categoryOptions.find((c) => c._id === selectedCategory)
                         ?.name
                     : "📂 All Categories"}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full">
+              <DropdownMenuContent>
                 <DropdownMenuItem onClick={() => setSelectedCategory("")}>
                   All Categories
                 </DropdownMenuItem>
@@ -170,17 +200,16 @@ export default function Home() {
           {(searchText || selectedCategory) && (
             <button
               onClick={resetFilters}
-              className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm lg:text-base mb-3"
+              className="w-full py-2 bg-blue-600 text-white rounded-lg mb-3"
             >
               Clear Filters
             </button>
           )}
 
-          {/* Load Next Page */}
           {hasMore && !isLoading && (
             <button
-              onClick={fetchData}
-              className="w-full py-2 mt-3 bg-black text-white rounded-lg text-sm lg:text-base"
+              onClick={() => fetchData()}
+              className="w-full py-2 bg-black text-white rounded-lg"
             >
               Load next 50 businesses
             </button>
@@ -189,10 +218,12 @@ export default function Home() {
 
         {/* Map */}
         <div className="h-full z-10">
-          <MapWithMarkers
-            onSelectBusiness={setSelectedBusiness}
-            clients={filteredClients}
-          />
+          <MapErrorBoundary>
+            <MapWithMarkers
+              clients={stableClients}
+              onSelectBusiness={setSelectedBusiness}
+            />
+          </MapErrorBoundary>
         </div>
       </div>
     </div>
