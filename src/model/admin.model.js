@@ -35,6 +35,10 @@ const adminSchema = new mongoose.Schema(
         message: "Mobile number must be exactly 10 digits.",
       },
     },
+    rewardPoints: {
+      type: Number,
+      default: 0,
+    },
     createdAt: {
       type: Date,
       immutable: true,

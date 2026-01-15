@@ -6,6 +6,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { userLogout, userLogin } from "@/redux/slice/user/userSlice";
 import { useParams, useRouter } from "next/navigation";
 import SearchUser from "@/component/admin/UserList/SearchUser";
+import Image from "next/image";
+import { UserRoundPlus } from "lucide-react";
 
 const UserDashboardPage = () => {
   const admin = useSelector((state) => state.userAuth);
@@ -27,7 +29,7 @@ const UserDashboardPage = () => {
       setIsRoleValid(false);
     }
   }, [session, dispatch, admin?.id]);
-  
+
   // Loading state
   if (status === "loading") {
     return (
@@ -87,12 +89,33 @@ const UserDashboardPage = () => {
 
   // Main dashboard
   return (
-
     <>
-    <div className=" min-h-screen  bg-gray-100 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
-      <SearchUser id = {session.user.id} />
-    </div>
-    
+      <div className=" min-h-screen  bg-gray-100 px-4 py-12 dark:bg-gray-900 sm:px-6 lg:px-8">
+        <SearchUser id={session.user.id} />
+
+        {/* Floating Circular Button */}
+
+        <button
+          onClick={() => router.push("/admin/dashboard/visitedform")}
+          className="
+    fixed bottom-25 right-6 z-50
+    flex h-14 w-14 items-center justify-center
+    rounded-full text-white
+
+bg-gray-600    shadow-[0_8px_12px_rgba(0,0,0,0.25)]
+    transition-transform duration-300 ease-in-out
+    hover:scale-110
+    active:scale-95
+  "
+          aria-label="Create User"
+        >
+          <UserRoundPlus
+            size={26}
+            strokeWidth={2.2}
+            className="filter drop-shadow-[0_2px_2px_rgba(0,0,0,0.45)]"
+          />
+        </button>
+      </div>
     </>
   );
 };

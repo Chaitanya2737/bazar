@@ -35,7 +35,7 @@ export default function RootLayout({ children }) {
         <nav className="sticky bottom-0 shadow-md z-50 ">
         <AdminCompNav />
         </nav>
-      </div>
+      </div> 
     </>
   );
 }
