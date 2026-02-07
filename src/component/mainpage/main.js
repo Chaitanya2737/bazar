@@ -91,8 +91,10 @@ export default function Maincomp() {
     setActiveIndex(activeIndex === index ? null : index);
   };
 
-  const handleSubmit = () => {
-    const phoneNumber = "918421699469";
+  const handleSubmit = () => { 
+
+    
+    const phoneNumber = "918421679469";
     const message = `
 Hello Vedayana Technology Pvt. Ltd. 👋
 
