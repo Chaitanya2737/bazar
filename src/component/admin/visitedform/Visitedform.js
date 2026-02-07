@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 const initialValue = {
   name: "",
@@ -15,19 +16,22 @@ const initialValue = {
   location: null,
 };
 
-const id = "68088f53cb58e586a9e1e6c0";
+const TOTAL_STEPS = 3;
 
-const Visitedform = () => {
+const VisitedForm = () => {
   const [step, setStep] = useState(1);
   const [value, setValue] = useState(initialValue);
   const [loading, setLoading] = useState(false);
 
-  const totalSteps = 3;
+  const { data: session, status } = useSession();
+  const adminId = useMemo(() => session?.user?.id, [session]);
 
-  const next = () => setStep((s) => Math.min(s + 1, totalSteps));
+  /* ---------------- STEP CONTROL ---------------- */
+
+  const next = () => setStep((s) => Math.min(s + 1, TOTAL_STEPS));
   const back = () => setStep((s) => Math.max(s - 1, 1));
 
-  /* ---------------- VALIDATION (TOAST) ---------------- */
+  /* ---------------- VALIDATION ---------------- */
 
   const validateStep1 = () => {
     toast.dismiss();
@@ -73,7 +77,7 @@ const Visitedform = () => {
         lng: pos.coords.longitude,
         accuracy: pos.coords.accuracy,
       },
-      "allowed"
+      "allowed",
     );
   };
 
@@ -88,7 +92,13 @@ const Visitedform = () => {
   };
 
   const handleSubmit = () => {
+    if (loading) return;
     if (!validateStep3()) return;
+
+    if (status === "loading" || !adminId) {
+      toast.error("Session not ready. Please try again.");
+      return;
+    }
 
     if (!("geolocation" in navigator)) {
       submitToBackend(null, "not_supported");
@@ -112,17 +122,11 @@ const Visitedform = () => {
 
       const payload = {
         ...value,
-        location: location
-          ? {
-              lng: location.lng,
-              lat: location.lat,
-              accuracy: location.accuracy,
-            }
-          : null,
+        location,
         locationStatus: status,
         submittedAt: new Date().toISOString(),
-        adminId: id,
-        adminName: "chaitanya",
+        adminId,
+        adminName: session?.user?.name ?? "unknown",
       };
 
       await axios.post("/api/admin/savevisitedclient", payload);
@@ -137,6 +141,8 @@ const Visitedform = () => {
     }
   };
 
+  /* ---------------- UI HELPERS ---------------- */
+
   const getEmoji = (rank) => {
     if (rank < 30) return "🥱";
     if (rank < 60) return "🙂";
@@ -144,12 +150,19 @@ const Visitedform = () => {
     return "🔥";
   };
 
+  const getEmojiPosition = (rank) =>
+    Math.min(95, Math.max(0, rank));
+
   /* ---------------- UI ---------------- */
+
+  if (status === "loading") return null;
 
   return (
     <Card className="w-full max-w-md mx-auto rounded-2xl shadow-lg dark:bg-neutral-700 dark:text-white">
       <CardHeader className="text-center">
-        <h2 className="text-lg font-semibold">Submit Visit & Earn Points</h2>
+        <h2 className="text-lg font-semibold">
+          Submit Visit & Earn Points
+        </h2>
       </CardHeader>
 
       <CardContent className="space-y-6">
@@ -161,7 +174,9 @@ const Visitedform = () => {
               className="h-12"
               placeholder="Client name"
               value={value.name}
-              onChange={(e) => setValue({ ...value, name: e.target.value })}
+              onChange={(e) =>
+                setValue({ ...value, name: e.target.value })
+              }
             />
             <Button
               className="h-12 w-full"
@@ -179,8 +194,15 @@ const Visitedform = () => {
               autoFocus
               className="h-12"
               placeholder="Client phone number"
+              inputMode="numeric"
+              maxLength={10}
               value={value.phone}
-              onChange={(e) => setValue({ ...value, phone: e.target.value })}
+              onChange={(e) =>
+                setValue({
+                  ...value,
+                  phone: e.target.value.replace(/\D/g, ""),
+                })
+              }
             />
             <div className="flex gap-2">
               <Button variant="outline" onClick={back}>
@@ -199,12 +221,18 @@ const Visitedform = () => {
         {/* STEP 3 */}
         {step === 3 && (
           <>
-            <p className="font-medium text-center">Client Interest Level</p>
+            <p className="font-medium text-center">
+              Client Interest Level
+            </p>
 
             <div className="relative pt-6">
               <div
                 className="absolute -top-1 text-2xl transition-all"
-                style={{ left: `calc(${value.ranking}% - 15px)` }}
+                style={{
+                  left: `calc(${getEmojiPosition(
+                    value.ranking,
+                  )}% - 15px)`,
+                }}
               >
                 {getEmoji(value.ranking)}
               </div>
@@ -213,13 +241,9 @@ const Visitedform = () => {
                 value={[value.ranking]}
                 max={100}
                 step={1}
-                onValueChange={(val) => setValue({ ...value, ranking: val[0] })}
-                className="
-                  [&_[data-orientation=horizontal]]:h-3
-                  [&_[data-orientation=horizontal]_span]:h-3
-                  [&_[role=slider]]:h-6
-                  [&_[role=slider]]:w-6
-                "
+                onValueChange={(val) =>
+                  setValue({ ...value, ranking: val[0] })
+                }
               />
             </div>
 
@@ -246,4 +270,4 @@ const Visitedform = () => {
   );
 };
 
-export default Visitedform;
+export default VisitedForm;

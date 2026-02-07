@@ -91,6 +91,24 @@ export default function Maincomp() {
     setActiveIndex(activeIndex === index ? null : index);
   };
 
+  const handleSubmit = () => {
+    const phoneNumber = "91842179469";
+    const message = `
+Hello Vedayana Technology Pvt. Ltd. 👋
+
+I’m interested in the bazar.sh project.
+Please contact me at your earliest convenience.
+
+Thank you.
+`;
+
+    const encodedMessage = encodeURIComponent(message);
+
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+
+    window.open(whatsappUrl, "_blank");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 rounded-2xl shadow-lg ">
       <Head>
@@ -119,6 +137,13 @@ export default function Maincomp() {
               – ग्राहकांशी सतत संपर्कात राहा, नवे ग्राहक मिळवा आणि तुमचा ऑनलाईन
               व्यवसाय झपाट्याने वाढवा.
             </p>
+
+            <Button
+              className="bg-pink-600 dark:bg-orange-500 dark:text-white"
+              onClick={handleSubmit}
+            >
+               डेमो साठी येथे क्लिक करा 
+            </Button>
           </div>
 
           <div className="relative w-full h-96 sm:h-[28rem] md:h-[42rem] mx-auto rounded-2xl shadow-2xl overflow-hidden">
@@ -271,7 +296,7 @@ export default function Maincomp() {
             <div className="relative w-full max-w-3xl rounded-2xl p-[2px] bg-gradient-to-r from-blue-400 via-pink-400 to-purple-400 shadow-2xl">
               <div className="relative bg-white dark:bg-gray-900 rounded-2xl p-8 md:p-10 shadow-inner">
                 <h1 className="text-3xl font-semibold text-gray-900 dark:text-white text-center">
-                  💻  Website Features
+                  💻 Website Features
                 </h1>
 
                 <p className="mt-4 text-gray-600 dark:text-gray-300 leading-relaxed text-center">
@@ -347,7 +372,7 @@ export default function Maincomp() {
             <div className="relative w-full max-w-3xl rounded-2xl p-[2px] bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 shadow-2xl">
               <div className="relative bg-white dark:bg-gray-900 rounded-2xl p-8 md:p-10 shadow-inner">
                 <h1 className="text-3xl font-semibold text-gray-900 dark:text-white text-center">
-                  📣  Marketing Features
+                  📣 Marketing Features
                 </h1>
 
                 <p className="mt-4 text-gray-600 dark:text-gray-300 leading-relaxed text-center">
