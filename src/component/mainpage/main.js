@@ -92,7 +92,7 @@ export default function Maincomp() {
   };
 
   const handleSubmit = () => {
-    const phoneNumber = "91842179469";
+    const phoneNumber = "918421699469";
     const message = `
 Hello Vedayana Technology Pvt. Ltd. 👋
 
