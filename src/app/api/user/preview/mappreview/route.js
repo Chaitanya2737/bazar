@@ -9,7 +9,7 @@ export async function POST(req) {
 
   try {
     const { page = 1 } = await req.json(); // get page from request body
-    const limit = 50;
+    const limit = 500;
     const skip = (page - 1) * limit;
 
     const users = await UserModel.find()
