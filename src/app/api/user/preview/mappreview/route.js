@@ -14,7 +14,7 @@ export async function POST(req) {
 
     const users = await UserModel.find()
       .select(
-        "-review -products -slug -handlerName  -siteoffer -bio -mobileNumber -gstNumber -role -referralCode -visitCount -carauselImages -termsAccepted -admin -language -joiningDate -socialMediaLinks -subscriptionPlan -password -email -videoUrl"
+        "-review -products -slug   -siteoffer -bio -mobileNumber -gstNumber -role -referralCode -visitCount -carauselImages -termsAccepted -admin -language -joiningDate -socialMediaLinks -subscriptionPlan -password -email -videoUrl"
       )
       .populate("categories", "name")
       .skip(skip)

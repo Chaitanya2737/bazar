@@ -3,6 +3,8 @@ import React, { useState, useMemo, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { useRouter } from "next/navigation";
+
 
 // Fix Leaflet icons
 delete L.Icon.Default.prototype._getIconUrl;
@@ -28,117 +30,99 @@ function extractCoordinates(url) {
   return null;
 }
 
-// 🔥 ICON MEMO CACHE (very important)
+
+
 const iconCache = new Map();
 
-const createDivIcon = (business, index = 0, total = 1, scale = 1) => {
-  const key = `${business._id}-${index}-${total}-${scale}`;
+const createDivIcon = (business, scale = 1) => {
+  const key = `${business._id}-${scale}`;
   if (iconCache.has(key)) return iconCache.get(key);
 
-  const size = 50 * scale;
-
-  // Spread overlapping markers
-  let offsetX = 0;
-  let offsetY = 0;
-
-  if (total > 1) {
-    const angle = (index / total) * 2 * Math.PI;
-    const distance = 20;
-    offsetX = Math.cos(angle) * distance;
-    offsetY = Math.sin(angle) * distance;
-  }
+  const nameSize = 12 * scale;
+  const handlerSize = 9 * scale;
+  const dotSize = 10 * scale;
 
   const icon = new L.DivIcon({
-    className: "custom-marker",
+    className: "name-marker",
     html: `
       <div style="
-        transform: translate(${offsetX}px, ${offsetY}px);
         display:flex;
         flex-direction:column;
         align-items:center;
-        font-family: sans-serif;
+        font-family:sans-serif;
       ">
-
-        <!-- Logo Circle -->
+        
+        <!-- Name + Handler Pill -->
         <div style="
-          width:${size}px;
-          height:${size}px;
-          border-radius:50%;
-          overflow:hidden;
-          border:3px solid white;
-          box-shadow:0 4px 10px rgba(0,0,0,0.25);
-          position:relative;
+          background:#F9F9F9;
+          padding:6px 14px;
+          border-radius:16px;
+          box-shadow:0 2px 6px rgba(0,0,0,0.25);
+          text-align:center;
+          white-space:nowrap;
         ">
-          <img 
-            src="${business.businessIcon || "/default.png"}"
-            style="width:100%;height:100%;object-fit:cover;"
-          />
+          <div style="
+            font-size:${nameSize}px;
+            font-weight:700;
+            color:#111;
+          ">
+            ${business.businessName}
+          </div>
 
           ${
-            business.isOpen
-              ? `<div style="
-                  position:absolute;
-                  bottom:2px;
-                  right:2px;
-                  width:10px;
-                  height:10px;
-                  background:#22c55e;
-                  border-radius:50%;
-                  border:2px solid white;
-                "></div>`
+            business.handlerName
+              ? `
+              <div style="
+                font-size:${handlerSize}px;
+                font-weight:500;
+                color:#666;
+                margin-top:2px;
+              ">
+                ${business.handlerName}
+              </div>
+              `
               : ""
           }
         </div>
 
-        <!-- Name Badge -->
+        <!-- Connector Line -->
         <div style="
-          margin-top:4px;
-          background:white;
-          padding:3px 8px;
-          border-radius:20px;
-          font-size:${11 * scale}px;
-          font-weight:600;
-          white-space:nowrap;
-          box-shadow:0 2px 6px rgba(0,0,0,0.15);
-        ">
-          ${business.businessName || "Unnamed"}
-        </div>
+          width:2px;
+          height:8px;
+          background:#555;
+        "></div>
 
-        ${
-          business.rating
-            ? `<div style="
-                margin-top:2px;
-                font-size:10px;
-                color:#f59e0b;
-                font-weight:600;
-              ">
-                ★ ${business.rating}
-              </div>`
-            : ""
-        }
+        <!-- Bottom Center Dot -->
+        <div style="
+          width:${dotSize}px;
+          height:${dotSize}px;
+          background:${business.isOpen ? "#22c55e" : "#ef4444"};
+          border-radius:50%;
+          box-shadow:0 0 6px rgba(0,0,0,1);
+        "></div>
 
       </div>
     `,
-    iconSize: [size, size + 40],
-    iconAnchor: [size / 2, size / 2],
+    iconSize: [180, 65],
+    iconAnchor: [90, 65],
   });
 
   iconCache.set(key, icon);
   return icon;
 };
 
-
-
 // 🔥 RENDER ONLY VISIBLE MARKERS
 function VisibleMarkers({ clients, onSelectBusiness }) {
   const map = useMap();
   const [visible, setVisible] = useState([]);
+  const router = useRouter();
+
 
   useEffect(() => {
     const update = () => {
       const bounds = map.getBounds();
       const filtered = clients.filter(
-        (c) => c.lat && c.lng && bounds.contains([c.lat, c.lng])
+        (c) => c.lat && c.lng && bounds.contains([c.lat, c.lng]),
       );
       setVisible(filtered);
     };
@@ -155,11 +139,21 @@ function VisibleMarkers({ clients, onSelectBusiness }) {
       position={[business.lat, business.lng]}
       icon={createDivIcon(business)}
       eventHandlers={{
-        click: () => onSelectBusiness?.(business),
+        click: () => {
+  const slug = business.businessName
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-");
+
+  router.push(`/${slug}`);
+},
+
       }}
     />
   ));
 }
+
+
 
 export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
   const [selectedBusiness, setSelectedBusiness] = useState(null);
@@ -175,13 +169,11 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
   return (
     <div style={{ height: "100vh", width: "100%" }}>
       <MapContainer
-        center={[16.8489, 74.5746]}
-        zoom={6}
+        center={[16.8524, 74.5815]} // Sangli
+        zoom={13} // Good city-level zoom
         style={{ height: "100%", width: "100%" }}
       >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-        />
+        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
 
         <VisibleMarkers
           clients={resolvedClients}
