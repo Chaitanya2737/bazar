@@ -15,7 +15,7 @@ const UserProduct = new mongoose.Schema(
       required: true,
       validate: {
         validator: function (v) {
-          return /\.(jpg|jpeg|png|gif)$/.test(v);
+          return /\.(jpg|jpeg|png|gif|avif)$/.test(v);
         },
         message: "Thumbnail must be a valid image URL.",
       },

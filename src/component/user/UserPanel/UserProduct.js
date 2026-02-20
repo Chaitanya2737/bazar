@@ -26,6 +26,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { Trash2 } from "lucide-react";
 import { getUserDataApi } from "@/redux/slice/user/serviceApi";
+import Suggestionproduct from "../suggestion/suggestionproduct";
 
 // Simple debounce
 const debounce = (fn, wait) => {
@@ -54,6 +55,8 @@ const UserProduct = () => {
   const user = useSelector((s) => s.userdata?.userData || s.userAuth);
   const id = user?._id;
   const businessName = user?.businessName || "My Business";
+
+ 
 
   // Fetch products
   const fetchProducts = async () => {
@@ -124,7 +127,7 @@ const UserProduct = () => {
         }
         setProduct((p) => ({ ...p, thumbnail: file }));
       }, 250),
-    []
+    [],
   );
 
   const handleSubmit = async () => {
@@ -261,10 +264,11 @@ const UserProduct = () => {
           </CarouselItem>
         );
       }),
-    [products, expandedDescriptions]
+    [products, expandedDescriptions],
   );
 
   return (
+    <>
     <div className="container mx-auto p-4">
       {/* Upload Product Dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -373,7 +377,13 @@ const UserProduct = () => {
           </Carousel>
         )}
       </div>
+
+      <div>
+       <Suggestionproduct categoryId={user?.categories} userId = {id} />
+      </div>
     </div>
+    
+    </>
   );
 };
 
