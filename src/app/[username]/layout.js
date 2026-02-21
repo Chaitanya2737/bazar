@@ -1,16 +1,17 @@
 import { getUserBySlug } from "@/lib/generateMetadata";
 import React from "react";
 
-export async function generateMetadata(props) {
-  const { username } = await props.params;
-  const decodedSlug = decodeURIComponent(username || "").trim();
-
-  console.log("📍 current routing:", decodedSlug);
+export async function generateMetadata({ params }) {
+  const decodedSlug = decodeURIComponent(params?.username || "").trim();
 
   const { user } = (await getUserBySlug(decodedSlug)) || {};
 
-  // 🧩 Fallback metadata
+  const BASE_URL = "https://www.bazar.sh";
+
+  // 🔹 Fallback metadata
   if (!user) {
+    const fallbackImage = `${BASE_URL}/og-default.jpg`; // make sure this is 1200x630
+
     return {
       title: "Bazar SH - Empowering Small & Medium Businesses",
       description: "Grow your business online with Bazar SH.",
@@ -19,10 +20,10 @@ export async function generateMetadata(props) {
         siteName: "Bazar SH",
         title: "Bazar SH - Empowering Small & Medium Businesses",
         description: "Grow your business online with Bazar SH.",
-        url: "https://www.bazar.sh",
+        url: BASE_URL,
         images: [
           {
-            url: "/favicon.png",
+            url: fallbackImage,
             width: 1200,
             height: 630,
             alt: "Bazar SH",
@@ -33,36 +34,36 @@ export async function generateMetadata(props) {
         card: "summary_large_image",
         title: "Bazar SH - Empowering Small & Medium Businesses",
         description: "Grow your business online with Bazar SH.",
-        images: ["/favicon.png"],
+        images: [fallbackImage],
       },
     };
   }
 
-  // 🧠 Prepare user info
+  // 🔹 Categories
   const categoryNames = Array.isArray(user.categories)
     ? user.categories.map((cat) => cat.name)
     : user.categories?.name
-    ? [user.categories.name]
-    : [];
+      ? [user.categories.name]
+      : [];
 
+  // 🔹 Description limit
   const description =
-    user.bio?.length > 160 ? user.bio.slice(0, 157) + "..." : user.bio || "";
+    user.bio?.length > 160
+      ? user.bio.slice(0, 157) + "..."
+      : user.bio || `Visit ${user.businessName} on Bazar SH`;
 
-  // 🧩 Cloudinary image optimization
+  // 🔹 Cloudinary 1200x630 Transform (FULL WIDTH FIX)
   let businessIcon = user.businessIcon;
-  if (businessIcon?.startsWith("https://res.cloudinary.com/")) {
+
+  if (businessIcon?.includes("/upload/")) {
     businessIcon = businessIcon.replace(
-      /\/upload\/(v\d+\/)?/,
-      "/upload/w_1200,h_630,c_fill,q_auto,f_jpg/$1"
+      "/upload/",
+      "/upload/w_1200,h_630,c_fill,g_auto,q_auto,f_auto/",
     );
   }
 
-  // 🧩 Create proper one-line encoded URL
   const title = `${user.businessName} | Bazar SH`;
-  const url = `https://www.bazar.sh/${encodeURIComponent(user.slug)}`;
-
-  // 🧠 Log for debugging (server-side)
-  console.log("🧠 Generated Metadata:", { title, description, url, businessIcon });
+  const url = `${BASE_URL}/${encodeURIComponent(user.slug)}`;
 
   return {
     title,
@@ -93,8 +94,6 @@ export async function generateMetadata(props) {
       canonical: url,
     },
     robots: "index, follow",
-    "googlebot":
-      "index, follow, max-video-preview:-1, max-image-preview:large, max-snippet:-1",
   };
 }
 

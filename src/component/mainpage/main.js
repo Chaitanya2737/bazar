@@ -8,6 +8,8 @@ import {
   Bell,
   Instagram,
   ChevronDown,
+  ArrowDownRight,
+  Star,
 } from "lucide-react";
 import Head from "next/head";
 import AdminSponsorCard from "./AdminSponsorCard";
@@ -32,19 +34,15 @@ export default function Maincomp() {
   ];
 
   const brands = [
-    { src: "/trusted-by/image.png", name: "जय बाळूमामा यात्री निवास" },
-    {
-      src: "/trusted-by/image copy.png",
-      name: "वाघमोडे बंधू यांचे हॉटेल सुनिल",
-    },
-    { src: "/trusted-by/image copy 2.png", name: "श्री दत्त प्रसन्न प्रा. लि" },
-    { src: "/trusted-by/image copy 3.png", name: "SAI HILLS HOLLYDAYS" },
-    {
-      src: "/trusted-by/image copy 4.png",
-      name: "राधेशाम गोल्ड अँड सिल्व्हर,",
-    },
-    { src: "/trusted-by/image copy 6.png", name: "पाटील ई - मोटर्स," },
-    { src: "/trusted-by/image copy 7.png", name: "सोनाई ई मोटर्स," },
+    { img: "/trusted-by/Ambassador.png", title: "Hotel ambassador" },
+
+    { img: "/trusted-by/ranada.png", title: "Ranada vikas foundation admapur" },
+    { img: "/trusted-by/promoj.png", title: "पोमाजे रिसॉर्ट" },
+    { img: "/trusted-by/sunil.png", title: "Hotel sunil" },
+    { img: "/trusted-by/sonaiwithgraybackground.png", title: "sonai motor" },
+    { img: "/trusted-by/datta.png", title: "Shree Datta motor" },
+    { img: "/trusted-by/radhesham.png", title: "radesham" },
+    { img: "/trusted-by/hotelBhyagashri.png", title: "Hotel bhyagashri" },
   ];
 
   const items = [
@@ -91,9 +89,7 @@ export default function Maincomp() {
     setActiveIndex(activeIndex === index ? null : index);
   };
 
-  const handleSubmit = () => { 
-
-    
+  const handleSubmit = () => {
     const phoneNumber = "918421679469";
     const message = `
 Hello Vedayana Technology Pvt. Ltd. 👋
@@ -144,7 +140,7 @@ Thank you.
               className="bg-pink-600 dark:bg-orange-500 dark:text-white"
               onClick={handleSubmit}
             >
-               डेमो साठी येथे क्लिक करा 
+              डेमो साठी येथे क्लिक करा
             </Button>
           </div>
 
@@ -553,35 +549,41 @@ Thank you.
 
         {/* Animated logo strip */}
         <motion.div
-          className="flex gap-16 items-center justify-center whitespace-nowrap "
-          animate={{ x: ["0%", "-100%"] }}
+          className="flex gap-16 items-center whitespace-nowrap m-16"
+          animate={{ x: ["0%", "-500%"] }}
           transition={{
             repeat: Infinity,
-            duration: 12,
-            ease: "easeInOut",
+            duration: 20,
+            ease: "linear",
           }}
         >
           {[...brands, ...brands].map((brand, i) => (
             <motion.div
               key={i}
-              className="flex-shrink-0 w-40 h-24 my-10 flex flex-col justify-center items-center opacity-90 hover:opacity-100 transition-all"
-              whileHover={{ scale: 1.05, y: -2 }}
+              className="shrink-0 w-72"
+              whileHover={{ scale: 1.05, y: -5 }}
             >
-              <div className="relative w-100 h-100 mb-2">
+              <div
+                key={i}
+                className="relative w-72  aspect-[3/4] overflow-hidden rounded-3xl shadow-xl group"
+              >
                 <Image
-                  src={brand.src}
-                  alt={brand.name}
+                  src={brand.img}
                   fill
-                  className="object-contain drop-shadow-md"
+                  className="object-cover group-hover:scale-105 transition duration-500"
+                  alt="Image"
                 />
+
+                {/* Bottom Glass Section */}
+                <div className="absolute bottom-0 w-full backdrop-blur-md bg-white/20 p-4">
+                  <h1 className="font-semibold mt-2 text-center">
+                    {brand.title}
+                  </h1>
+                </div>
               </div>
-              <h1 className="text-sm font-medium text-gray-700 dark:text-gray-300 tracking-wide">
-                {brand.name}
-              </h1>
             </motion.div>
           ))}
         </motion.div>
-
         {/* Glow border at bottom */}
         <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-pink-400 via-orange-400 to-pink-400 animate-pulse"></div>
       </section>
