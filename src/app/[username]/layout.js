@@ -58,7 +58,7 @@ export async function generateMetadata({ params }) {
   if (businessIcon?.includes("/upload/")) {
     businessIcon = businessIcon.replace(
       "/upload/",
-      "/upload/w_1200,h_630,c_fill,g_auto,q_auto,f_auto/",
+      "/upload/w_1200,h_630,c_pad,ar_1.91,b_white,q_auto,f_auto/",
     );
   }
 
