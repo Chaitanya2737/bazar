@@ -1,8 +1,9 @@
+import UnderConstruction from '@/component/user/UnderContruction'
 import React from 'react'
 
 const page = () => {
   return (
-    <div> System page</div>
+   <UnderConstruction/>
   )
 }
 

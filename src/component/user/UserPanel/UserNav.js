@@ -55,14 +55,19 @@ const UserNav = () => {
         </span>
       </div>
 
-        <ThemeToggle />
+      <ThemeToggle />
       {/* Right Section */}
       <div className="flex items-center gap-4">
-
         {isAuthenticated && (
           <Button
             onClick={handleLogout}
-            className="relative flex items-center  rounded-full text-white shadow-lg transition-all duration-300 ease-in-out group"
+            className="bg-white/70 dark:bg-gray-700/60
+               backdrop-blur-md
+               border border-gray-300 dark:border-gray-600
+               hover:bg-gray-100 dark:hover:bg-gray-600
+               text-gray-800 dark:text-white
+               px-5 py-2 rounded-xl
+               transition-all duration-200"
           >
             <LogOut className="w-4 h-4 group-hover:rotate-[-15deg] transition-transform duration-300" />
             <span className="tracking-wide">Logout</span>

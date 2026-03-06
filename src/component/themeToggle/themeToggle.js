@@ -50,8 +50,8 @@ const ThemeToggle = () => {
         />
       </button>
       <Moon
-        className={`w-5 h-5 text-white transition-opacity ${
-          darkMode ? "opacity-100" : "opacity-40"
+        className={`w-5 h-5 dark:text-white transition-opacity text-black ${
+          darkMode ? "opacity-100" : "opacity-40" 
         }`}
       />
     </div>

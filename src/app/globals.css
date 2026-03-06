@@ -284,3 +284,24 @@ button:hover {
 
 
 
+
+
+/* 🔵 Black Dotted Animated Background */
+.dotted-bg {
+  background-color: #000;
+  background-image: radial-gradient(rgba(255,255,255,0.15) 1px, transparent 1px);
+  background-size: 25px 25px;
+  animation: moveDots 12s linear infinite;
+}
+
+@keyframes moveDots {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(25px, 25px);
+  }
+}
+
+
+
