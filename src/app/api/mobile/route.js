@@ -75,7 +75,6 @@ export async function POST(request) {
       }
     }
 
-    // --- Generate JWT ---
     const token = jwt.sign(
       {
         id: user._id,
@@ -83,7 +82,6 @@ export async function POST(request) {
         role: user.role,
       },
       process.env.NEXTAUTH_SECRET,
-      { expiresIn: "7d" },
     );
 
     return NextResponse.json({
@@ -95,6 +93,7 @@ export async function POST(request) {
         handlerName: user.handlerName || "",
         email: user.email,
         role: user.role,
+        subscriptionPlan: user.subscriptionPlan,
       },
     });
   } catch (error) {
