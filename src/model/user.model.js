@@ -119,6 +119,18 @@ const userSchema = new mongoose.Schema({
     },
   ],
 
+  // user.model.js
+  deviceActivations: [
+    {
+      deviceId: String, // unique device identifier from client
+      activatedAt: Date,
+    },
+  ],
+  maxDevices: {
+    type: Number,
+    default: 1, // max number of devices allowed
+  },
+
   review: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Review",
