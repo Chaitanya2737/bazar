@@ -56,6 +56,14 @@ export const userAddingField = {
   termsAccepted: false,
   referralCode: "",
 
+  //term and condition 
+  termsAccepted :false,
+
+  //device activation 
+
+  maxDevices:1,
+  subscriptionPlan: "basic",
+
 };
 
 

@@ -5,7 +5,6 @@ import CategoryModel from "@/model/categories.model";
 import AdminModel from "@/model/admin.model";
 import bcrypt from "bcryptjs";
 import cloudinary from "@/lib/cloudinaryConfig";
-import slugify from "slugify";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpeg"];
@@ -20,16 +19,18 @@ function generateSlug(name) {
 }
 
 export async function POST(req) {
-
   try {
     await connectDB();
     const formData = await req.formData();
     const userDataJson = formData.get("userdata");
 
+    console.log(userDataJson);
+    console.log(formData);
+
     if (!userDataJson) {
       return NextResponse.json(
         { success: false, message: "Missing userdata" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +40,7 @@ export async function POST(req) {
     } catch {
       return NextResponse.json(
         { success: false, message: "Invalid JSON format for userdata" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -49,6 +50,7 @@ export async function POST(req) {
       "admin",
       "email",
       "password",
+      "subscriptionPlan",
     ];
 
     const missingFields = required.filter((field) => !user[field]);
@@ -58,7 +60,7 @@ export async function POST(req) {
           success: false,
           message: `Missing required fields: ${missingFields.join(", ")}`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -72,7 +74,7 @@ export async function POST(req) {
           success: false,
           message: "Mobile numbers must be between 1 and 4",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -81,7 +83,7 @@ export async function POST(req) {
     if (!adminDoc) {
       return NextResponse.json(
         { success: false, message: "Admin not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -89,7 +91,7 @@ export async function POST(req) {
     if (!category) {
       return NextResponse.json(
         { success: false, message: "Category not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -105,14 +107,14 @@ export async function POST(req) {
       if (!ALLOWED_TYPES.includes(file.type)) {
         return NextResponse.json(
           { success: false, message: "Unsupported file type" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
       if (file.size > MAX_FILE_SIZE) {
         return NextResponse.json(
           { success: false, message: "File size exceeds 5MB" },
-          { status: 400 }
+          { status: 400 },
         );
       }
       let folder = (user.businessName || "").trim();
@@ -143,7 +145,7 @@ export async function POST(req) {
         console.error("Cloudinary upload error:", uploadErr);
         return NextResponse.json(
           { success: false, message: "Failed to upload image to Cloudinary" },
-          { status: 500 }
+          { status: 500 },
         );
       }
     }
@@ -165,7 +167,7 @@ export async function POST(req) {
       admin: adminDoc._id,
       role: user.role || "user",
       expiringDate: user.expiringDate,
-      termsAccepted : user.termsAccepted ,
+      termsAccepted: user.termsAccepted,
       socialMediaLinks: {
         insta: user.insta || "",
         youtube: user.youtube || "",
@@ -174,10 +176,21 @@ export async function POST(req) {
         linkedin: user.linkedin || "",
       },
       businessIcon: businessIconUrl,
-      count: 0,
+      maxDevices: user.maxDevices,
+      subscriptionPlan: user.subscriptionPlan,
     });
 
     await newUser.save();
+
+    console.log()
+
+    const userDataForEmail = {
+      businessName:user.businessName,
+      email:user.email,
+      plan:user.subscriptionPlan,
+      website:`https://www.bazar.sh/${slugVariable}`
+    }
+
 
     return NextResponse.json(
       {
@@ -190,7 +203,7 @@ export async function POST(req) {
           email: newUser.email,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Unhandled error:", error);
@@ -205,7 +218,7 @@ export async function POST(req) {
           success: false,
           message: `${duplicateField} "${duplicateValue}" already exists.`,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -217,7 +230,7 @@ export async function POST(req) {
         error:
           process.env.NODE_ENV === "development" ? error.message : undefined,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -227,13 +240,13 @@ export async function GET() {
     await connectDB();
     return NextResponse.json(
       { success: true, message: "API is working" },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("GET Error:", error);
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

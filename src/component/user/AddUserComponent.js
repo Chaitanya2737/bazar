@@ -37,6 +37,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import Script from "next/script";
 import { motion, AnimatePresence } from "framer-motion";
+import ProcessingModal from "@/app/testing/page";
 
 // Parent Component
 const AddUserComponent = () => {
@@ -56,6 +57,7 @@ const AddUserComponent = () => {
         : {
             BasicCategories: true,
             BusinessCategories: false,
+            DeviceActivations: false,
             SocialMediaLink: false,
             TermsConditions: false, // 🆕 Add this
           };
@@ -63,6 +65,7 @@ const AddUserComponent = () => {
     return {
       BasicCategories: true,
       BusinessCategories: false,
+      DeviceActivations: false,
       SocialMediaLink: false,
       TermsConditions: false, // 🆕
     };
@@ -72,14 +75,24 @@ const AddUserComponent = () => {
     localStorage.setItem("collapse", JSON.stringify(isOpen));
   }, [isOpen]);
 
-  const setValue = useCallback((e) => {
-    const { name, value, files } = e.target;
-    if (name === "businessIcon") {
-      setFormData((prev) => ({ ...prev, [name]: files[0] }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    }
-  }, []);
+const setValue = useCallback((e) => {
+  const { name, value, files } = e.target;
+
+  // ✅ handle file safely
+  if (name === "businessIcon") {
+    const file = files?.[0] || value; // 👈 FIX
+
+    setFormData((prev) => ({
+      ...prev,
+      businessIcon: file,
+    }));
+  } else {
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  }
+}, []);
 
   const handleSubmit = async () => {
     try {
@@ -128,7 +141,7 @@ const AddUserComponent = () => {
       });
       // 8. Navigate to success page
       navigation.push(
-        `/adduser/success/${encodeURIComponent(businessName)}/${status}`
+        `/adduser/success/${encodeURIComponent(businessName)}/${status}`,
       );
     } catch (error) {
       // 9. Show friendly error message
@@ -165,6 +178,22 @@ const AddUserComponent = () => {
       </div>
       {isOpen.BusinessCategories && (
         <BusinessCategories
+          formData={formData}
+          setValue={setValue}
+          setIsOpen={setIsOpen}
+          setLocalFile={setLocalFile}
+          localFile={localFile}
+        />
+      )}
+
+      <div className="md:col-span-2 mt-5">
+        <h2 className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight">
+          Device Activations
+        </h2>
+      </div>
+
+      {isOpen.DeviceActivations && (
+        <DeviceActivations
           formData={formData}
           setValue={setValue}
           setIsOpen={setIsOpen}
@@ -226,6 +255,14 @@ const AddUserComponent = () => {
 
 export default AddUserComponent;
 
+
+
+
+
+
+
+
+
 // Basic Categories
 export const BasicCategories = ({ formData, setValue, setIsOpen }) => {
   const [errors, setErrors] = useState({});
@@ -268,7 +305,11 @@ export const BasicCategories = ({ formData, setValue, setIsOpen }) => {
   const next = () => {
     if (validate()) {
       setValue({ target: { name: "mobileNumbers", value: mobileNumbers } });
-      setIsOpen((prev) => ({ ...prev, BusinessCategories: true }));
+      setIsOpen((prev) => ({
+        ...prev,
+        BusinessCategories: true,
+        BasicCategories: false,
+      }));
     }
   };
 
@@ -414,14 +455,13 @@ export const BusinessCategories = ({
   setValue,
   setIsOpen,
   setLocalFile,
+  localFile,
 }) => {
   const [errors, setErrors] = useState({});
 
   const [categorie, setCategorie] = useState([]);
   const { id } = useParams();
   const [adminId, setAdminId] = useState(id || "");
-
-  console.log(adminId);
 
   const back = () =>
     setIsOpen((prev) => ({
@@ -433,23 +473,41 @@ export const BusinessCategories = ({
   const validate = () => {
     const newErrors = {};
 
-    if (!String(formData.businessName).trim())
+    if (!String(formData.businessName || "").trim())
       newErrors.businessName = "Business name is required";
-    if (!String(formData.address).trim())
+
+    if (!String(formData.address || "").trim())
       newErrors.address = "Address is required";
-    if (!String(formData.businessLocation).trim())
+
+    if (!String(formData.businessLocation || "").trim())
       newErrors.businessLocation = "Business location is required";
-    if (!String(formData.categories).trim())
+
+    if (!String(formData.categories || "").trim())
       newErrors.categories = "Categories is required";
 
+    // ✅ Logo required (edit safe)
+    if (!localFile && !formData.businessIcon) {
+      newErrors.businessIcon = "Business logo is required";
+    }
+
     setErrors(newErrors);
+
+    // ✅ Show only first error
+    const firstError = Object.values(newErrors)[0];
+    if (firstError) {
+      toast.error(firstError);
+    }
+
     return Object.keys(newErrors).length === 0;
   };
 
   const next = () => {
     if (validate()) {
-      console.log("next working");
-      setIsOpen((prev) => ({ ...prev, SocialMediaLink: true }));
+      setIsOpen((prev) => ({
+        ...prev,
+        BusinessCategories: false,
+        DeviceActivations: true,
+      }));
     }
   };
 
@@ -512,8 +570,25 @@ export const BusinessCategories = ({
             id="businessIcon"
             type="file"
             name="businessIcon"
-            onChange={(e) => setLocalFile(e.target.files[0])}
+            onChange={(e) => {
+              const file = e.target.files[0];
+
+              // ✅ store in formData (MAIN FIX)
+              setValue({
+                target: {
+                  name: "businessIcon",
+                  value: file,
+                },
+              });
+
+              // ✅ optional (keep for preview if needed)
+              setLocalFile(file);
+            }}
           />
+          {errors.businessIcon && (
+            <p className="text-sm text-red-500 mt-1">{errors.businessIcon}</p>
+          )}
+          
         </div>
 
         <div>
@@ -664,6 +739,136 @@ export const BusinessCategories = ({
           variant="secondary"
           className="w-full flex items-center justify-center gap-2 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800"
         >
+          <span>Device Activations</span>
+          <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-2" />
+        </Button>
+      </div>
+    </>
+  );
+};
+
+export const DeviceActivations = ({
+  setIsOpen,
+  formData,
+  isSubmitted,
+  setValue,
+}) => {
+  const back = () =>
+    setIsOpen((prev) => ({
+      ...prev,
+      BusinessCategories: true,
+      DeviceActivations: false,
+    }));
+
+  const next = () =>
+    setIsOpen((prev) => ({
+      ...prev,
+      SocialMediaLink: true,
+      DeviceActivations: false,
+    }));
+
+  const handleActivationChange = (value) => {
+    setValue({
+      target: {
+        name: "maxDevices",
+        value: value,
+      },
+    });
+  };
+
+  const handlePlanChange = (value) => {
+    setValue({
+      target: {
+        name: "subscriptionPlan",
+        value: value,
+      },
+    });
+  };
+
+  return (
+    <>
+      <div className="space-y-5 mt-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Subscription Plan */}
+          <div>
+            <label className="text-sm font-medium mb-2 block">
+              Subscription Plan
+            </label>
+
+            <Select
+              value={formData?.subscriptionPlan || ""}
+              onValueChange={handlePlanChange}
+              disabled={isSubmitted}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select plan" />
+              </SelectTrigger>
+
+              <SelectContent>
+                <SelectItem value="basic">Basic</SelectItem>
+                <SelectItem value="premium">Premium</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Device Activations */}
+          <div>
+            <label className="text-sm font-medium mb-2 block">
+              Maximum Device Activations
+            </label>
+
+            <Select
+              value={formData?.maxDevices || "1"}
+              onValueChange={handleActivationChange}
+              disabled={isSubmitted || !formData?.subscriptionPlan}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select activation count" />
+              </SelectTrigger>
+
+              <SelectContent className="max-h-60">
+                {Array.from({ length: 100 }, (_, i) => (
+                  <SelectItem key={i + 1} value={(i + 1).toString()}>
+                    {i + 1}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* License Validity */}
+          <div className="md:col-span-2">
+            <label className="text-sm font-medium block mb-1">
+              License Validity
+            </label>
+
+            <div className="w-full rounded-md border px-3 py-2 bg-muted text-sm">
+              8 Years
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+        <Button
+          onClick={back}
+          variant="secondary"
+          disabled={isSubmitted}
+          className="w-full flex items-center justify-center gap-2 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800"
+        >
+          <ArrowLeftFromLine className="w-4 h-4 group-hover:translate-x-2" />
+          <span>Edit Business Categories</span>
+        </Button>
+
+        <Button
+          onClick={next}
+          variant="secondary"
+          disabled={
+            isSubmitted || !formData?.subscriptionPlan || !formData?.maxDevices
+          }
+          className="w-full flex items-center justify-center gap-2 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800"
+        >
           <span>Add Social Media Link</span>
           <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-2" />
         </Button>
@@ -680,84 +885,150 @@ export const SocialMediaLink = ({
   handleSubmit,
   isSubmitted,
 }) => {
+  const [errors, setErrors] = useState({});
+
   const back = () =>
     setIsOpen((prev) => ({
       ...prev,
-      BusinessCategories: true,
+      DeviceActivations: true,
       SocialMediaLink: false,
     }));
 
-  const next = () =>
-    setIsOpen((prev) => ({
-      ...prev,
-      SocialMediaLink: false,
-      TermsConditions: true,
-    }));
+  // ✅ URL validation helper
+  const isValidUrl = (url) => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // ✅ Platform validation
+  const validate = () => {
+    const newErrors = {};
+
+    const fields = ["insta", "facebook", "linkedin", "youtube"];
+
+    fields.forEach((field) => {
+      const value = String(formData?.[field] || "").trim();
+
+      if (value) {
+        // Must be valid URL
+        if (!isValidUrl(value)) {
+          newErrors[field] = "Invalid URL format";
+          return;
+        }
+
+        // Platform-specific check
+        if (field === "insta" && !value.includes("instagram.com")) {
+          newErrors[field] = "Enter a valid Instagram link";
+        }
+
+        if (field === "facebook" && !value.includes("facebook.com")) {
+          newErrors[field] = "Enter a valid Facebook link";
+        }
+
+        if (field === "linkedin" && !value.includes("linkedin.com")) {
+          newErrors[field] = "Enter a valid LinkedIn link";
+        }
+
+        if (field === "youtube" && !value.includes("youtube.com")) {
+          newErrors[field] = "Enter a valid YouTube link";
+        }
+      }
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const next = () => {
+    if (validate()) {
+      setIsOpen((prev) => ({
+        ...prev,
+        SocialMediaLink: false,
+        TermsConditions: true,
+      }));
+    }
+  };
 
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-5">
+        {/* Instagram */}
         <div>
-          <Label htmlFor="insta">Instagram</Label>
+          <Label className={errors.insta ? "text-red-500" : ""}>
+            Instagram
+          </Label>
           <Input
             className="bg-gray-100 dark:bg-gray-700 mt-1"
-            id="insta"
             name="insta"
             value={formData?.insta || ""}
             onChange={setValue}
           />
+          {errors.insta && (
+            <p className="text-sm text-red-500 mt-1">{errors.insta}</p>
+          )}
         </div>
+
+        {/* Facebook */}
         <div>
-          <Label htmlFor="facebook">Facebook</Label>
+          <Label className={errors.facebook ? "text-red-500" : ""}>
+            Facebook
+          </Label>
           <Input
             className="bg-gray-100 dark:bg-gray-700 mt-1"
-            id="facebook"
             name="facebook"
             value={formData?.facebook || ""}
             onChange={setValue}
           />
+          {errors.facebook && (
+            <p className="text-sm text-red-500 mt-1">{errors.facebook}</p>
+          )}
         </div>
+
+        {/* LinkedIn */}
         <div>
-          <Label htmlFor="linkedin">LinkedIn</Label>
+          <Label className={errors.linkedin ? "text-red-500" : ""}>
+            LinkedIn
+          </Label>
           <Input
             className="bg-gray-100 dark:bg-gray-700 mt-1"
-            id="linkedin"
             name="linkedin"
             value={formData?.linkedin || ""}
             onChange={setValue}
           />
+          {errors.linkedin && (
+            <p className="text-sm text-red-500 mt-1">{errors.linkedin}</p>
+          )}
         </div>
+
+        {/* YouTube */}
         <div>
-          <Label htmlFor="youtube">YouTube</Label>
+          <Label className={errors.youtube ? "text-red-500" : ""}>
+            YouTube
+          </Label>
           <Input
             className="bg-gray-100 dark:bg-gray-700 mt-1"
-            id="youtube"
             name="youtube"
             value={formData?.youtube || ""}
             onChange={setValue}
           />
+          {errors.youtube && (
+            <p className="text-sm text-red-500 mt-1">{errors.youtube}</p>
+          )}
         </div>
       </div>
 
+      {/* Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
-        <Button
-          onClick={back}
-          variant="secondary"
-          disabled={isSubmitted}
-          className="w-full flex items-center justify-center gap-2 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800"
-        >
-          <ArrowLeftFromLine className="w-4 h-4 group-hover:translate-x-2" />
-          <span>Edit in Business Categories</span>
+        <Button onClick={back} disabled={isSubmitted} className="w-full">
+          Back
         </Button>
 
-        <Button
-          onClick={next}
-          variant="secondary"
-          disabled={isSubmitted} // Add disabled prop here
-          className="w-full flex items-center justify-center gap-2 group bg-gray-800 text-gray-100 dark:bg-gray-100 dark:text-gray-800"
-        >
-          <span>View Terms & Conditions</span>
-          <ArrowRightFromLine className="w-4 h-4 group-hover:translate-x-2" />
+        <Button onClick={next} disabled={isSubmitted} className="w-full">
+          View Terms & Conditions
         </Button>
       </div>
     </>
@@ -782,20 +1053,70 @@ export const TermsConditions = ({
 
   const setAgreed = (value) => {
     const agreed = value === true;
-    setFormData((prev) => {
-      const updated = { ...prev, termsAccepted: agreed };
-      console.log("🟢 Updated formData:", updated);
-      return updated;
-    });
+
+    setFormData((prev) => ({
+      ...prev,
+      termsAccepted: agreed,
+    }));
+
     setAgree(agreed);
   };
 
+  // ✅ Full Validation
+  const validateAll = () => {
+    const errors = {};
+
+    // Basic
+    if (!String(formData.handlerName || "").trim())
+      errors.handlerName = "Handler name is required";
+
+    if (!formData.mobileNumbers?.length)
+      errors.mobileNumbers = "Mobile number is required";
+
+    if (!String(formData.email || "").trim())
+      errors.email = "Email is required";
+
+    // Business
+    if (!String(formData.businessName || "").trim())
+      errors.businessName = "Business name is required";
+
+    if (!String(formData.businessLocation || "").trim())
+      errors.businessLocation = "Business location is required";
+
+    if (!String(formData.categories || "").trim())
+      errors.categories = "Category is required";
+
+    // Logo
+    if (!formData.localFile && !formData.businessIcon)
+      errors.businessIcon = "Business logo is required";
+
+    // Device
+    if (!formData.maxDevices)
+      errors.maxDevices = "Device activation is required";
+
+    return errors;
+  };
+
   const next = () => {
-    if (!agree) {
-      toast.error("Please accept the terms and conditions to proceed.");
-      return; // prevent moving forward
+    const errors = validateAll();
+
+    // ❌ If validation fails
+    if (Object.keys(errors).length > 0) {
+      console.log("❌ Validation Errors:", errors);
+
+      const firstError = Object.values(errors)[0];
+      toast.error(firstError);
+
+      return;
     }
 
+    // ❌ Terms not accepted
+    if (!agree) {
+      toast.error("Please accept the terms and conditions to proceed.");
+      return;
+    }
+
+    // ✅ Move to payment
     setIsOpen((prev) => ({
       ...prev,
       TermsConditions: false,
@@ -804,43 +1125,26 @@ export const TermsConditions = ({
   };
 
   return (
-    <Card className="mt-6 border border-gray-200 dark:border-gray-700 text-black dark:bg-gray-800 dark:text-white shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden">
+    <Card className="mt-6 border border-gray-200 dark:border-gray-700 text-black dark:bg-gray-800 dark:text-white shadow-sm rounded-2xl overflow-hidden">
       {/* Header */}
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-gray-900/50 dark:to-gray-800/50">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-xl">
-            <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div>
-            <CardTitle className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">
-              Bazar.sh Terms & Conditions
-            </CardTitle>
-            <CardDescription className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Updated: Oct 2025
-            </CardDescription>
-          </div>
-        </div>
+      <CardHeader className="flex justify-between pb-4 border-b">
+        <CardTitle>Bazar.sh Terms & Conditions</CardTitle>
       </CardHeader>
 
       {/* Content */}
-      <CardContent className="p-6 space-y-4 text-base text-gray-700 dark:text-gray-300 leading-relaxed max-h-72 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-        <div className="space-y-3">
-          {[
-            "आपल्या व्यवसायाचे नाव, लोगो आणि दिलेली माहिती सार्वजनिकरित्या Bazar.sh वर प्रदर्शित केली जाईल.",
-            "आपली वैयक्तिक माहिती कोणत्याही इतर कंपनी किंवा व्यक्तीकडे दिली जाणार नाही.",
-            "Bazar.sh तपासणी, सुधारणा किंवा माहिती अपडेट साठी आपणास संपर्क करू शकतो।",
-            "आपण दिलेल्या माहितीचा वापर Bazar.sh फक्त आपल्या व्यवसायाच्या प्रमोशनसाठीच करेल.",
-            "जर कोणत्याही वापरकर्त्याने जाती, धर्म, लिंग, व्यक्ती किंवा समाजाविरुद्ध आक्षेपार्ह, अश्लील, भेदभाव करणारी किंवा कायद्याच्या विरोधात असलेली कोणतीही प्रतिमा, माहिती किंवा सामग्री अपलोड केली, तर त्याचे खाते तत्काळ हटविले जाईल, आवश्यक ती कायदेशीर कारवाई करण्यात येईल आणि अशा कृतीसाठी Bazar.sh कोणतीही जबाबदारी स्वीकारणार नाही.",
-            "जर प्रोजेक्टमध्ये कोणतीही तांत्रिक अडचण किंवा त्रुटी निर्माण झाली, तर त्याच्या निराकरणासाठी वापरकर्त्याने ७ ते १२ दिवस संयम ठेवावा.",
-          ].map((term, index) => (
-            <div key={index} className="flex items-start gap-3 py-2">
-              <span className="flex-shrink-0 w-6 h-6 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5">
-                {index + 1}
-              </span>
-              <p className="flex-1 text-gray-700 dark:text-gray-300">{term}</p>
-            </div>
-          ))}
-        </div>
+      <CardContent className="p-6 space-y-4 max-h-72 overflow-y-auto">
+        {[
+          "आपल्या व्यवसायाचे नाव, लोगो आणि दिलेली माहिती सार्वजनिकरित्या Bazar.sh वर प्रदर्शित केली जाईल.",
+          "आपली वैयक्तिक माहिती कोणत्याही इतर कंपनी किंवा व्यक्तीकडे दिली जाणार नाही.",
+          "Bazar.sh तपासणी, सुधारणा किंवा माहिती अपडेट साठी आपणास संपर्क करू शकतो।",
+          "आपण दिलेल्या माहितीचा वापर Bazar.sh फक्त आपल्या व्यवसायाच्या प्रमोशनसाठीच करेल.",
+          "अवैध/अश्लील सामग्री अपलोड केल्यास खाते हटवले जाईल.",
+          "तांत्रिक अडचणीसाठी ७ ते १२ दिवस लागू शकतात.",
+        ].map((term, index) => (
+          <p key={index}>
+            {index + 1}. {term}
+          </p>
+        ))}
       </CardContent>
 
       {/* Footer */}
@@ -886,7 +1190,6 @@ export const TermsConditions = ({
     </Card>
   );
 };
-
 
 export const Payment = ({
   setIsOpen,
@@ -974,197 +1277,11 @@ export const Payment = ({
 
   return (
     <>
-<AnimatePresence>
-  {isSubmitting && (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center backdrop-blur-lg bg-gradient-to-br from-black/90 via-purple-900/20 to-blue-900/20 text-white"
-    >
-      {/* Animated gradient orbs */}
-      <motion.div
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.6, 0.3],
-          rotate: [0, 180, 360],
-        }}
-        transition={{ repeat: Infinity, duration: 4, ease: "linear" }}
-        className="absolute w-80 h-80 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-3xl"
-      />
-      <motion.div
-        animate={{
-          scale: [1.2, 1, 1.2],
-          opacity: [0.4, 0.2, 0.4],
-          rotate: [180, 360, 180],
-        }}
-        transition={{ repeat: Infinity, duration: 5, ease: "linear", delay: 1 }}
-        className="absolute w-96 h-96 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl"
-      />
-
-      {/* Main content container */}
-      <motion.div
-        initial={{ scale: 0.8, y: 20 }}
-        animate={{ scale: 1, y: 0 }}
-        transition={{ type: "spring", damping: 15, stiffness: 200 }}
-        className="relative z-10 flex flex-col items-center justify-center text-center max-w-md mx-4"
-      >
-        {/* Floating emoji with bounce */}
-        <motion.div
-          animate={{ 
-            y: [0, -15, 0],
-            rotate: [0, 5, -5, 0]
-          }}
-          transition={{ 
-            y: { repeat: Infinity, duration: 2, ease: "easeInOut" },
-            rotate: { repeat: Infinity, duration: 3, ease: "easeInOut" }
-          }}
-          className="text-7xl mb-6 filter drop-shadow-2xl"
-        >
-          🚀
-        </motion.div>
-
-        {/* Progress indicator */}
-        <div className="relative flex flex-col items-center gap-4 mb-8">
-          {/* Outer glow ring */}
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-            className="absolute w-24 h-24 border-2 border-transparent border-t-white/30 border-r-white/10 rounded-full"
-          />
-          
-          {/* Main spinner */}
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
-            className="w-20 h-20 border-4 border-white/20 border-t-white rounded-full relative"
-          >
-            {/* Inner pulse */}
-            <motion.div
-              animate={{ scale: [1, 1.1, 1] }}
-              transition={{ repeat: Infinity, duration: 1 }}
-              className="absolute inset-2 border-2 border-white/10 rounded-full"
-            />
-          </motion.div>
-
-          {/* Progress dots */}
-          <div className="flex gap-1">
-            {[0, 1, 2].map((index) => (
-              <motion.div
-                key={index}
-                animate={{ scale: [1, 1.3, 1] }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 1,
-                  delay: index * 0.2,
-                }}
-                className="w-2 h-2 bg-white/60 rounded-full"
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Text content */}
-        <div className="space-y-3">
-          {/* Main message */}
-          <motion.h3
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent"
-          >
-            Processing Your Request
-          </motion.h3>
-
-          {/* Sub message */}
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="text-lg text-gray-200 font-medium"
-          >
-            Securing your payment... ⏳
-          </motion.p>
-
-          {/* Animated status text */}
-          <motion.div
-            animate={{ opacity: [0.7, 1, 0.7] }}
-            transition={{ repeat: Infinity, duration: 2 }}
-            className="text-sm text-gray-300 space-y-1"
-          >
-            <p>✓ Payment verified</p>
-            <p>✓ Data encrypted</p>
-            <motion.p
-              animate={{ opacity: [1, 0.5, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5 }}
-            >
-              🔄 Finalizing submission...
-            </motion.p>
-          </motion.div>
-
-          {/* Funny reassurance */}
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-            className="text-xs text-gray-400 italic pt-2 border-t border-white/10"
-          >
-            Dont worry, weve got this! Your data is safe with us 🔒
-          </motion.p>
-        </div>
-
-        {/* Progress bar */}
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: "100%" }}
-          transition={{ duration: 8, ease: "linear" }}
-          className="h-1 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mt-6 overflow-hidden"
-        >
-          <motion.div
-            animate={{ x: [-100, 100] }}
-            transition={{ repeat: Infinity, duration: 1 }}
-            className="h-full w-20 bg-white/30 skew-x-12"
-          />
-        </motion.div>
-      </motion.div>
-
-      {/* Background particles */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(15)].map((_, i) => (
-          <motion.div
-            key={i}
-            animate={{
-              y: [0, -100],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-            className="absolute w-1 h-1 bg-white/30 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              bottom: "0%",
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Close warning - only show after a few seconds */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 5 }}
-        className="absolute bottom-8 text-xs text-gray-400 text-center"
-      >
-        <p>Please keep this tab open until complete</p>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
-
+      <AnimatePresence>
+        {isSubmitting && (
+        <ProcessingModal />
+        )}
+      </AnimatePresence>
 
       <Card className="mt-6 border border-gray-300 dark:border-gray-700 text-black dark:text-white bg-white dark:bg-gray-900 shadow-sm hover:shadow-lg transition-all duration-300 rounded-2xl overflow-hidden">
         <Script src="https://checkout.razorpay.com/v1/checkout.js" />
@@ -1239,3 +1356,8 @@ export const Payment = ({
     </>
   );
 };
+
+
+
+
+

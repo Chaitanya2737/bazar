@@ -119,7 +119,6 @@ const userSchema = new mongoose.Schema({
     },
   ],
 
-  // user.model.js
   deviceActivations: [
     {
       deviceId: String, // unique device identifier from client
