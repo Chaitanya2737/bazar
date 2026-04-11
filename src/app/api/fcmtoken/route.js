@@ -6,6 +6,7 @@ export async function POST(request) {
   try {
     await connectDB();
 
+
     const {
       token,
       deviceInfo = "Unknown Device",

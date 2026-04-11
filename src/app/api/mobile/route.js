@@ -94,6 +94,7 @@ export async function POST(request) {
         email: user.email,
         role: user.role,
         subscriptionPlan: user.subscriptionPlan,
+        slug :user.slug
       },
     });
   } catch (error) {
