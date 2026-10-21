@@ -173,8 +173,7 @@ export default function MapWithMarkers({ clients = [], onSelectBusiness }) {
         zoom={13} // Good city-level zoom
         style={{ height: "100%", width: "100%" }}
       >
-        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-
+<TileLayer url="https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_2t3s_1_a5990924622d7d0dae49ea75" />
         <VisibleMarkers
           clients={resolvedClients}
           onSelectBusiness={(b) => {

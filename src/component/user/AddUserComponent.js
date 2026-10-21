@@ -1201,7 +1201,7 @@ export const Payment = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [remark, setRemark] = useState("");
-  const amount = 2000;
+  const amount = 200;
 
   const back = () =>
     setIsOpen((prev) => ({

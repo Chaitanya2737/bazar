@@ -18,10 +18,10 @@ const systemSchema = new mongoose.Schema(
     role: {
       type: String,
       default: "system",
-      enum: ["system"], // ensure this can't be used for regular users/admins
+      enum: ["system"],
     },
     permissions: {
-      type: [String], // like ['read:any', 'write:any']
+      type: [String], 
       default: [],
     },
     isActive: {
